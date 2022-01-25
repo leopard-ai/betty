@@ -6,6 +6,7 @@ from collections import OrderedDict
 import torch
 
 import hypergrad as hg
+import optim
 import utils
 
 
@@ -73,7 +74,7 @@ class Problem:
         PyTorch's native optimizer updates model parameters in-place. This blocks users from
         calculating higher-order gradient, so we need to patch optimizer to avoid this issue.
         """
-        raise NotImplementedError
+        return optim.patch_optimizer(optimizer, self.training_step, self.train_dataloader)
 
     def initialize(self):
         # * Check if first-order approximation will be used
@@ -86,32 +87,23 @@ class Problem:
     def step(self):
         # * perform current level step
         if self.check_inner_ready():
-            # TODO: Handle StopIteration
-            batch = next(iter(self.train_dataloader))
-            loss = self.training_step(batch)
-            grads = self.calculate_gradients(loss, self.parameters(), self._first_order)
-            new_params = self.optimizer_step(grads)
-            self._param_history.append(new_params)
-
+            self.optimizer.step(self.parameters(),
+                                list(self._nexts.keys()),
+                                list(self._prevs.keys()))
             for problem in self._prevs:
                 self._prevs[problem] += 1
                 if self._prevs[problem] % problem.hgconfig().step == 0:
                     problem.nexts()[self] = True
                     problem.step()
 
+            for problem in self._nexts:
+                self._nexts[problem] = False
+
     def set_param(self, params):
         """[summary]
         Set module's parameters to new parameters
         """
         raise NotImplementedError
-
-    def optimizer_step(self, grads):
-        """[summary]
-        Execute optimizer.step() when gradient calculations are all done
-        """
-        for problem in self._nexts:
-            self._nexts[problem] = False
-        return grads
 
     def calculate_gradients(self, loss, params, first_order=False):
         """[summary]
