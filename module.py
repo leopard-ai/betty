@@ -1,13 +1,10 @@
-import typing as _typing
 import abc
 from dataclasses import dataclass
-from collections import OrderedDict
 
 import torch
+import higher
 
-import hypergrad as hg
 import optim
-import utils
 
 
 @dataclass
@@ -18,195 +15,142 @@ class HypergradientConfig:
     leaf: bool = False
 
 
-class Problem:
-    """[summary]
-    """
+class Module:
     def __init__(self,
-                 module: torch.nn.Module = None,
-                 optimizer: torch.optim.Optimizer = None,
-                 train_dataloader: _typing.Any = None,
-                 valid_dataloader: _typing.Any = None,
-                 hgconfig: 'HypergradientConfig' = None,
-                 max_len: int = 1) -> None:
-        # * problem
-        self.module = module
-        self.optimizer = self.configure_optimizer(optimizer)
-        self.train_dataloader = train_dataloader
-        self.valid_dataloader = valid_dataloader
+                 data_loader,
+                 config,
+                 device=None):
+        self._config = config
+        self.device = None
 
-        # * Hypergradient
-        # Example: hypergradient = {'type': 'reverse', 'step': 3, 'leaf': True}
-        self._hgconfig = hgconfig
-        self._first_order = None
-        self._param_history = utils.LimitedList(max_len)
-        # prev: (problem, count)
-        self._prevs = OrderedDict()
-        # next: (problem, ready)
-        self._nexts = OrderedDict()
+        self.data_loader = iter(data_loader)
 
-    def forward(self, *args, **kwargs):
-        """[summary]
-        User defines how the forward function for the problem is defined.
-        """
-        self.module.forward(*args, **kwargs)
+        # ! Maybe users want to define parents and children in the same way they define modules for
+        # ! the current level problem
+        # ! One idea is to let them configure modules in each level using `configure_level` member
+        # ! function
+        self._currents = []
+        self._parents = []
+        self._children = []
+        self._optimizers = []
+
+        self.ready = None
+        self.count = 0
+        self._first_order = False
 
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
 
     @abc.abstractmethod
-    def training_step(self, batch):
+    def forward(self, *args, **kwargs):
         """[summary]
-        User defines how training loss is defined.
+        Users define how forward call is defined for the current problem.
         """
-        # ! Currently, users need to call dependent problems with self._nexts[i] or self._prevs[i].
-        # ! How to build a more straightforward and clean way to access other problems
         raise NotImplementedError
 
     @abc.abstractmethod
-    def validation_step(self, batch):
+    def training_step(self, *args, **kwargs):
         """[summary]
-        User defines how validation loss is defined.
+        Users define how loss is calculated for the current problem.
         """
+        # (batch, batch_idx)
         raise NotImplementedError
 
-    def configure_optimizer(self, optimizer):
-        """[summary]
-        PyTorch's native optimizer updates model parameters in-place. This blocks users from
-        calculating higher-order gradient, so we need to patch optimizer to avoid this issue.
-        """
-        return optim.patch_optimizer(optimizer, self.training_step, self.train_dataloader)
+    def step(self, *args, **kwargs):
+        if self.check_ready():
+            self.count += 1
+
+            batch = next(self.data_loader)
+            loss = self.training_step(batch)
+            # grads = self.backward(loss, self.parameters())
+            # self.optimizer.step(grads)
+
+            for problem in self._parents:
+                if self.count % problem.hgconfig().step == 0:
+                    idx = problem.children().index(self)
+                    problem[idx] = True
+                    problem.step()
+
+            self.ready = [False for _ in range(len(self._children))]
+
+    def backward(self, loss, params, first_order=False):
+        grads = {}
+        if self._config.leaf:
+            grad = torch.autograd.grad(loss, params, create_graph=not first_order)
+            for p, g in zip(params, grad):
+                grads[p] = g
+        else:
+            assert len(self._children) > 0
+
+        return grads
 
     def initialize(self):
-        # * Check if first-order approximation will be used
+        self.ready = [False for _ in range(len(self._children))]
+
         first_order = []
-        for problem in self._prevs:
-            hgconfig = problem.hgconfig()
+        for problem in self._parents:
+            hgconfig = problem.config()
             first_order.append(hgconfig.first_order)
         self._first_order = all(first_order)
 
-    def step(self):
-        # * perform current level step
-        if self.check_inner_ready():
-            self.optimizer.step(self.parameters(),
-                                list(self._nexts.keys()),
-                                list(self._prevs.keys()))
-            for problem in self._prevs:
-                self._prevs[problem] += 1
-                if self._prevs[problem] % problem.hgconfig().step == 0:
-                    problem.nexts()[self] = True
-                    problem.step()
-
-            for problem in self._nexts:
-                self._nexts[problem] = False
-
-    def set_param(self, params):
-        """[summary]
-        Set module's parameters to new parameters
-        """
+    def configure_optimizer(self):
         raise NotImplementedError
 
-    def calculate_gradients(self, loss, params, first_order=False):
-        """[summary]
-        Return gradient for loss with respect to parameters
-        """
-        if self._hgconfig.leaf:
-            return torch.autograd.grad(loss, params, create_graph=not first_order)
-        else:
-            # TODO: Hypergradient calculation
-            raise NotImplementedError
+    def configure_models(self):
+        fmoules = []
+        for module in self._currents:
+            fmodule = higher.monkeypatch(module)
 
-    def clone(self):
-        """[summary]
-        Return the copy of module
-        """
-        raise NotImplementedError
+        return fmodules
 
-    def parameters(self):
-        """[summary]
-        Return module's parameters
-        """
-        return self.module.parameters()
-
-    def check_inner_ready(self):
+    def check_ready(self):
         """[summary]
         Check if parameter updates in all children are ready
         """
-        if self._hgconfig.leaf:
+        if self._config.leaf:
             return True
-        ready = all(list(self._nexts.values()))
+        ready = all(self.ready)
         return ready
 
-    def append_next(self, problem):
-        assert problem not in self._nexts
-        assert problem not in self._prevs
-        self._nexts[problem] = False
+    def add_child(self, problem):
+        """[summary]
+        Add a new problem to the children node list.
+        """
+        assert problem not in self._children
+        assert problem not in self._parents
+        self._children.append(problem)
 
-    def append_prev(self, problem):
-        assert problem not in self._nexts
-        assert problem not in self._prevs
-        self._prevs[problem] = 0
+    def add_parent(self, problem):
+        """[summary]
+        Add a new problem to the parent node list.
+        """
+        assert problem not in self._children
+        assert problem not in self._parents
+        self._parents.append(problem)
+
+    def parameters(self):
+        """[summary]
+        Return (trainable) parameters for the current problem.
+        """
+        return None
 
     @property
-    def module(self):
+    def config(self):
         """[summary]
-        Return module
+        Return the hypergradient configuration for the current problem.
         """
-        return self.module
-
-    @module.setter
-    def module(self, module):
-        """[summary]
-        Set new module
-        """
-        self.module = module
+        return self._config
 
     @property
-    def optimizer(self):
+    def children(self):
         """[summary]
-        Return optimizer
+        Return children problems for the current problem.
         """
-        return self.optimizer
-
-    @optimizer.setter
-    def optimizer(self, optimizer):
-        """[summary]
-        Set new optimizer
-        """
-        self.optimizer = self.configure_optimizer(optimizer)
+        return self._children
 
     @property
-    def train_dataloader(self):
+    def parents(self):
         """[summary]
-        Return train data loader
+        Return parent problemss for the current problem.
         """
-        return self.train_dataloader
-
-    @train_dataloader.setter
-    def train_dataloader(self, loader):
-        self.train_dataloader = loader
-
-    @property
-    def valid_dataloader(self):
-        """[summary]
-        Return valid data loader
-        """
-        return self.valid_dataloader
-
-    @valid_dataloader.setter
-    def valid_dataloader(self, loader):
-        self.valid_dataloader = loader
-
-    @property
-    def hgconfig(self):
-        """[summary]
-        Return hypergradient configuration
-        """
-        return self._hgconfig
-
-    @property
-    def nexts(self):
-        return self._nexts
-
-    @property
-    def prevs(self):
-        return self._prevs
+        return self._parents
