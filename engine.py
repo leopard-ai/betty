@@ -42,3 +42,5 @@ class Engine:
             if problem.hgconfig().leaf:
                 self.leaves.append(problem)
             problem.initialize()
+
+# engine.train()

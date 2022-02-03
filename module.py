@@ -21,7 +21,7 @@ class Module:
                  config,
                  device=None):
         self._config = config
-        self.device = None
+        self.device = device
 
         self.data_loader = iter(data_loader)
 
@@ -32,7 +32,8 @@ class Module:
         self._currents = []
         self._parents = []
         self._children = []
-        self._optimizers = []
+
+        self.optimizer = None
 
         self.ready = None
         self.count = 0
@@ -62,8 +63,11 @@ class Module:
 
             batch = next(self.data_loader)
             loss = self.training_step(batch)
-            # grads = self.backward(loss, self.parameters())
-            # self.optimizer.step(grads)
+            grads = self.backward(loss, self.parameters())
+            # param.grad
+            new_params = self.optimizer.step(grads)
+            for module in self._currents:
+                module.update_params(new_params)
 
             for problem in self._parents:
                 if self.count % problem.hgconfig().step == 0:
@@ -74,6 +78,16 @@ class Module:
             self.ready = [False for _ in range(len(self._children))]
 
     def backward(self, loss, params, first_order=False):
+        """[summary]
+        Calculate and return gradient for given loss and parameters
+        Args:
+            loss ([type]): [description]
+            params ([type]): [description]
+            first_order (bool, optional): [description]. Defaults to False.
+
+        Returns:
+            [type]: [description]
+        """
         grads = {}
         if self._config.leaf:
             grad = torch.autograd.grad(loss, params, create_graph=not first_order)
@@ -81,6 +95,10 @@ class Module:
                 grads[p] = g
         else:
             assert len(self._children) > 0
+            if self._config.type == 'implicit':
+                raise NotImplementedError
+            elif self._config.type == 'maml':
+                raise NotImplementedError 
 
         return grads
 
@@ -93,15 +111,26 @@ class Module:
             first_order.append(hgconfig.first_order)
         self._first_order = all(first_order)
 
-    def configure_optimizer(self):
+        self.patch_models()
+        self.patch_optimizer()
+
+    def patch_optimizer(self):
+        """[summary]
+        Patch optimizer to avoid in-place operations so that gradient flows through param update.
+        Raises:
+            NotImplementedError: [description]
+        """
         raise NotImplementedError
 
-    def configure_models(self):
-        fmoules = []
-        for module in self._currents:
-            fmodule = higher.monkeypatch(module)
-
-        return fmodules
+    def patch_models(self):
+        """[summary]
+        Patch models to support functional forward that takes params as an input
+        """
+        for idx, module in enumerate(self._currents):
+            patched_module = higher.monkeypatch(module,
+                                                device=self.device,
+                                                track_higher_grads=not self._first_order)
+            self._currents[idx] = patched_module
 
     def check_ready(self):
         """[summary]
@@ -132,7 +161,8 @@ class Module:
         """[summary]
         Return (trainable) parameters for the current problem.
         """
-        return None
+        params = [module.parameters() for module in self._currents]
+        return params
 
     @property
     def config(self):
