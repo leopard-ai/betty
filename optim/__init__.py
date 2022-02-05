@@ -1,30 +1,21 @@
-import abc
-
 import torch
 
-from .adam import *
-from .adamw import *
-from .sgd import *
+from .sgd import PatchedSGD
+from .adam import PatchedAdam
+from .adamw import PatchedAdamW
 
+optimizer_mapping = {
+    torch.optim.SGD: PatchedSGD,
+    torch.optim.Adam: PatchedAdam,
+    torch.optim.AdamW: PatchedAdamW
+}
 
-def patch_optimizer(optimizer):
+def get_patched_optimizer(optimizer):
     """[summary]
-    Take non-differentiable optimizer (e.g., PyTorch's native optimizers),
-    and return differentiable optimizer
+    Return patched optimizer that allows gradient flow for parameter update given
     """
-    return PatchedOptimizer(optimizer)
+    assert type(optimizer) in optimizer_mapping
 
-
-class PatchedOptimizer:
-    """[summary]
-    Make optimizer.step() differentiable
-    """
-    def __init__(self, optimizer):
-        self.optimizer = optimizer
-
-    @abc.abstractmethod
-    def _update(self, params, inners, outers):
-        pass
-
-    def step(self, grads):
-        pass
+    patched_optimizer_cls = optimizer_mapping[type(optimizer)]
+    patched_optimizer = patched_optimizer_cls(optimizer)
+    return patched_optimizer

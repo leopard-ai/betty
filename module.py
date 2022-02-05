@@ -9,7 +9,7 @@ import optim
 
 @dataclass
 class HypergradientConfig:
-    type: 'string' = 'reverse'
+    type: 'string' = 'implicit'
     step: int = 1
     first_order: bool = False
     leaf: bool = False
@@ -29,10 +29,11 @@ class Module:
         # ! the current level problem
         # ! One idea is to let them configure modules in each level using `configure_level` member
         # ! function
-        self._currents = []
         self._parents = []
         self._children = []
 
+        self.module = None
+        self.fmodule = None
         self.optimizer = None
 
         self.ready = None
@@ -50,7 +51,7 @@ class Module:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def training_step(self, *args, **kwargs):
+    def training_step(self, batch, *args, **kwargs):
         """[summary]
         Users define how loss is calculated for the current problem.
         """
@@ -58,16 +59,17 @@ class Module:
         raise NotImplementedError
 
     def step(self, *args, **kwargs):
+        """[summary]
+        Perform gradient calculation and update parameters accordingly
+        """
         if self.check_ready():
             self.count += 1
 
             batch = next(self.data_loader)
-            loss = self.training_step(batch)
-            grads = self.backward(loss, self.parameters())
-            # param.grad
-            new_params = self.optimizer.step(grads)
-            for module in self._currents:
-                module.update_params(new_params)
+            loss = self.training_step(batch, *args, **kwargs)
+            self.backward(loss, self.trainable_parameters(), self._first_order)
+            new_params = self.optimizer.step()
+            self.fmodule.update_params(new_params)
 
             for problem in self._parents:
                 if self.count % problem.hgconfig().step == 0:
@@ -88,21 +90,31 @@ class Module:
         Returns:
             [type]: [description]
         """
-        grads = {}
         if self._config.leaf:
             grad = torch.autograd.grad(loss, params, create_graph=not first_order)
             for p, g in zip(params, grad):
-                grads[p] = g
+                if hasattr(p, 'gradient') and p.gradient is not None:
+                    p.gradient = p.gradient + g
+                else:
+                    p.gradient = g
         else:
             assert len(self._children) > 0
             if self._config.type == 'implicit':
                 raise NotImplementedError
             elif self._config.type == 'maml':
-                raise NotImplementedError 
+                raise NotImplementedError
 
-        return grads
+    def zero_grad(self):
+        """[summary]
+        Set gradients for trainable parameters for the current problem to 0.
+        """
+        for param in self.trainable_parameters():
+            param.gradient = None
 
     def initialize(self):
+        """[summary]
+        Initialize basic things
+        """
         self.ready = [False for _ in range(len(self._children))]
 
         first_order = []
@@ -126,11 +138,9 @@ class Module:
         """[summary]
         Patch models to support functional forward that takes params as an input
         """
-        for idx, module in enumerate(self._currents):
-            patched_module = higher.monkeypatch(module,
-                                                device=self.device,
-                                                track_higher_grads=not self._first_order)
-            self._currents[idx] = patched_module
+        self.fmodule = higher.monkeypatch(self.module,
+                                          device=self.device,
+                                          track_higher_grads=not self._first_order)
 
     def check_ready(self):
         """[summary]
@@ -159,10 +169,16 @@ class Module:
 
     def parameters(self):
         """[summary]
-        Return (trainable) parameters for the current problem.
+        Return parameters for the current problem.
         """
-        params = [module.parameters() for module in self._currents]
-        return params
+        return self.fmodule.fast_params
+
+    def trainable_parameters(self):
+        """[summary]
+        Return trainable parameters for the current problem.
+        """
+        return [p if p.requires_grad else torch.tensor([], requires_grad=True)
+            for p in self.parameters()]
 
     @property
     def config(self):
