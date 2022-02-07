@@ -10,12 +10,10 @@ optimizer_mapping = {
     torch.optim.AdamW: PatchedAdamW
 }
 
-def get_patched_optimizer(optimizer):
+def get_update_fn(optimizer):
     """[summary]
-    Return patched optimizer that allows gradient flow for parameter update given
+    Return (functional) udpate function for the given optimizer (e.g., F.sgd, F.Adam)
     """
     assert type(optimizer) in optimizer_mapping
 
-    patched_optimizer_cls = optimizer_mapping[type(optimizer)]
-    patched_optimizer = patched_optimizer_cls(optimizer)
-    return patched_optimizer
+    return optimizer_mapping[type(optimizer)]

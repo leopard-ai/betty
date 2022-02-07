@@ -2,9 +2,10 @@ import abc
 from dataclasses import dataclass
 
 import torch
-import higher
+import functorch
 
 import optim
+import utils
 
 
 @dataclass
@@ -34,7 +35,15 @@ class Module:
 
         self.module = None
         self.fmodule = None
+        self.params = None
+        self.buffers = None
+
         self.optimizer = None
+        self.state = []
+        self.param_groups = []
+        self.param_mapping = []
+        self.flattened_param_mapping = None
+        self.update_fn = None
 
         self.ready = None
         self.count = 0
@@ -51,7 +60,7 @@ class Module:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def training_step(self, batch, *args, **kwargs):
+    def calculate_loss(self, batch, *args, **kwargs):
         """[summary]
         Users define how loss is calculated for the current problem.
         """
@@ -66,10 +75,12 @@ class Module:
             self.count += 1
 
             batch = next(self.data_loader)
-            loss = self.training_step(batch, *args, **kwargs)
+            loss = self.calculate_loss(batch, *args, **kwargs)
             self.backward(loss, self.trainable_parameters(), self._first_order)
-            new_params = self.optimizer.step()
-            self.fmodule.update_params(new_params)
+            self.optimizer_step()
+            utils.swap_state(self.fmodule.stateless_model,
+                             self.fmodule.split_names,
+                             list(self.params) + list(self.buffers))
 
             for problem in self._parents:
                 if self.count % problem.hgconfig().step == 0:
@@ -90,6 +101,9 @@ class Module:
         Returns:
             [type]: [description]
         """
+        if self.optimizer is None:
+            return None
+
         if self._config.leaf:
             grad = torch.autograd.grad(loss, params, create_graph=not first_order)
             for p, g in zip(params, grad):
@@ -103,6 +117,20 @@ class Module:
                 raise NotImplementedError
             elif self._config.type == 'maml':
                 raise NotImplementedError
+
+    def optimizer_step(self, *args, **kwargs):
+        """[summary]
+        Update weights as in native PyTorch's optim.step()
+        """
+        if self.optimizer is None:
+            self.custom_optimizer_step(*args, **kwargs)
+
+    def custom_optimizer_step(self):
+        """[summary]
+        Users define how optimizer step is performed. This is mainly used for developing
+        meta- (or learnable) optimizer
+        """
+        raise NotImplementedError
 
     def zero_grad(self):
         """[summary]
@@ -123,8 +151,27 @@ class Module:
             first_order.append(hgconfig.first_order)
         self._first_order = all(first_order)
 
+        self.initialize_optimizer_state()
         self.patch_models()
         self.patch_optimizer()
+
+    def initialize_optimizer_state(self):
+        """[summary]
+        Initialize optimizer state
+        """
+        for param_group in self.optimizer.param_groups:
+            for param in param_group['params']:
+                param.grad = torch.zeros_like(param.data)
+        self.optimizer.step()
+
+    def patch_models(self):
+        """[summary]
+        Patch models to support functional forward that takes params as an input
+        """
+        fmodule, params, buffers = functorch.make_functional_with_buffers(self.module)
+        self.fmodule = fmodule
+        self.params = params
+        self.buffers = buffers
 
     def patch_optimizer(self):
         """[summary]
@@ -132,15 +179,28 @@ class Module:
         Raises:
             NotImplementedError: [description]
         """
-        raise NotImplementedError
+        if self.optimizer is None:
+            return None
 
-    def patch_models(self):
-        """[summary]
-        Patch models to support functional forward that takes params as an input
-        """
-        self.fmodule = higher.monkeypatch(self.module,
-                                          device=self.device,
-                                          track_higher_grads=not self._first_order)
+        self.state = [None for _ in range(len(list(self.module.parameters())))]
+        for param_group in self.optimizer.param_groups:
+            # copy param group dictionaory from optimizer.param_groups to self.param_groups
+            my_param_group = {}
+            for key, value in param_group.items():
+                if key != 'params':
+                    my_param_group[key] = value
+            self.param_groups.append(my_param_group)
+
+            # construct param mapping from optimizer.param_groups
+            param_mapping = []
+            for param in param_group['params']:
+                param_idx = list(self.module.parameters()).index(param)
+                param_mapping.append(param_idx)
+                self.state[param_idx] = self.optimizer.state[param]
+            self.param_mapping.append(param_mapping)
+        self.flattened_param_mapping = utils.flatten_list(self.param_mapping)
+
+        self.update_fn = optim.get_update_fn(self.optimizer)
 
     def check_ready(self):
         """[summary]
@@ -171,14 +231,15 @@ class Module:
         """[summary]
         Return parameters for the current problem.
         """
-        return self.fmodule.fast_params
+        return self.params
 
     def trainable_parameters(self):
         """[summary]
         Return trainable parameters for the current problem.
         """
-        return [p if p.requires_grad else torch.tensor([], requires_grad=True)
-            for p in self.parameters()]
+        mapping_set = set(self.flattened_param_mapping)
+        trainable_params = list(p for idx, p in enumerate(self.params) if idx in mapping_set)
+        return trainable_params
 
     @property
     def config(self):

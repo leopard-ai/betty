@@ -2,13 +2,6 @@ import abc
 
 import torch
 
-def patch_optimizer(optimizer):
-    """[summary]
-    Take non-differentiable optimizer (e.g., PyTorch's native optimizers),
-    and return differentiable optimizer
-    """
-    return PatchedOptimizer(optimizer)
-
 
 class PatchedOptimizer:
     """[summary]
