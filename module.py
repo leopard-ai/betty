@@ -76,7 +76,7 @@ class Module:
 
             batch = next(self.data_loader)
             loss = self.calculate_loss(batch, *args, **kwargs)
-            self.backward(loss, self.trainable_parameters(), self._first_order)
+            self.backward(loss, self.params, self._first_order)
             self.optimizer_step()
             utils.swap_state(self.fmodule.stateless_model,
                              self.fmodule.split_names,
@@ -124,6 +124,13 @@ class Module:
         """
         if self.optimizer is None:
             self.custom_optimizer_step(*args, **kwargs)
+        else:
+            self.update_fn(
+                self.params,
+                self.param_mapping,
+                self.param_groups,
+                self.state
+            )
 
     def custom_optimizer_step(self):
         """[summary]

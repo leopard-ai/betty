@@ -1,13 +1,13 @@
 import torch
 
-from .sgd import PatchedSGD
-from .adam import PatchedAdam
-from .adamw import PatchedAdamW
+from .sgd import fsgd
+from .adam import fadam
+from .adamw import fadamw
 
 optimizer_mapping = {
-    torch.optim.SGD: PatchedSGD,
-    torch.optim.Adam: PatchedAdam,
-    torch.optim.AdamW: PatchedAdamW
+    torch.optim.SGD: fsgd,
+    torch.optim.Adam: fadam,
+    torch.optim.AdamW: fadamw
 }
 
 def get_update_fn(optimizer):
