@@ -5,6 +5,7 @@ import torch
 import functorch
 
 import optim
+import hypergradient
 import utils
 
 
@@ -112,6 +113,7 @@ class Module:
             utils.swap_state(self.fmodule.stateless_model,
                              self.fmodule.split_names,
                              list(self.params) + list(self.buffers))
+            self.zero_grad()
 
             for problem in self._parents:
                 if self.count % problem.hgconfig().step == 0:
@@ -137,17 +139,17 @@ class Module:
 
         if self._config.leaf:
             grad = torch.autograd.grad(loss, params, create_graph=not first_order)
-            for p, g in zip(params, grad):
-                if hasattr(p, 'gradient') and p.gradient is not None:
-                    p.gradient = p.gradient + g
-                else:
-                    p.gradient = g
         else:
             assert len(self._children) > 0
-            if self._config.type == 'implicit':
-                raise NotImplementedError
-            elif self._config.type == 'maml':
-                raise NotImplementedError
+            grad_fn = hypergradient.get_grad_fn(self.config.type)
+            grad = grad_fn(loss, params, first_order=first_order)
+
+        # set gradient for each parameter
+        for p, g in zip(params, grad):
+            if hasattr(p, 'gradient') and p.gradient is not None:
+                p.gradient = p.gradient + g
+            else:
+                p.gradient = g
 
     def optimizer_step(self, *args, **kwargs):
         """[summary]
