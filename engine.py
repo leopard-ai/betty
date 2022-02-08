@@ -1,5 +1,3 @@
-import torch
-
 import module
 
 class Engine:
@@ -29,15 +27,15 @@ class Engine:
         """[summary]
         Initialize dependencies (computational graph) between problems.
         """
-        # * Set dependencies for problems
+        # Set dependencies for problems
         for key, value_list in self.dependencies.items():
             assert key in self.problems
             for value in value_list:
                 assert value in self.problems
-                key.append_next(value)
-                value.append_prev(key)
+                key.add_children(value)
+                value.add_parent(key)
 
-        # * specify leaves
+        # specify leaves
         for problem in self.problems:
             if problem.hgconfig().leaf:
                 self.leaves.append(problem)

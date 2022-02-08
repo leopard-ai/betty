@@ -18,26 +18,26 @@ class HypergradientConfig:
 
 class Module:
     def __init__(self,
-                 data_loader,
                  config,
                  device=None):
         self._config = config
         self.device = device
 
-        self.data_loader = iter(data_loader)
-
-        # ! Maybe users want to define parents and children in the same way they define modules for
-        # ! the current level problem
-        # ! One idea is to let them configure modules in each level using `configure_level` member
-        # ! function
+        # computation graph depedency
+        # ! dependency can be defined both in ``Module'' class and ``Engine'' class
         self._parents = []
         self._children = []
 
+        # data loader
+        self.data_loader = None
+
+        # module
         self.module = None
         self.fmodule = None
         self.params = None
         self.buffers = None
 
+        # optimizer
         self.optimizer = None
         self.state = []
         self.param_groups = []
@@ -45,9 +45,40 @@ class Module:
         self.flattened_param_mapping = None
         self.update_fn = None
 
+        # misc
         self.ready = None
         self.count = 0
         self._first_order = False
+
+    def initialize(self):
+        """[summary]
+        Initialize basic things
+        """
+        # initialize update ready to False
+        if self.config.leaf:
+            assert len(self._children) == 0
+        self.ready = [False for _ in range(len(self._children))]
+
+        # initialize whether to track higher-order gradient for parameter update
+        first_order = []
+        for problem in self._parents:
+            hgconfig = problem.config()
+            first_order.append(hgconfig.first_order)
+        self._first_order = all(first_order)
+
+        # set up data loader
+        self.data_loader = iter(self.configure_data_loader())
+
+        # set up module for the current level
+        self.module = self.configure_module()
+
+        # set up optimizer
+        self.optimizer = self.configure_optimizer()
+
+        # patch model and optimizer to follow functional programming paradigm
+        self.initialize_optimizer_state()
+        self.patch_models()
+        self.patch_optimizer()
 
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
@@ -146,21 +177,26 @@ class Module:
         for param in self.trainable_parameters():
             param.gradient = None
 
-    def initialize(self):
+    @abc.abstractmethod
+    def configure_data_loader(self):
         """[summary]
-        Initialize basic things
+        Return user-defined data loader
         """
-        self.ready = [False for _ in range(len(self._children))]
+        raise NotImplementedError
 
-        first_order = []
-        for problem in self._parents:
-            hgconfig = problem.config()
-            first_order.append(hgconfig.first_order)
-        self._first_order = all(first_order)
+    @abc.abstractmethod
+    def configure_module(self):
+        """[summary]
+        Return user-defined module
+        """
+        raise NotImplementedError
 
-        self.initialize_optimizer_state()
-        self.patch_models()
-        self.patch_optimizer()
+    @abc.abstractmethod
+    def configure_optimizer(self):
+        """[summary]
+        Return user-defined optimizer
+        """
+        raise NotImplementedError
 
     def initialize_optimizer_state(self):
         """[summary]
