@@ -64,7 +64,7 @@ class Module:
         # initialize whether to track higher-order gradient for parameter update
         first_order = []
         for problem in self._parents:
-            hgconfig = problem.config()
+            hgconfig = problem.config
             first_order.append(hgconfig.first_order)
         self._first_order = all(first_order)
 
@@ -118,7 +118,7 @@ class Module:
             self.zero_grad()
 
             for problem in self._parents:
-                if self.count % problem.hgconfig().step == 0:
+                if self.count % problem.hgconfig.step == 0:
                     idx = problem.children().index(self)
                     problem[idx] = True
                     problem.step()

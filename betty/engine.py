@@ -34,11 +34,11 @@ class Engine:
             assert key in self.problems
             for value in value_list:
                 assert value in self.problems
-                key.add_children(value)
+                key.add_child(value)
                 value.add_parent(key)
 
         # specify leaves
         for problem in self.problems:
-            if problem.hgconfig().leaf:
+            if problem.config.leaf:
                 self.leaves.append(problem)
             problem.initialize()
