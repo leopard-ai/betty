@@ -1,18 +1,19 @@
 import abc
+import typing
 from dataclasses import dataclass
 
 import torch
 import functorch
 
-import optim
-import hypergradient
-import utils
+import betty.optim as optim
+import betty.hypergradient as hypergradient
+import betty.utils as utils
 
 
 @dataclass
 class HypergradientConfig:
-    type: 'string' = 'implicit'
-    step: int = 1
+    type: str = 'maml'
+    step: int = 2
     first_order: bool = False
     leaf: bool = False
 
@@ -80,6 +81,7 @@ class Module:
         self.initialize_optimizer_state()
         self.patch_models()
         self.patch_optimizer()
+        self.zero_grad()
 
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
@@ -110,9 +112,9 @@ class Module:
             loss = self.calculate_loss(batch, *args, **kwargs)
             self.backward(loss, self.params, self._first_order)
             self.optimizer_step()
-            utils.swap_state(self.fmodule.stateless_model,
-                             self.fmodule.split_names,
-                             list(self.params) + list(self.buffers))
+            #utils.swap_state(self.fmodule.stateless_model,
+            #                 self.fmodule.split_names,
+            #                 list(self.params) + list(self.buffers))
             self.zero_grad()
 
             for problem in self._parents:
@@ -170,7 +172,7 @@ class Module:
         Users define how optimizer step is performed. This is mainly used for developing
         meta- (or learnable) optimizer
         """
-        raise NotImplementedError
+        pass
 
     def zero_grad(self):
         """[summary]

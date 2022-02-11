@@ -1,1 +1,3 @@
-# betty
+# Betty
+
+Multi-level optimization library
