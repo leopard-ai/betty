@@ -1,4 +1,5 @@
 import math
+from tkinter import W
 
 import torch
 
@@ -8,6 +9,7 @@ def fadam(
     param_groups,
     states
 ):
+    params = list(params)
     for group_idx, group_mapping in enumerate(param_mapping):
         group = param_groups[group_idx]
 
@@ -22,7 +24,7 @@ def fadam(
                 continue
             grad = p.gradient
 
-            state = states[group_idx][param_idx]
+            state = states[param_idx]
 
             state['step'] += 1
             bias_correction1 = 1 - beta1**state['step']
@@ -42,3 +44,5 @@ def fadam(
 
             step_size = group['lr'] / bias_correction1
             params[param_idx] = p - step_size * (state['exp_avg'] / denom)
+
+    return tuple(params)

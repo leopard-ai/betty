@@ -108,19 +108,24 @@ class Module:
         if self.check_ready():
             self.count += 1
 
-            batch = next(self.data_loader)
+            try:
+                batch = next(self.data_loader)
+            except StopIteration:
+                self.data_loader = iter(self.configure_data_loader())
+                batch = next(self.data_loader)
             loss = self.calculate_loss(batch, *args, **kwargs)
             self.backward(loss, self.params, self._first_order)
-            self.optimizer_step()
-            #utils.swap_state(self.fmodule.stateless_model,
-            #                 self.fmodule.split_names,
-            #                 list(self.params) + list(self.buffers))
+            new_params = self.optimizer_step()
+            self.params = new_params
+            utils.swap_state(self.fmodule.stateless_model,
+                             self.fmodule.split_names,
+                             list(self.params) + list(self.buffers))
             self.zero_grad()
 
             for problem in self._parents:
-                if self.count % problem.hgconfig.step == 0:
-                    idx = problem.children().index(self)
-                    problem[idx] = True
+                if self.count % problem.config.step == 0:
+                    idx = problem.children.index(self)
+                    problem.ready[idx] = True
                     problem.step()
 
             self.ready = [False for _ in range(len(self._children))]
@@ -158,21 +163,22 @@ class Module:
         Update weights as in native PyTorch's optim.step()
         """
         if self.optimizer is None:
-            self.custom_optimizer_step(*args, **kwargs)
+            new_params = self.custom_optimizer_step(*args, **kwargs)
         else:
-            self.update_fn(
+            new_params = self.update_fn(
                 self.params,
                 self.param_mapping,
                 self.param_groups,
                 self.state
             )
+        return new_params
 
     def custom_optimizer_step(self):
         """[summary]
         Users define how optimizer step is performed. This is mainly used for developing
         meta- (or learnable) optimizer
         """
-        pass
+        return self.params
 
     def zero_grad(self):
         """[summary]

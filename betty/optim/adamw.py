@@ -8,6 +8,7 @@ def fadamw(
     param_groups,
     states
 ):
+    params = list(params)
     for group_idx, group_mapping in enumerate(param_mapping):
         group = param_groups[group_idx]
 
@@ -22,7 +23,7 @@ def fadamw(
             grad = p.gradient
 
             p = p * (1 - group['lr'] * group['weight_decay'])
-            state = states[group_idx][param_idx]
+            state = states[param_idx]
 
             state['step'] += 1
             bias_correction1 = 1 - beta1**state['step']
@@ -39,3 +40,5 @@ def fadamw(
 
             step_size = group['lr'] / bias_correction1
             params[param_idx] = p - step_size * (state['exp_avg'] / denom)
+
+    return tuple(params)

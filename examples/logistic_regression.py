@@ -24,7 +24,7 @@ y = (y > 0).astype(float)
 
 x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.5)
 x_train, y_train = torch.from_numpy(x_train).to(device).float(), torch.from_numpy(y_train).to(device).float()
-x_val, y_val = torch.from_numpy(x_val).to(device), torch.from_numpy(y_val).to(device)
+x_val, y_val = torch.from_numpy(x_val).to(device).float(), torch.from_numpy(y_val).to(device).float()
 
 def make_data_loader(xs, ys):
     datasets = [(xs, ys)]
@@ -56,13 +56,13 @@ class Parent(Module):
         return self.params[0]
 
     def calculate_loss(self, batch, *args, **kwargs):
+        self.params[0].clamp(min=1e-8)
         inputs, targets = batch
         child = self.children[0]
-        outs = child.fmodule(child.params, child.buffers, inputs)
-        loss = F.binary_cross_entropy_with_logits(outs, targets) +\
-            0.5 * child.params[0].pow(2) @ self.params[0]()
+        outs = child(inputs)
+        loss = F.binary_cross_entropy_with_logits(outs, targets)
 
-        print('val loss:', loss)
+        print('val loss:', loss.item())
         return loss
 
     def configure_data_loader(self):
@@ -72,7 +72,7 @@ class Parent(Module):
         return ParentNet().to(device)
 
     def configure_optimizer(self):
-        return torch.optim.SGD(self.module.parameters(), lr=0.1, momentum=0.9)
+        return torch.optim.Adam(self.module.parameters(), lr=0.001)
 
 class Child(Module):
     def forward(self, inputs):
@@ -84,7 +84,7 @@ class Child(Module):
         loss = F.binary_cross_entropy_with_logits(outs, targets) +\
             0.5 * self.params[0].pow(2) @ self.parents[0]()
 
-        print('train loss:', loss)
+        print('train loss:', loss.item())
         return loss
 
     def configure_data_loader(self):
@@ -97,7 +97,7 @@ class Child(Module):
         return torch.optim.SGD(self.module.parameters(), lr=0.1)
 
 parent_config = HypergradientConfig(type='maml',
-                                    step=5,
+                                    step=1,
                                     first_order=False,
                                     leaf=False)
 child_config = HypergradientConfig(type='maml',
@@ -106,7 +106,12 @@ child_config = HypergradientConfig(type='maml',
                                    leaf=True)
 parent = Parent(config=parent_config, device=device)
 child = Child(config=child_config, device=device)
+
 problems = [parent, child]
 dependencies = {parent: [child]}
+
+#problems = [child]
+#dependencies = {child: []}
+
 engine = Engine(config=None, problems=problems, dependencies=dependencies)
 engine.train()
