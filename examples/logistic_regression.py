@@ -56,13 +56,13 @@ class Parent(Module):
         return self.params[0]
 
     def calculate_loss(self, batch, *args, **kwargs):
-        self.params[0].clamp(min=1e-8)
         inputs, targets = batch
         child = self.children[0]
         outs = child(inputs)
         loss = F.binary_cross_entropy_with_logits(outs, targets)
 
-        print('val loss:', loss.item())
+        if self.count % 10 == 0:
+            print('count:', self.count, 'val loss:', loss.item())
         return loss
 
     def configure_data_loader(self):
@@ -72,7 +72,7 @@ class Parent(Module):
         return ParentNet().to(device)
 
     def configure_optimizer(self):
-        return torch.optim.Adam(self.module.parameters(), lr=0.001)
+        return torch.optim.SGD(self.module.parameters(), lr=1, momentum=0.9)
 
 class Child(Module):
     def forward(self, inputs):
@@ -84,7 +84,7 @@ class Child(Module):
         loss = F.binary_cross_entropy_with_logits(outs, targets) +\
             0.5 * self.params[0].pow(2) @ self.parents[0]()
 
-        print('train loss:', loss.item())
+        #print('train loss:', loss.item())
         return loss
 
     def configure_data_loader(self):
@@ -97,7 +97,7 @@ class Child(Module):
         return torch.optim.SGD(self.module.parameters(), lr=0.1)
 
 parent_config = HypergradientConfig(type='maml',
-                                    step=1,
+                                    step=100,
                                     first_order=False,
                                     leaf=False)
 child_config = HypergradientConfig(type='maml',

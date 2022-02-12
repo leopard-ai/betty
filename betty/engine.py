@@ -14,7 +14,7 @@ class Engine:
         self.initialize()
 
     def train(self):
-        for _ in range(500):
+        for _ in range(50000):
             for leaf in self.leaves:
                 leaf.step()
 

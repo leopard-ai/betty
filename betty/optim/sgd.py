@@ -7,7 +7,6 @@ def fsgd(
     param_groups,
     states
 ):
-    params = list(params)
     for group_idx, group_mapping in enumerate(param_mapping):
         group = param_groups[group_idx]
 
@@ -22,6 +21,7 @@ def fsgd(
             if p.gradient is None:
                 continue
             grad = p.gradient
+            #print('sgd grad:', grad)
             if weight_decay != 0:
                 grad = grad + weight_decay * p
 
@@ -37,5 +37,7 @@ def fsgd(
             else:
                 grad = buf
 
-            params[param_idx] = p - group['lr'] * grad
-    return tuple(params)
+            p.update = group['lr'] * grad
+            #params[param_idx] = p - group['lr'] * grad
+    #return tuple(params)
+    return tuple(p - p.update for p in params)

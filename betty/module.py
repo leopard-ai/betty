@@ -171,6 +171,9 @@ class Module:
                 self.param_groups,
                 self.state
             )
+        if not self._config.leaf:
+            new_params[0].data.clamp_(min=1e-8)
+
         return new_params
 
     def custom_optimizer_step(self):
