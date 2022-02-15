@@ -38,6 +38,8 @@ def fsgd(
                 grad = buf
 
             p.update = group['lr'] * grad
-            #params[param_idx] = p - group['lr'] * grad
-    #return tuple(params)
-    return tuple(p - p.update for p in params)
+    out = tuple(p - p.update for p in params if hasattr(p, 'update'))
+    for p in params:
+        if hasattr(p, 'update'):
+            del p.update
+    return out

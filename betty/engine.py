@@ -1,4 +1,6 @@
 import typing
+
+import torch
 from betty.module import Module
 
 

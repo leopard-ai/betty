@@ -15,6 +15,8 @@ class HypergradientConfig:
     type: str = 'maml'
     step: int = 2
     first_order: bool = False
+    retain_graph: bool = False
+    allow_unused: bool = False
     leaf: bool = False
 
 
@@ -29,6 +31,8 @@ class Module:
         # ! dependency can be defined both in ``Module'' class and ``Engine'' class
         self._parents = []
         self._children = []
+        self.ready = None
+        self.count = 0
 
         # data loader
         self.data_loader = None
@@ -48,9 +52,10 @@ class Module:
         self.update_fn = None
 
         # misc
-        self.ready = None
-        self.count = 0
         self._first_order = False
+        self._retain_graph = config.retain_graph
+        self._allow_unused = config.allow_unused
+        self._inner_loop_start = True
 
     def initialize(self):
         """[summary]
@@ -67,6 +72,8 @@ class Module:
             hgconfig = problem.config
             first_order.append(hgconfig.first_order)
         self._first_order = all(first_order)
+
+        self._inner_loop_start = True
 
         # set up data loader
         self.data_loader = iter(self.configure_data_loader())
@@ -94,7 +101,7 @@ class Module:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def calculate_loss(self, batch, *args, **kwargs):
+    def loss_fn(self, batch, *args, **kwargs):
         """[summary]
         Users define how loss is calculated for the current problem.
         """
@@ -106,31 +113,48 @@ class Module:
         Perform gradient calculation and update parameters accordingly
         """
         if self.check_ready():
+            if self._inner_loop_start:
+                self.on_inner_loop_start()
+                self._inner_loop_start = False
             self.count += 1
 
+            # load data
             try:
                 batch = next(self.data_loader)
             except StopIteration:
                 self.data_loader = iter(self.configure_data_loader())
                 batch = next(self.data_loader)
-            loss = self.calculate_loss(batch, *args, **kwargs)
-            self.backward(loss, self.params, self._first_order)
+
+            # calculate loss
+            loss = self.loss_fn(batch, *args, **kwargs)
+
+            # calculate gradient
+            self.backward(loss, self.params,
+                          create_graph=not self._first_order,
+                          retain_graph=self._retain_graph,
+                          allow_unused=self._allow_unused)
+
+            # calculate parameter update
             new_params = self.optimizer_step()
             self.params = new_params
-            utils.swap_state(self.fmodule.stateless_model,
-                             self.fmodule.split_names,
-                             list(self.params) + list(self.buffers))
+
+            # zero-out grad
             self.zero_grad()
 
+            # call parent step function
             for problem in self._parents:
                 if self.count % problem.config.step == 0:
                     idx = problem.children.index(self)
                     problem.ready[idx] = True
                     problem.step()
 
+                    self._inner_loop_start = True
+
+                # TODO: reinitialize params at the beginning of inner loop
+
             self.ready = [False for _ in range(len(self._children))]
 
-    def backward(self, loss, params, first_order=False):
+    def backward(self, loss, params, create_graph=True, retain_graph=False, allow_unused=False):
         """[summary]
         Calculate and return gradient for given loss and parameters
         Args:
@@ -145,11 +169,17 @@ class Module:
             return None
 
         if self._config.leaf:
-            grad = torch.autograd.grad(loss, params, create_graph=not first_order)
+            grad = torch.autograd.grad(loss, params,
+                                       create_graph=create_graph,
+                                       retain_graph=retain_graph,
+                                       allow_unused=allow_unused)
         else:
             assert len(self._children) > 0
             grad_fn = hypergradient.get_grad_fn(self.config.type)
-            grad = grad_fn(loss, params, first_order=first_order)
+            grad = grad_fn(loss, params,
+                           create_graph=create_graph,
+                           retain_graph=retain_graph,
+                           allow_unused=allow_unused)
 
         # set gradient for each parameter
         for p, g in zip(params, grad):
@@ -171,8 +201,8 @@ class Module:
                 self.param_groups,
                 self.state
             )
-        if not self._config.leaf:
-            new_params[0].data.clamp_(min=1e-8)
+
+        self.param_callback(new_params)
 
         return new_params
 
@@ -187,8 +217,11 @@ class Module:
         """[summary]
         Set gradients for trainable parameters for the current problem to 0.
         """
-        for param in self.trainable_parameters():
-            param.gradient = None
+        for param in list(self.params):
+            if hasattr(param, 'gradient'):
+                del param.gradient
+            if hasattr(param, 'grad'):
+                del param.grad
 
     @abc.abstractmethod
     def configure_data_loader(self):
@@ -210,6 +243,21 @@ class Module:
         Return user-defined optimizer
         """
         raise NotImplementedError
+
+    def grad_callback(self, grads):
+        """[summary]
+        Users define custom gradient callback functions such as gradient clipping
+        """
+        return
+
+    def param_callback(self, params):
+        """[summary]
+        Users define custom parameter callback functions such as parameter clipping
+        """
+        return
+
+    def on_inner_loop_start(self):
+        self._inner_loop_start = False
 
     def initialize_optimizer_state(self):
         """[summary]
