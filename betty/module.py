@@ -298,7 +298,7 @@ class Module:
             # construct param mapping from optimizer.param_groups
             param_mapping = []
             for param in param_group['params']:
-                param_idx = list(self.module.parameters()).index(param)
+                param_idx = utils.get_param_index(param, self.module.parameters())
                 param_mapping.append(param_idx)
                 self.state[param_idx] = self.optimizer.state[param]
             self.param_mapping.append(param_mapping)

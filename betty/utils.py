@@ -56,3 +56,11 @@ def flatten_list(regular_list):
     if type(regular_list[0] == list):
         return [item for sublist in regular_list for item in sublist]
     return regular_list
+
+
+def get_param_index(param, param_list):
+    param_list = list(param_list)
+    for idx, p in enumerate(param_list):
+        if p is param:
+            return idx
+    print('no corresponding parameter found!')

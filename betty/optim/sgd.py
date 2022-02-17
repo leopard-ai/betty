@@ -21,7 +21,6 @@ def fsgd(
             if p.gradient is None:
                 continue
             grad = p.gradient
-            #print('sgd grad:', grad)
             if weight_decay != 0:
                 grad = grad + weight_decay * p
 

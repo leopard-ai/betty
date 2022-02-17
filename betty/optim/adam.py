@@ -9,7 +9,6 @@ def fadam(
     param_groups,
     states
 ):
-    params = list(params)
     for group_idx, group_mapping in enumerate(param_mapping):
         group = param_groups[group_idx]
 
@@ -23,7 +22,6 @@ def fadam(
             if p.gradient is None:
                 continue
             grad = p.gradient
-            print('adam grad:', grad)
 
             state = states[param_idx]
 
@@ -44,6 +42,10 @@ def fadam(
                 denom = state['exp_avg_sq'].sqrt() / math.sqrt(bias_correction2) + group['eps']
 
             step_size = group['lr'] / bias_correction1
-            params[param_idx] = p - step_size * (state['exp_avg'] / denom)
+            p.update = step_size * (state['exp_avg'] / denom)
 
-    return tuple(params)
+    out = tuple(p - p.update for p in params if hasattr(p, 'update'))
+    for p in params:
+        if hasattr(p, 'update'):
+            del p.update
+    return out
