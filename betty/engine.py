@@ -1,6 +1,5 @@
 import typing
 
-import torch
 from betty.module import Module
 
 
@@ -41,6 +40,7 @@ class Engine:
 
         # specify leaves
         for problem in self.problems:
-            if problem.config.leaf:
+            if len(self.dependencies.get(problem, [])) == 0:
+                problem.set_leaf()
                 self.leaves.append(problem)
             problem.initialize()

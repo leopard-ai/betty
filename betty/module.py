@@ -17,7 +17,6 @@ class HypergradientConfig:
     first_order: bool = False
     retain_graph: bool = False
     allow_unused: bool = False
-    leaf: bool = False
 
 
 class Module:
@@ -52,6 +51,7 @@ class Module:
         self.scheduler = scheduler
 
         # misc
+        self._leaf = False
         self._first_order = False
         self._retain_graph = config.retain_graph
         self._allow_unused = config.allow_unused
@@ -62,7 +62,7 @@ class Module:
         Initialize basic things
         """
         # initialize update ready to False
-        if self.config.leaf:
+        if self._leaf:
             assert len(self._children) == 0
         self.ready = [False for _ in range(len(self._children))]
 
@@ -182,7 +182,7 @@ class Module:
         if self.optimizer is None:
             return None
 
-        if self._config.leaf:
+        if self._leaf:
             grad = torch.autograd.grad(loss, params,
                                        create_graph=create_graph,
                                        retain_graph=retain_graph,
@@ -318,6 +318,9 @@ class Module:
         Return parameters for the current problem.
         """
         return self.params
+
+    def set_leaf(self):
+        self._leaf = True
 
     @property
     def config(self):

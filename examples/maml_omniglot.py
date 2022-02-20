@@ -134,13 +134,11 @@ class Child(Module):
 
 parent_config = HypergradientConfig(type='maml',
                                     step=arg.inner_steps,
-                                    first_order=False,
-                                    leaf=False)
+                                    first_order=False)
 child_config = HypergradientConfig(type='maml',
                                    step=1,
                                    first_order=False,
-                                   retain_graph=True,
-                                   leaf=True)
+                                   retain_graph=True)
 
 parent = Parent(config=parent_config, device=arg.device)
 children = [Child(config=child_config, device=arg.device) for _ in range(arg.task_num)]
