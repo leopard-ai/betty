@@ -23,6 +23,9 @@ class HypergradientConfig:
 class Module:
     def __init__(self,
                  config,
+                 module=None,
+                 optimizer=None,
+                 scheduler=None,
                  device=None):
         self._config = config
         self.device = device
@@ -39,14 +42,14 @@ class Module:
         self.valid_data_loader = None
 
         # module
-        self.module = None
+        self.module = module
         self.fmodule = None
         self.params = None
         self.buffers = None
 
-        # optimizer
-        self.optimizer = None
-        self.scheduler = None
+        # optimizer & lr scheduler
+        self.optimizer = optimizer
+        self.scheduler = scheduler
 
         # misc
         self._first_order = False
@@ -78,13 +81,20 @@ class Module:
             self.valid_data_loader = iter(self.configure_valid_data_loader())
 
         # set up module for the current level
-        self.module = self.configure_module()
+        if self.is_implemented('configure_module'):
+            if self.configure_module() is not None:
+                self.module = self.configure_module()
+        assert self.module is not None, "Module should be specified!"
 
         # set up optimizer
-        self.optimizer = self.configure_optimizer()
+        if self.is_implemented('configure_optimizer'):
+            if self.configure_optimizer() is not None:
+                self.optimizer = self.configure_optimizer()
 
         # set up lr scheduler
-        self.scheduler = self.configure_scheduler()
+        if self.is_implemented('configure_scheduler'):
+            if self.configure_scheduler is not None:
+                self.scheduler = self.configure_scheduler()
 
         # patch model and optimizer to follow functional programming paradigm
         self.initialize_optimizer_state()
@@ -235,27 +245,6 @@ class Module:
         """
         return None
 
-    @abc.abstractmethod
-    def configure_module(self):
-        """[summary]
-        Return user-defined module
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def configure_optimizer(self):
-        """[summary]
-        Return user-defined optimizer
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def configure_scheduler(self):
-        """[summary]
-        Return user-defined lr scheduler
-        """
-        raise NotImplementedError
-
     def grad_callback(self, grads):
         pass
 
@@ -263,7 +252,10 @@ class Module:
         pass
 
     def on_inner_loop_start(self):
-        self._inner_loop_start = False
+        pass
+
+    def is_implemented(self, fn_name):
+        return callable(getattr(self, fn_name, None))
 
     def initialize_optimizer_state(self):
         """[summary]

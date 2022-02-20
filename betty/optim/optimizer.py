@@ -5,7 +5,7 @@ import torch
 import betty.utils as utils
 
 
-class DifferentiableOptimizerBase:
+class DifferentiableOptimizerBase(torch.optim.Optimizer):
     def __init__(self,
                  optimizer,
                  module):

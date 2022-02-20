@@ -1,6 +1,6 @@
 import argparse
 import sys
-sys.path.insert(0, "/home/ubuntu/workspace/betty")
+sys.path.insert(0, "./..")
 
 import numpy as np
 import torch
@@ -79,6 +79,7 @@ class Parent(Module):
             accs.append((out.argmax(dim=1) == self.batch[1][idx]).detach())
         self.batch = (x_qry, y_qry)
         self.child_batch = (x_spt, y_spt)
+        self.scheduler.step()
         if self.count % 10 == 0:
             acc = 100. * torch.cat(accs).float().mean().item()
             print('='*65)
@@ -98,6 +99,9 @@ class Parent(Module):
 
     def configure_optimizer(self):
         return optim.Adam(self.module.parameters(), lr=0.001, betas=(0.5, 0.9))
+
+    def configure_scheduler(self):
+        return optim.lr_scheduler.StepLR(self.optimizer, step_size=20, gamma=0.9)
 
 
 class Child(Module):

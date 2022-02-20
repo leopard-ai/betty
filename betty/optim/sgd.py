@@ -1,5 +1,3 @@
-import torch
-
 from betty.optim.optimizer import DifferentiableOptimizerBase
 
 

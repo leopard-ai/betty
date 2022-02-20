@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, "/home/ubuntu/workspace/betty")
+sys.path.insert(0, "./..")
 
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -62,7 +62,7 @@ class Parent(Module):
         loss = F.binary_cross_entropy_with_logits(outs, targets)
 
         if self.count % 10 == 0:
-            print('count:', self.count, 'val loss:', loss.item())
+            print('count:', self.count, '|| val loss:', loss.item())
         return loss
 
     def configure_train_data_loader(self):
