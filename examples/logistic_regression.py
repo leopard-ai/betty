@@ -55,7 +55,7 @@ class Parent(Module):
     def forward(self, *args, **kwargs):
         return self.params[0]
 
-    def loss_fn(self, batch, *args, **kwargs):
+    def training_step(self, batch, *args, **kwargs):
         inputs, targets = batch
         child = self.children[0]
         outs = child(inputs)
@@ -65,14 +65,14 @@ class Parent(Module):
             print('count:', self.count, 'val loss:', loss.item())
         return loss
 
-    def configure_data_loader(self):
+    def configure_train_data_loader(self):
         return make_data_loader(x_val, y_val)
 
     def configure_module(self):
         return ParentNet().to(device)
 
     def configure_optimizer(self):
-        return torch.optim.SGD(self.module.parameters(), lr=5, momentum=0.9)
+        return torch.optim.SGD(self.module.parameters(), lr=1, momentum=0.9)
 
     def param_callback(self, params):
         for p in params:
@@ -82,14 +82,14 @@ class Child(Module):
     def forward(self, inputs):
         return self.fmodule(self.params, self.buffers, inputs)
 
-    def loss_fn(self, batch, *args, **kwargs):
+    def training_step(self, batch, *args, **kwargs):
         inputs, targets = batch
         outs = self.forward(inputs)
         loss = F.binary_cross_entropy_with_logits(outs, targets) +\
             0.5 * (self.params[0].unsqueeze(0) @ torch.diag(self.parents[0]()) @ self.params[0].unsqueeze(1)).sum()
         return loss
 
-    def configure_data_loader(self):
+    def configure_train_data_loader(self):
         return make_data_loader(x_train, y_train)
 
     def configure_module(self):

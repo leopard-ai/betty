@@ -35,7 +35,8 @@ class Module:
         self.count = 0
 
         # data loader
-        self.data_loader = None
+        self.train_data_loader = None
+        self.valid_data_loader = None
 
         # module
         self.module = None
@@ -45,11 +46,7 @@ class Module:
 
         # optimizer
         self.optimizer = None
-        self.state = []
-        self.param_groups = []
-        self.param_mapping = []
-        self.flattened_param_mapping = None
-        self.update_fn = None
+        self.scheduler = None
 
         # misc
         self._first_order = False
@@ -76,7 +73,9 @@ class Module:
         self._inner_loop_start = True
 
         # set up data loader
-        self.data_loader = iter(self.configure_data_loader())
+        self.train_data_loader = iter(self.configure_train_data_loader())
+        if self.configure_valid_data_loader() is not None:
+            self.valid_data_loader = iter(self.configure_valid_data_loader())
 
         # set up module for the current level
         self.module = self.configure_module()
@@ -84,10 +83,14 @@ class Module:
         # set up optimizer
         self.optimizer = self.configure_optimizer()
 
+        # set up lr scheduler
+        self.scheduler = self.configure_scheduler()
+
         # patch model and optimizer to follow functional programming paradigm
         self.initialize_optimizer_state()
         self.patch_models()
         self.patch_optimizer()
+        self.patch_scheduler()
         self.zero_grad()
 
     def __call__(self, *args, **kwargs):
@@ -101,12 +104,15 @@ class Module:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def loss_fn(self, batch, *args, **kwargs):
+    def training_step(self, batch, *args, **kwargs):
         """[summary]
         Users define how loss is calculated for the current problem.
         """
         # (batch, batch_idx)
         raise NotImplementedError
+
+    def valid_step(self, batch, *args, **kwargs):
+        pass
 
     def step(self, *args, **kwargs):
         """[summary]
@@ -120,13 +126,13 @@ class Module:
 
             # load data
             try:
-                batch = next(self.data_loader)
+                batch = next(self.train_data_loader)
             except StopIteration:
-                self.data_loader = iter(self.configure_data_loader())
-                batch = next(self.data_loader)
+                self.train_data_loader = iter(self.configure_train_data_loader())
+                batch = next(self.train_data_loader)
 
             # calculate loss
-            loss = self.loss_fn(batch, *args, **kwargs)
+            loss = self.training_step(batch, *args, **kwargs)
 
             # calculate gradient
             self.backward(loss, self.params,
@@ -149,8 +155,6 @@ class Module:
                     problem.step()
 
                     self._inner_loop_start = True
-
-                # TODO: reinitialize params at the beginning of inner loop
 
             self.ready = [False for _ in range(len(self._children))]
 
@@ -195,12 +199,7 @@ class Module:
         if self.optimizer is None:
             new_params = self.custom_optimizer_step(*args, **kwargs)
         else:
-            new_params = self.update_fn(
-                self.params,
-                self.param_mapping,
-                self.param_groups,
-                self.state
-            )
+            new_params = self.optimizer.step(self.params)
 
         self.param_callback(new_params)
 
@@ -224,11 +223,17 @@ class Module:
                 del param.grad
 
     @abc.abstractmethod
-    def configure_data_loader(self):
+    def configure_train_data_loader(self):
         """[summary]
         Return user-defined data loader
         """
         raise NotImplementedError
+
+    def configure_valid_data_loader(self):
+        """[summary]
+        Return user-defined data loader
+        """
+        return None
 
     @abc.abstractmethod
     def configure_module(self):
@@ -244,17 +249,18 @@ class Module:
         """
         raise NotImplementedError
 
-    def grad_callback(self, grads):
+    @abc.abstractmethod
+    def configure_scheduler(self):
         """[summary]
-        Users define custom gradient callback functions such as gradient clipping
+        Return user-defined lr scheduler
         """
-        return
+        raise NotImplementedError
+
+    def grad_callback(self, grads):
+        pass
 
     def param_callback(self, params):
-        """[summary]
-        Users define custom parameter callback functions such as parameter clipping
-        """
-        return
+        pass
 
     def on_inner_loop_start(self):
         self._inner_loop_start = False
@@ -283,37 +289,21 @@ class Module:
         Raises:
             NotImplementedError: [description]
         """
-        if self.optimizer is None:
-            return None
+        if self.optimizer is not None:
+            self.optimizer = optim.patch_optimizer(self.optimizer, self.module)
 
-        self.state = [None for _ in range(len(list(self.module.parameters())))]
-        for param_group in self.optimizer.param_groups:
-            # copy param group dictionaory from optimizer.param_groups to self.param_groups
-            my_param_group = {}
-            for key, value in param_group.items():
-                if key != 'params':
-                    my_param_group[key] = value
-            self.param_groups.append(my_param_group)
-
-            # construct param mapping from optimizer.param_groups
-            param_mapping = []
-            for param in param_group['params']:
-                param_idx = utils.get_param_index(param, self.module.parameters())
-                param_mapping.append(param_idx)
-                self.state[param_idx] = self.optimizer.state[param]
-            self.param_mapping.append(param_mapping)
-        self.flattened_param_mapping = utils.flatten_list(self.param_mapping)
-
-        self.update_fn = optim.get_update_fn(self.optimizer)
+    def patch_scheduler(self):
+        """[summary]
+        Patch scheduler to work on patched optimizer
+        """
+        if self.scheduler is not None:
+            self.scheduler = optim.patch_scheduler(self.scheduler, self.optimizer)
 
     def check_ready(self):
         """[summary]
         Check if parameter updates in all children are ready
         """
-        if self._config.leaf:
-            return True
-        ready = all(self.ready)
-        return ready
+        return all(self.ready)
 
     def add_child(self, problem):
         """[summary]
@@ -336,14 +326,6 @@ class Module:
         Return parameters for the current problem.
         """
         return self.params
-
-    def trainable_parameters(self):
-        """[summary]
-        Return trainable parameters for the current problem.
-        """
-        mapping_set = set(self.flattened_param_mapping)
-        trainable_params = list(p for idx, p in enumerate(self.params) if idx in mapping_set)
-        return trainable_params
 
     @property
     def config(self):

@@ -69,20 +69,24 @@ class Parent(Module):
     def forward(self, *args, **kwargs):
         return self.params, self.buffers
 
-    def loss_fn(self, batch, *args, **kwargs):
+    def training_step(self, batch, *args, **kwargs):
         x_spt, y_spt, x_qry, y_qry = batch
         loss = 0
+        accs = []
         for idx, ch in enumerate(self._children):
             out = ch(self.batch[0][idx])
             loss += F.cross_entropy(out, self.batch[1][idx])
+            accs.append((out.argmax(dim=1) == self.batch[1][idx]).detach())
         self.batch = (x_qry, y_qry)
         self.child_batch = (x_spt, y_spt)
-        if self.count % 1 == 0:
-            print('val loss:', loss)
+        if self.count % 10 == 0:
+            acc = 100. * torch.cat(accs).float().mean().item()
+            print('='*65)
+            print('step:', self.count, '|| loss:', loss.clone().detach().item(), ' || acc:', acc)
 
         return loss
 
-    def configure_data_loader(self):
+    def configure_train_data_loader(self):
         data_loader = db
         x_spt, y_spt, x_qry, y_qry = next(data_loader)
         self.batch = (x_qry, y_qry)
@@ -93,14 +97,14 @@ class Parent(Module):
         return Net(arg.n_way, self.device)
 
     def configure_optimizer(self):
-        return optim.Adam(self.module.parameters(), lr=0.01)
+        return optim.Adam(self.module.parameters(), lr=0.001, betas=(0.5, 0.9))
 
 
 class Child(Module):
     def forward(self, x):
         return self.fmodule(self.params, self.buffers, x)
 
-    def loss_fn(self, batch, *args, **kwargs):
+    def training_step(self, batch, *args, **kwargs):
         child_idx = self.parents[0].children.index(self)
         inputs, targets = self.parents[0].child_batch
         inputs, targets = inputs[child_idx], targets[child_idx]
@@ -115,7 +119,7 @@ class Child(Module):
         self.params = tuple(p.clone() for p in params)
         self.buffers = tuple(b.clone() for b in buffers)
 
-    def configure_data_loader(self):
+    def configure_train_data_loader(self):
         return [None]
 
     def configure_module(self):

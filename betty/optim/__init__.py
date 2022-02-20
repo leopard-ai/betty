@@ -1,19 +1,20 @@
 import torch
 
-from .sgd import fsgd
-from .adam import fadam
-from .adamw import fadamw
+from .sgd import DifferentiableSGD
+from .adam import DifferentiableAdam
+from .adamw import DifferentiableAdamW
+from .lr_scheduler import patch_scheduler
 
 optimizer_mapping = {
-    torch.optim.SGD: fsgd,
-    torch.optim.Adam: fadam,
-    torch.optim.AdamW: fadamw
+    torch.optim.SGD: DifferentiableSGD,
+    torch.optim.Adam: DifferentiableAdam,
+    torch.optim.AdamW: DifferentiableAdamW
 }
 
-def get_update_fn(optimizer):
+def patch_optimizer(optimizer, module):
     """[summary]
-    Return (functional) udpate function for the given optimizer (e.g., F.sgd, F.Adam)
+    Return dofferentiable optimizer for the given optimizer
     """
     assert type(optimizer) in optimizer_mapping
 
-    return optimizer_mapping[type(optimizer)]
+    return optimizer_mapping[type(optimizer)](optimizer, module)
