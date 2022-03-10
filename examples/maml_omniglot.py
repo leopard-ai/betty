@@ -82,28 +82,25 @@ class Parent(Module):
 
     def training_step(self, batch, *args, **kwargs):
         x_spt, y_spt, x_qry, y_qry = batch
-        loss = 0
+        losses = []
         accs = []
         for idx, ch in enumerate(self._children):
             out = ch(self.batch[0][idx])
-            loss += F.cross_entropy(out, self.batch[1][idx])
+            loss = F.cross_entropy(out, self.batch[1][idx])
+            losses.append(loss)
             accs.append((out.argmax(dim=1) == self.batch[1][idx]).detach())
         self.batch = (x_qry, y_qry)
         self.child_batch = (x_spt, y_spt)
         self.scheduler.step()
         if self.count % 10 == 0:
             acc = 100. * torch.cat(accs).float().mean().item()
-            print('='*65)
-            print('step:', self.count, '|| loss:', loss.clone().detach().item(), ' || acc:', acc)
+            print('step:', self.count, '|| loss:', sum(losses).clone().detach().item(), ' || acc:', acc)
 
-        return loss
+        return losses
 
     def configure_train_data_loader(self):
         data_loader = db
         x_spt, y_spt, x_qry, y_qry = next(data_loader)
-        print('='*20)
-        print(x_spt.shape, y_spt.shape)
-        print(x_qry.shape, y_qry.shape)
         self.batch = (x_qry, y_qry)
         self.child_batch = (x_spt, y_spt)
         return data_loader
@@ -164,8 +161,8 @@ child_config = HypergradientConfig(type='maml',
                                    first_order=False,
                                    retain_graph=True)
 
-parent = Parent(config=parent_config, device=arg.device)
-children = [Child(config=child_config, device=arg.device) for _ in range(arg.task_num)]
+parent = Parent(name='parent', config=parent_config, device=arg.device)
+children = [Child(name='child', config=child_config, device=arg.device) for _ in range(arg.task_num)]
 problems = children + [parent]
 dependencies = {parent: children}
 engine = Engine(config=None, problems=problems, dependencies=dependencies)

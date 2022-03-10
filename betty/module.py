@@ -135,7 +135,7 @@ class Module:
 
     def step(self,
              backpropagate=True,
-             save_state=False):
+             param_update=True):
         """[summary]
         Perform gradient calculation and update parameters accordingly
         """
@@ -145,7 +145,7 @@ class Module:
                 self._inner_loop_start = False
             if self._training and backpropagate:
                 self.count += 1
-            if save_state:
+            if not param_update:
                 self.params_temp = copy.deepcopy(self.params)
                 self.buffers_temp = copy.deepcopy(self.buffers)
                 self.optimizer_state_temp = copy.deepcopy(self.optimizer.state)
@@ -162,10 +162,10 @@ class Module:
 
             # calculate loss
             losses = self.training_step(batch)
-            if not isinstance(losses, Iterable):
+            if not (isinstance(losses, tuple) or isinstance(losses, list)):
                 losses = (losses,)
             # TODO: Add custom loss aggregation
-            # loss aggregation
+            # aggregate loss
             losses = tuple(loss / len(losses) for loss in losses)
 
             # calculate gradient (a.k.a backward)

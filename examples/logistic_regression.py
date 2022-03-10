@@ -108,8 +108,8 @@ child_config = HypergradientConfig(type='maml',
                                    step=1,
                                    first_order=False,
                                    retain_graph=True)
-parent = Parent(config=parent_config, device=device)
-child = Child(config=child_config, device=device)
+parent = Parent(name='outer', config=parent_config, device=device)
+child = Child(name='inner', config=child_config, device=device)
 
 problems = [parent, child]
 dependencies = {parent: [child]}
