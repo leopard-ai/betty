@@ -123,7 +123,7 @@ def index_classes(items):
 
 class OmniglotNShot:
 
-    def __init__(self, root, batchsz, n_way, k_shot, k_query, imgsz, device=None):
+    def __init__(self, root, batchsz, n_way, k_shot, k_query, imgsz, device=None, mode='train'):
         """
         Different from mnistNShot, the
         :param root:
@@ -135,6 +135,7 @@ class OmniglotNShot:
         """
 
         self.resize = imgsz
+        self.mode = mode
         self.device = device
         if not os.path.isfile(os.path.join(root, 'omniglot.npy')):
             # if root/data.npy does not exist, just download it
@@ -278,7 +279,7 @@ class OmniglotNShot:
         :param mode: The name of the splitting (one of "train", "val", "test")
         :return:
         """
-        mode = 'train'
+        mode = self.mode
         # update cache if indexes is larger cached num
         if self.indexes[mode] >= len(self.datasets_cache[mode]):
             self.indexes[mode] = 0

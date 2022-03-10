@@ -115,4 +115,4 @@ problems = [parent, child]
 dependencies = {parent: [child]}
 
 engine = Engine(config=None, problems=problems, dependencies=dependencies)
-engine.train()
+engine.run()

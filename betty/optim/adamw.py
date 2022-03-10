@@ -23,8 +23,8 @@ class DifferentiableAdamW(DifferentiableOptimizerBase):
                 state = self.state[param_idx]
 
                 state['step'] += 1
-                bias_correction1 = 1 - beta1**state['step']
-                bias_correction2 = 1 - beta2**state['step']
+                bias_correction1 = 1 - beta1 ** state['step']
+                bias_correction2 = 1 - beta2 ** state['step']
 
                 state['exp_avg'] = state['exp_avg'] * beta1 + (1 - beta1) * grad
                 state['exp_avg_sq'] = state['exp_avg_sq'] * beta2 + (1 - beta2) * grad * grad

@@ -1,4 +1,6 @@
 import abc
+from collections.abc import Iterable
+import copy
 import typing
 from dataclasses import dataclass
 
@@ -7,7 +9,6 @@ import functorch
 
 import betty.optim as optim
 import betty.hypergradient as hypergradient
-import betty.utils as utils
 
 
 @dataclass
@@ -21,11 +22,14 @@ class HypergradientConfig:
 
 class Module:
     def __init__(self,
+                 name,
                  config,
                  module=None,
                  optimizer=None,
                  scheduler=None,
+                 train_data_loader=None,
                  device=None):
+        self._name = name
         self._config = config
         self.device = device
 
@@ -33,12 +37,13 @@ class Module:
         # ! dependency can be defined both in ``Module'' class and ``Engine'' class
         self._parents = []
         self._children = []
+        self._problem_name_dict = {}
         self.ready = None
         self.count = 0
 
         # data loader
-        self.train_data_loader = None
-        self.valid_data_loader = None
+        self.train_data_loader = train_data_loader
+        self.train_data_iterator = None
 
         # module
         self.module = module
@@ -50,12 +55,18 @@ class Module:
         self.optimizer = optimizer
         self.scheduler = scheduler
 
+        # temp
+        self.params_temp = None
+        self.buffers_temp = None
+        self.optimizer_state_temp = None
+
         # misc
         self._leaf = False
         self._first_order = False
         self._retain_graph = config.retain_graph
         self._allow_unused = config.allow_unused
         self._inner_loop_start = True
+        self._training = True
 
     def initialize(self):
         """[summary]
@@ -76,15 +87,17 @@ class Module:
         self._inner_loop_start = True
 
         # set up data loader
-        self.train_data_loader = iter(self.configure_train_data_loader())
-        if self.configure_valid_data_loader() is not None:
-            self.valid_data_loader = iter(self.configure_valid_data_loader())
+        train_data_loader = copy.deepcopy(self.train_data_loader)
+        if self.is_implemented('configure_train_data_loader'):
+            train_data_loader = self.configure_train_data_loader()
+        assert train_data_loader is not None, "Train data loader must be specified!"
+        self.train_data_iterator = iter(train_data_loader)
 
         # set up module for the current level
         if self.is_implemented('configure_module'):
             if self.configure_module() is not None:
                 self.module = self.configure_module()
-        assert self.module is not None, "Module should be specified!"
+        assert self.module is not None, "Module must be specified!"
 
         # set up optimizer
         if self.is_implemented('configure_optimizer'):
@@ -96,7 +109,7 @@ class Module:
             if self.configure_scheduler is not None:
                 self.scheduler = self.configure_scheduler()
 
-        # patch model and optimizer to follow functional programming paradigm
+        # patch model, optimizer, lr_scheduler to follow functional programming paradigm
         self.initialize_optimizer_state()
         self.patch_models()
         self.patch_optimizer()
@@ -114,17 +127,15 @@ class Module:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def training_step(self, batch, *args, **kwargs):
+    def training_step(self, batch):
         """[summary]
         Users define how loss is calculated for the current problem.
         """
-        # (batch, batch_idx)
         raise NotImplementedError
 
-    def valid_step(self, batch, *args, **kwargs):
-        pass
-
-    def step(self, *args, **kwargs):
+    def step(self,
+             backpropagate=True,
+             save_state=False):
         """[summary]
         Perform gradient calculation and update parameters accordingly
         """
@@ -132,23 +143,49 @@ class Module:
             if self._inner_loop_start:
                 self.on_inner_loop_start()
                 self._inner_loop_start = False
-            self.count += 1
+            if self._training and backpropagate:
+                self.count += 1
+            if save_state:
+                self.params_temp = copy.deepcopy(self.params)
+                self.buffers_temp = copy.deepcopy(self.buffers)
+                self.optimizer_state_temp = copy.deepcopy(self.optimizer.state)
 
             # load data
             try:
-                batch = next(self.train_data_loader)
+                batch = next(self.train_data_iterator)
             except StopIteration:
-                self.train_data_loader = iter(self.configure_train_data_loader())
-                batch = next(self.train_data_loader)
+                train_data_loader = copy.deepcopy(self.train_data_loader)
+                if self.is_implemented('configure_train_data_loader'):
+                    train_data_loader = self.configure_train_data_loader()
+                self.train_data_iterator = iter(train_data_loader)
+                batch = next(self.train_data_iterator)
 
             # calculate loss
-            loss = self.training_step(batch, *args, **kwargs)
+            losses = self.training_step(batch)
+            if not isinstance(losses, Iterable):
+                losses = (losses,)
+            # TODO: Add custom loss aggregation
+            # loss aggregation
+            losses = tuple(loss / len(losses) for loss in losses)
 
-            # calculate gradient
-            self.backward(loss, self.params,
-                          create_graph=not self._first_order,
-                          retain_graph=self._retain_graph,
-                          allow_unused=self._allow_unused)
+            # calculate gradient (a.k.a backward)
+            if len(losses) == 1:
+                child = None if len(self._children) == 0 else self._children[0]
+                self.backward(loss=losses[0],
+                              params=self.params,
+                              child=child,
+                              create_graph=not self._first_order,
+                              retain_graph=self._retain_graph,
+                              allow_unused=self._allow_unused)
+            else:
+                assert len(losses) == len(self._children)
+                for loss, child in zip(losses, self._children):
+                    self.backward(loss=loss,
+                                  params=self.params,
+                                  child=child,
+                                  create_graph=not self._first_order,
+                                  retain_graph=self._retain_graph,
+                                  allow_unused=self._allow_unused)
 
             # calculate parameter update
             new_params = self.optimizer_step()
@@ -158,17 +195,25 @@ class Module:
             self.zero_grad()
 
             # call parent step function
-            for problem in self._parents:
-                if self.count % problem.config.step == 0:
-                    idx = problem.children.index(self)
-                    problem.ready[idx] = True
-                    problem.step()
+            if self._training and backpropagate:
+                for problem in self._parents:
+                    if self.count % problem.config.step == 0:
+                        idx = problem.children.index(self)
+                        problem.ready[idx] = True
+                        problem.step()
 
-                    self._inner_loop_start = True
+                        self._inner_loop_start = True
 
             self.ready = [False for _ in range(len(self._children))]
+            self.params_temp = None
 
-    def backward(self, loss, params, create_graph=True, retain_graph=False, allow_unused=False):
+    def backward(self,
+                 loss,
+                 params,
+                 child=None,
+                 create_graph=True,
+                 retain_graph=False,
+                 allow_unused=False):
         """[summary]
         Calculate and return gradient for given loss and parameters
         Args:
@@ -182,7 +227,7 @@ class Module:
         if self.optimizer is None:
             return None
 
-        if self._leaf:
+        if self._leaf or self.config.type == 'torch':
             grad = torch.autograd.grad(loss, params,
                                        create_graph=create_graph,
                                        retain_graph=retain_graph,
@@ -190,7 +235,7 @@ class Module:
         else:
             assert len(self._children) > 0
             grad_fn = hypergradient.get_grad_fn(self.config.type)
-            grad = grad_fn(loss, params,
+            grad = grad_fn(loss, params, child,
                            create_graph=create_graph,
                            retain_graph=retain_graph,
                            allow_unused=allow_unused)
@@ -231,19 +276,6 @@ class Module:
                 del param.gradient
             if hasattr(param, 'grad'):
                 del param.grad
-
-    @abc.abstractmethod
-    def configure_train_data_loader(self):
-        """[summary]
-        Return user-defined data loader
-        """
-        raise NotImplementedError
-
-    def configure_valid_data_loader(self):
-        """[summary]
-        Return user-defined data loader
-        """
-        return None
 
     def grad_callback(self, grads):
         pass
@@ -297,12 +329,33 @@ class Module:
         """
         return all(self.ready)
 
+    def set_problem_attr(self, problem):
+        name = problem.name
+        if name not in self._problem_name_dict:
+            self._problem_name_dict[name] = 0
+            setattr(self, name, problem)
+        elif self._problem_name_dict[name] == 0:
+            # rename first problem
+            first_problem = getattr(self, name)
+            delattr(self, name)
+            setattr(self, name + '_0', first_problem)
+
+            self._problem_name_dict[name] += 1
+            name = name + '_' + str(self._problem_name_dict[name])
+            setattr(self, name, problem)
+        else:
+            self._problem_name_dict[name] += 1
+            name = name + '_' + str(self._problem_name_dict[name])
+            setattr(self, name, problem)
+        return name
+
     def add_child(self, problem):
         """[summary]
         Add a new problem to the children node list.
         """
         assert problem not in self._children
         assert problem not in self._parents
+        self.set_problem_attr(problem)
         self._children.append(problem)
 
     def add_parent(self, problem):
@@ -311,6 +364,7 @@ class Module:
         """
         assert problem not in self._children
         assert problem not in self._parents
+        self.set_problem_attr(problem)
         self._parents.append(problem)
 
     def parameters(self):
@@ -321,6 +375,16 @@ class Module:
 
     def set_leaf(self):
         self._leaf = True
+
+    def train(self):
+        self._training = True
+
+    def eval(self):
+        self._training = False
+
+    @property
+    def name(self):
+        return self._name
 
     @property
     def config(self):

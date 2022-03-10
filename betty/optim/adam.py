@@ -22,8 +22,8 @@ class DifferentiableAdam(DifferentiableOptimizerBase):
                 state = self.state[param_idx]
 
                 state['step'] += 1
-                bias_correction1 = 1 - beta1**state['step']
-                bias_correction2 = 1 - beta2**state['step']
+                bias_correction1 = 1 - beta1 ** state['step']
+                bias_correction2 = 1 - beta2 ** state['step']
 
                 if weight_decay != 0:
                     grad = grad + (weight_decay * p)
