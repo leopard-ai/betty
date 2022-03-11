@@ -57,8 +57,7 @@ class Parent(Module):
 
     def training_step(self, batch, *args, **kwargs):
         inputs, targets = batch
-        child = self.children[0]
-        outs = child(inputs)
+        outs = self.inner(inputs)
         loss = F.binary_cross_entropy_with_logits(outs, targets)
 
         if self.count % 10 == 0:
@@ -86,7 +85,7 @@ class Child(Module):
         inputs, targets = batch
         outs = self.forward(inputs)
         loss = F.binary_cross_entropy_with_logits(outs, targets) +\
-            0.5 * (self.params[0].unsqueeze(0) @ torch.diag(self.parents[0]()) @ self.params[0].unsqueeze(1)).sum()
+            0.5 * (self.params[0].unsqueeze(0) @ torch.diag(self.outer()) @ self.params[0].unsqueeze(1)).sum()
         return loss
 
     def configure_train_data_loader(self):

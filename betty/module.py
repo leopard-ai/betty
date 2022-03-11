@@ -44,6 +44,7 @@ class Module:
         # data loader
         self.train_data_loader = train_data_loader
         self.train_data_iterator = None
+        self.batch = None
 
         # module
         self.module = module
@@ -148,6 +149,7 @@ class Module:
             if not param_update:
                 self.params_temp = copy.deepcopy(self.params)
                 self.buffers_temp = copy.deepcopy(self.buffers)
+                # TODO: replace with state_dict, load_state_dict
                 self.optimizer_state_temp = copy.deepcopy(self.optimizer.state)
 
             # load data
@@ -159,9 +161,10 @@ class Module:
                     train_data_loader = self.configure_train_data_loader()
                 self.train_data_iterator = iter(train_data_loader)
                 batch = next(self.train_data_iterator)
+            self.batch = batch
 
             # calculate loss
-            losses = self.training_step(batch)
+            losses = self.training_step(self.batch)
             if not (isinstance(losses, tuple) or isinstance(losses, list)):
                 losses = (losses,)
             # TODO: Add custom loss aggregation
@@ -171,21 +174,21 @@ class Module:
             # calculate gradient (a.k.a backward)
             if len(losses) == 1:
                 child = None if len(self._children) == 0 else self._children[0]
-                self.backward(loss=losses[0],
-                              params=self.params,
-                              child=child,
-                              create_graph=not self._first_order,
-                              retain_graph=self._retain_graph,
-                              allow_unused=self._allow_unused)
+                grad = self.backward(loss=losses[0],
+                                     params=self.params,
+                                     child=child,
+                                     create_graph=not self._first_order,
+                                     retain_graph=self._retain_graph,
+                                     allow_unused=self._allow_unused)
             else:
                 assert len(losses) == len(self._children)
                 for loss, child in zip(losses, self._children):
-                    self.backward(loss=loss,
-                                  params=self.params,
-                                  child=child,
-                                  create_graph=not self._first_order,
-                                  retain_graph=self._retain_graph,
-                                  allow_unused=self._allow_unused)
+                    grad = self.backward(loss=loss,
+                                         params=self.params,
+                                         child=child,
+                                         create_graph=not self._first_order,
+                                         retain_graph=self._retain_graph,
+                                         allow_unused=self._allow_unused)
 
             # calculate parameter update
             new_params = self.optimizer_step()
@@ -204,8 +207,42 @@ class Module:
 
                         self._inner_loop_start = True
 
+                if not param_update:
+                    self.params, self.params_temp = self.params_temp, None
+                    self.buffers, self.buffers_temp = self.buffers_temp, None
+                    # TODO: replace with state_dict, load_state_dict
+                    self.optimizer.state = self.optimizer_state_temp
+                    self.optimizer_state_temp = None
+
+                    losses = self.training_step(self.batch)
+                    if not (isinstance(losses, tuple) or isinstance(losses, list)):
+                        losses = (losses,)
+                    losses = tuple(loss / len(losses) for loss in losses)
+
+                    if len(losses) == 1:
+                        child = None if len(self._children) == 0 else self._children[0]
+                        grad = self.backward(loss=losses[0],
+                                             params=self.params,
+                                             child=child,
+                                             create_graph=not self._first_order,
+                                             retain_graph=self._retain_graph,
+                                             allow_unused=self._allow_unused)
+                    else:
+                        assert len(losses) == len(self._children)
+                        for loss, child in zip(losses, self._children):
+                            grad = self.backward(loss=loss,
+                                                 params=self.params,
+                                                 child=child,
+                                                 create_graph=not self._first_order,
+                                                 retain_graph=self._retain_graph,
+                                                 allow_unused=self._allow_unused)
+
+                    new_params = self.optimizer_step()
+                    self.params = new_params
+
+                    self.zero_grad()
+
             self.ready = [False for _ in range(len(self._children))]
-            self.params_temp = None
 
     def backward(self,
                  loss,
@@ -246,6 +283,8 @@ class Module:
                 p.gradient = p.gradient + g
             else:
                 p.gradient = g
+
+        return grad
 
     def optimizer_step(self, *args, **kwargs):
         """[summary]
@@ -332,6 +371,7 @@ class Module:
     def set_problem_attr(self, problem):
         name = problem.name
         if name not in self._problem_name_dict:
+            assert not hasattr(self, name), f'Problem already has an attribute named {name}!'
             self._problem_name_dict[name] = 0
             setattr(self, name, problem)
         elif self._problem_name_dict[name] == 0:

@@ -84,7 +84,8 @@ class Parent(Module):
         x_spt, y_spt, x_qry, y_qry = batch
         losses = []
         accs = []
-        for idx, ch in enumerate(self._children):
+        for idx in range(len(self._children)):
+            ch = getattr(self, f'inner_{idx}')
             out = ch(self.batch[0][idx])
             loss = F.cross_entropy(out, self.batch[1][idx])
             losses.append(loss)
@@ -120,8 +121,8 @@ class Child(Module):
         return self.fmodule(self.params, self.buffers, x)
 
     def training_step(self, batch, *args, **kwargs):
-        child_idx = self.parents[0].children.index(self)
-        inputs, targets = self.parents[0].child_batch
+        child_idx = self.outer.children.index(self)
+        inputs, targets = self.outer.child_batch
         inputs, targets = inputs[child_idx], targets[child_idx]
         out = self.fmodule(self.params, self.buffers, inputs)
         loss = F.cross_entropy(out, targets)
@@ -130,7 +131,7 @@ class Child(Module):
 
     def on_inner_loop_start(self):
         assert len(self._parents) == 1
-        params, buffers = self._parents[0]()
+        params, buffers = self.outer()
         self.params = tuple(p.clone() for p in params)
         self.buffers = tuple(b.clone() for b in buffers)
 
@@ -161,8 +162,8 @@ child_config = HypergradientConfig(type='maml',
                                    first_order=False,
                                    retain_graph=True)
 
-parent = Parent(name='parent', config=parent_config, device=arg.device)
-children = [Child(name='child', config=child_config, device=arg.device) for _ in range(arg.task_num)]
+parent = Parent(name='outer', config=parent_config, device=arg.device)
+children = [Child(name='inner', config=child_config, device=arg.device) for _ in range(arg.task_num)]
 problems = children + [parent]
 dependencies = {parent: children}
 engine = Engine(config=None, problems=problems, dependencies=dependencies)

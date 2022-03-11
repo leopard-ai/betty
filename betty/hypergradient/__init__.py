@@ -4,7 +4,7 @@ from .neuman import neuman
 
 grad_fn_mapping = {
     'maml': maml,
-    'implicit': darts,
+    'darts': darts,
     'neuman': neuman
 }
 
