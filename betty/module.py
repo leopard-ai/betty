@@ -44,7 +44,7 @@ class Module:
         # data loader
         self.train_data_loader = train_data_loader
         self.train_data_iterator = None
-        self.batch = None
+        self.cur_batch = None
 
         # module
         self.module = module
@@ -60,6 +60,7 @@ class Module:
         self.params_temp = None
         self.buffers_temp = None
         self.optimizer_state_temp = None
+        self.grad_temp = None
 
         # misc
         self._leaf = False
@@ -161,10 +162,10 @@ class Module:
                     train_data_loader = self.configure_train_data_loader()
                 self.train_data_iterator = iter(train_data_loader)
                 batch = next(self.train_data_iterator)
-            self.batch = batch
+            self.cur_batch = batch
 
             # calculate loss
-            losses = self.training_step(self.batch)
+            losses = self.training_step(self.cur_batch)
             if not (isinstance(losses, tuple) or isinstance(losses, list)):
                 losses = (losses,)
             # TODO: Add custom loss aggregation
@@ -214,7 +215,7 @@ class Module:
                     self.optimizer.state = self.optimizer_state_temp
                     self.optimizer_state_temp = None
 
-                    losses = self.training_step(self.batch)
+                    losses = self.training_step(self.cur_batch)
                     if not (isinstance(losses, tuple) or isinstance(losses, list)):
                         losses = (losses,)
                     losses = tuple(loss / len(losses) for loss in losses)
@@ -236,6 +237,7 @@ class Module:
                                                  create_graph=not self._first_order,
                                                  retain_graph=self._retain_graph,
                                                  allow_unused=self._allow_unused)
+                    grad_temp = None
 
                     new_params = self.optimizer_step()
                     self.params = new_params
