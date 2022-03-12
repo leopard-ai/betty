@@ -85,7 +85,7 @@ class Parent(Module):
         losses = []
         accs = []
         for idx in range(len(self._children)):
-            ch = getattr(self, f'inner_{idx}')
+                ch = getattr(self, f'inner_{idx}')
             out = ch(self.batch[0][idx])
             loss = F.cross_entropy(out, self.batch[1][idx])
             losses.append(loss)
