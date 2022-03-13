@@ -1,20 +1,22 @@
 import torch
 from betty.hypergradient.utils import concat
 
-def darts(loss, params, child, create_graph=True, retain_graph=False, allow_unused=False):
+def darts(loss, params, child, create_graph=True, retain_graph=False, allow_unused=True):
     # direct grad
     direct_grad = torch.autograd.grad(loss,
                                       params,
                                       create_graph=create_graph,
                                       retain_graph=retain_graph,
-                                      allow_unused=allow_unused)
+                                      allow_unused=True)
 
     # implicit grad
-    delta = 0.01 / concat(child.grad_temp).norm()
+    R = 0.01
+    delta = torch.autograd.grad(loss, child.params)
+    eps = R / concat(delta).norm()
 
     # positie
-    for p, v in zip(child.params, child.grad_temp):
-        p.data.add_(delta, v.data)
+    for p, v in zip(child.params, delta):
+        p.data.add_(eps, v.data)
 
     losses_p = child.training_step(child.cur_batch)
     if not (isinstance(losses_p, tuple) or isinstance(losses_p, list)):
@@ -30,8 +32,8 @@ def darts(loss, params, child, create_graph=True, retain_graph=False, allow_unus
             grad_p += torch.autograd.grad(loss_p, params)
 
     # negative
-    for p, v in zip(child.params, child.grad_temp):
-        p.data.sub_(2 * delta, v.data)
+    for p, v in zip(child.params, delta):
+        p.data.sub_(2 * eps, v.data)
 
     losses_n = child.training_step(child.cur_batch)
     if not (isinstance(losses_n, tuple) or isinstance(losses_n, list)):
@@ -47,10 +49,13 @@ def darts(loss, params, child, create_graph=True, retain_graph=False, allow_unus
             grad_n += torch.autograd.grad(loss_n, params)
 
     # reverse weight change
-    for p, v in zip(child.params, child.grad_temp):
-        p.data.add(delta, v.data)
+    for p, v in zip(child.params, delta):
+        p.data.add(eps, v.data)
 
-    implicit_grad = [(x - y).div_(2 * delta) for x, y in zip(grad_p, grad_n)]
+    implicit_grad = [(x - y).div_(2 * eps) for x, y in zip(grad_p, grad_n)]
 
-    return direct_grad - implicit_grad
+    if direct_grad == (None,):
+        return [-ig for ig in implicit_grad]
+    else:
+        return [dg - ig for dg, ig in zip(direct_grad, implicit_grad)]
     

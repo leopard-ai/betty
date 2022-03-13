@@ -60,7 +60,6 @@ class Module:
         self.params_temp = None
         self.buffers_temp = None
         self.optimizer_state_temp = None
-        self.grad_temp = None
 
         # misc
         self._leaf = False
@@ -237,7 +236,6 @@ class Module:
                                                  create_graph=not self._first_order,
                                                  retain_graph=self._retain_graph,
                                                  allow_unused=self._allow_unused)
-                    grad_temp = None
 
                     new_params = self.optimizer_step()
                     self.params = new_params

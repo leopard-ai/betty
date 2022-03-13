@@ -100,9 +100,9 @@ class Child(Module):
     def on_inner_loop_start(self):
         self.params = (torch.nn.Parameter(torch.zeros(DATA_DIM)).to(device),)
 
-parent_config = HypergradientConfig(type='maml',
+parent_config = HypergradientConfig(type='darts',
                                     step=100,
-                                    first_order=False)
+                                    first_order=True)
 child_config = HypergradientConfig(type='maml',
                                    step=1,
                                    first_order=False,
