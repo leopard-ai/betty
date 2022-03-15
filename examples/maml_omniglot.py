@@ -17,7 +17,7 @@ argparser = argparse.ArgumentParser()
 argparser.add_argument('--n_way', type=int, help='n way', default=5)
 argparser.add_argument('--k_spt', type=int, help='k shot for support set', default=5)
 argparser.add_argument('--k_qry', type=int, help='k shot for query set', default=15)
-argparser.add_argument('--inner_steps', type=int, help='number of inner steps', default=5)
+argparser.add_argument('--inner_steps', type=int, help='number of inner steps', default=50)
 argparser.add_argument('--device', type=str, help='device', default='cuda')
 argparser.add_argument('--task_num',type=int, help='meta batch size, namely task num', default=16)
 argparser.add_argument('--seed', type=int, help='random seed', default=1)
@@ -92,7 +92,7 @@ class Parent(Module):
             accs.append((out.argmax(dim=1) == self.batch[1][idx]).detach())
         self.batch = (x_qry, y_qry)
         self.child_batch = (x_spt, y_spt)
-        self.scheduler.step()
+        #self.scheduler.step()
         if self.count % 10 == 0:
             acc = 100. * torch.cat(accs).float().mean().item()
             print('step:', self.count, '|| loss:', sum(losses).clone().detach().item(), ' || acc:', acc)
@@ -110,10 +110,11 @@ class Parent(Module):
         return Net(arg.n_way, self.device)
 
     def configure_optimizer(self):
-        return optim.Adam(self.module.parameters(), lr=0.001, betas=(0.5, 0.9))
+        return optim.Adam(self.module.parameters(), lr=0.001)
+        #return optim.SGD(self.module.parameters(), lr=0.01)
 
-    def configure_scheduler(self):
-        return optim.lr_scheduler.StepLR(self.optimizer, step_size=20, gamma=0.9)
+    #def configure_scheduler(self):
+    #    return optim.lr_scheduler.StepLR(self.optimizer, step_size=20, gamma=0.9)
 
 
 class Child(Module):
@@ -154,9 +155,10 @@ class MAMLEngine(Engine):
             x_spt, y_spt, x_qry, y_qry = next(data_loader)
 
 
-parent_config = HypergradientConfig(type='maml',
+parent_config = HypergradientConfig(type='darts',
                                     step=arg.inner_steps,
-                                    first_order=False)
+                                    retain_graph=True,
+                                    first_order=True)
 child_config = HypergradientConfig(type='maml',
                                    step=1,
                                    first_order=False,
