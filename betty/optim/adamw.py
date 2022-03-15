@@ -15,9 +15,9 @@ class DifferentiableAdamW(DifferentiableOptimizerBase):
             for param_idx in param_mapping:
                 p = params[param_idx]
 
-                if p.gradient is None:
+                if p.grad is None:
                     continue
-                grad = p.gradient
+                grad = p.grad
 
                 p = p * (1 - param_group['lr'] * param_group['weight_decay'])
                 state = self.state[param_idx]

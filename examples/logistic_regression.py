@@ -8,7 +8,8 @@ import torch
 import torch.nn.functional as F
 
 from betty.engine import Engine
-from betty.module import Module, HypergradientConfig
+from betty.config_template import Config
+from betty.problems import IterativeProblem
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -51,7 +52,7 @@ class ParentNet(torch.nn.Module):
     def forward(self):
         return None
 
-class Parent(Module):
+class Parent(IterativeProblem):
     def forward(self, *args, **kwargs):
         return self.params[0]
 
@@ -77,7 +78,7 @@ class Parent(Module):
         for p in params:
             p.data.clamp_(min=1e-8)
 
-class Child(Module):
+class Child(IterativeProblem):
     def forward(self, inputs):
         return self.fmodule(self.params, self.buffers, inputs)
 
@@ -100,13 +101,13 @@ class Child(Module):
     def on_inner_loop_start(self):
         self.params = (torch.nn.Parameter(torch.zeros(DATA_DIM)).to(device),)
 
-parent_config = HypergradientConfig(type='darts',
-                                    step=100,
-                                    first_order=True)
-child_config = HypergradientConfig(type='maml',
-                                   step=1,
-                                   first_order=False,
-                                   retain_graph=True)
+parent_config = Config(type='darts',
+                       step=100,
+                       first_order=True)
+child_config = Config(type='maml',
+                      step=1,
+                      first_order=False,
+                      retain_graph=True)
 parent = Parent(name='outer', config=parent_config, device=device)
 child = Child(name='inner', config=child_config, device=device)
 
