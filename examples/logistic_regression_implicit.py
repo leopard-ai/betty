@@ -1,4 +1,5 @@
 import sys
+from tkinter import W
 sys.path.insert(0, "./..")
 
 import numpy as np
@@ -41,7 +42,7 @@ class ChildNet(torch.nn.Module):
 
     def forward(self, inputs):
         outs = inputs @ self.w
-        return outs
+        return outs, self.w
 
 class ParentNet(torch.nn.Module):
     def __init__(self) -> None:
@@ -54,11 +55,11 @@ class ParentNet(torch.nn.Module):
 
 class Parent(ImplicitProblem):
     def forward(self, *args, **kwargs):
-        return list(self.trainable_parameters())[0]
+        return self.module()
 
     def training_step(self, batch, *args, **kwargs):
         inputs, targets = batch
-        outs = self.inner(inputs)
+        outs = self.inner(inputs)[0]
         loss = F.binary_cross_entropy_with_logits(outs, targets)
 
         if self.count % 10 == 0:
@@ -84,8 +85,7 @@ class Child(ImplicitProblem):
 
     def training_step(self, batch, *args, **kwargs):
         inputs, targets = batch
-        outs = self.module(inputs)
-        params = list(self.trainable_parameters())[0]
+        outs, params = self.module(inputs)
         loss = F.binary_cross_entropy_with_logits(outs, targets) +\
             0.5 * (params.unsqueeze(0) @ torch.diag(self.outer()) @ params.unsqueeze(1)).sum()
         return loss
@@ -100,7 +100,7 @@ class Child(ImplicitProblem):
         return torch.optim.SGD(self.module.parameters(), lr=0.1)
 
     def on_inner_loop_start(self):
-        self.params = (torch.nn.Parameter(torch.zeros(DATA_DIM)).to(device),)
+        self.module.w.data.zero_()
 
 parent_config = Config(type='darts',
                        step=100,
