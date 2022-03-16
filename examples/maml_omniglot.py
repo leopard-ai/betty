@@ -8,8 +8,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-from betty.module import Module, HypergradientConfig
 from betty.engine import Engine
+from betty.problems import IterativeProblem
+from betty.config_template import Config
+
 from support.omniglot_loader import OmniglotNShot
 
 
@@ -17,7 +19,7 @@ argparser = argparse.ArgumentParser()
 argparser.add_argument('--n_way', type=int, help='n way', default=5)
 argparser.add_argument('--k_spt', type=int, help='k shot for support set', default=5)
 argparser.add_argument('--k_qry', type=int, help='k shot for query set', default=15)
-argparser.add_argument('--inner_steps', type=int, help='number of inner steps', default=50)
+argparser.add_argument('--inner_steps', type=int, help='number of inner steps', default=5)
 argparser.add_argument('--device', type=str, help='device', default='cuda')
 argparser.add_argument('--task_num',type=int, help='meta batch size, namely task num', default=16)
 argparser.add_argument('--seed', type=int, help='random seed', default=1)
@@ -76,7 +78,7 @@ class Net(nn.Module):
         return self.net.forward(x)
 
 
-class Parent(Module):
+class Parent(IterativeProblem):
     def forward(self, *args, **kwargs):
         return self.params, self.buffers
 
@@ -85,14 +87,14 @@ class Parent(Module):
         losses = []
         accs = []
         for idx in range(len(self._children)):
-            ch = getattr(self, f'inner_{idx}')
-            out = ch(self.batch[0][idx])
-            loss = F.cross_entropy(out, self.batch[1][idx])
+            net = getattr(self, f'inner_{idx}')
+            out = net(self.parent_batch[0][idx])
+            loss = F.cross_entropy(out, self.parent_batch[1][idx])
             losses.append(loss)
-            accs.append((out.argmax(dim=1) == self.batch[1][idx]).detach())
-        self.batch = (x_qry, y_qry)
+            accs.append((out.argmax(dim=1) == self.parent_batch[1][idx]).detach())
+        self.parent_batch = (x_qry, y_qry)
         self.child_batch = (x_spt, y_spt)
-        #self.scheduler.step()
+        self.scheduler.step()
         if self.count % 10 == 0:
             acc = 100. * torch.cat(accs).float().mean().item()
             print('step:', self.count, '|| loss:', sum(losses).clone().detach().item(), ' || acc:', acc)
@@ -102,7 +104,7 @@ class Parent(Module):
     def configure_train_data_loader(self):
         data_loader = db
         x_spt, y_spt, x_qry, y_qry = next(data_loader)
-        self.batch = (x_qry, y_qry)
+        self.parent_batch = (x_qry, y_qry)
         self.child_batch = (x_spt, y_spt)
         return data_loader
 
@@ -110,14 +112,13 @@ class Parent(Module):
         return Net(arg.n_way, self.device)
 
     def configure_optimizer(self):
-        return optim.Adam(self.module.parameters(), lr=0.001)
-        #return optim.SGD(self.module.parameters(), lr=0.01)
+        return optim.Adam(self.module.parameters(), lr=0.001, betas=(0.5, 0.95))
+    
+    def configure_scheduler(self):
+        return optim.lr_scheduler.StepLR(self.optimizer, step_size=20, gamma=0.9)
 
-    #def configure_scheduler(self):
-    #    return optim.lr_scheduler.StepLR(self.optimizer, step_size=20, gamma=0.9)
 
-
-class Child(Module):
+class Child(IterativeProblem):
     def forward(self, x):
         return self.fmodule(self.params, self.buffers, x)
 
@@ -145,24 +146,13 @@ class Child(Module):
     def configure_optimizer(self):
         return optim.SGD(self.module.parameters(), lr=0.1)
 
-
-class MAMLEngine(Engine):
-    def validation(self, data_loader):
-        iters = data_loader.x_test.shape[0] // data_loader.batchsz
-        data_loader = iter(data_loader)
-
-        for _ in range(iters):
-            x_spt, y_spt, x_qry, y_qry = next(data_loader)
-
-
-parent_config = HypergradientConfig(type='darts',
-                                    step=arg.inner_steps,
-                                    retain_graph=True,
-                                    first_order=True)
-child_config = HypergradientConfig(type='maml',
-                                   step=1,
-                                   first_order=False,
-                                   retain_graph=True)
+parent_config = Config(type='maml',
+                       step=arg.inner_steps,
+                       first_order=False)
+child_config = Config(type='maml',
+                      step=1,
+                      first_order=False,
+                      retain_graph=True)
 
 parent = Parent(name='outer', config=parent_config, device=arg.device)
 children = [Child(name='inner', config=child_config, device=arg.device) for _ in range(arg.task_num)]

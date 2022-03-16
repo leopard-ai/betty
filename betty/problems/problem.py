@@ -318,6 +318,10 @@ class Problem:
             setattr(self, name, problem)
         else:
             self._problem_name_dict[name] += 1
+            name = name + '_' + str(self._problem_name_dict[name])
+            setattr(self, name, problem)
+
+        return name
 
     def add_child(self, problem):
         """[summary]

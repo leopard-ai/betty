@@ -279,10 +279,10 @@ class Module:
 
         # set gradient for each parameter
         for p, g in zip(params, grad):
-            if hasattr(p, 'gradient') and p.gradient is not None:
-                p.gradient = p.gradient + g
+            if hasattr(p, 'grad') and p.grad is not None:
+                p.grad = p.grad + g
             else:
-                p.gradient = g
+                p.grad = g
 
         return grad
 
