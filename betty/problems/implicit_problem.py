@@ -39,7 +39,7 @@ class ImplicitProblem(Problem):
         self.scheduler_state_dict_cache = None
 
     def parameters(self):
-        return self.module.parameters()
+        return list(self.module.parameters())
 
     def trainable_parameters(self):
-        return self.module.parameters()
+        return list(self.module.parameters())

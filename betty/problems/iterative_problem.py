@@ -42,8 +42,6 @@ class IterativeProblem(Problem):
             params = self.custom_optimizer_step(*args, **kwargs)
         else:
             params = self.optimizer.step(self.params)
-        if self.is_implemented('param_callback'):
-            self.param_callback(params)
 
         self.params = params
 

@@ -149,6 +149,9 @@ class Problem:
             # calculate parameter update
             self.optimizer_step()
 
+            if self.is_implemented('param_callback'):
+                self.param_callback(self.trainable_parameters())
+
             # zero-out grad
             self.zero_grad()
 
@@ -175,6 +178,9 @@ class Problem:
                                   allow_unused=self._allow_unused)
 
                     self.optimizer_step()
+
+                    if self.is_implemented('param_callback'):
+                        self.param_callback(self.trainable_parameters())
 
                     self.zero_grad()
 

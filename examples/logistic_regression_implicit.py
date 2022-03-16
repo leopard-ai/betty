@@ -54,7 +54,7 @@ class ParentNet(torch.nn.Module):
 
 class Parent(ImplicitProblem):
     def forward(self, *args, **kwargs):
-        return self.params[0]
+        return list(self.trainable_parameters())[0]
 
     def training_step(self, batch, *args, **kwargs):
         inputs, targets = batch
@@ -80,13 +80,14 @@ class Parent(ImplicitProblem):
 
 class Child(ImplicitProblem):
     def forward(self, inputs):
-        return self.fmodule(self.params, self.buffers, inputs)
+        return self.module(inputs)
 
     def training_step(self, batch, *args, **kwargs):
         inputs, targets = batch
-        outs = self.forward(inputs)
+        outs = self.module(inputs)
+        params = list(self.trainable_parameters())[0]
         loss = F.binary_cross_entropy_with_logits(outs, targets) +\
-            0.5 * (self.params[0].unsqueeze(0) @ torch.diag(self.outer()) @ self.params[0].unsqueeze(1)).sum()
+            0.5 * (params.unsqueeze(0) @ torch.diag(self.outer()) @ params.unsqueeze(1)).sum()
         return loss
 
     def configure_train_data_loader(self):

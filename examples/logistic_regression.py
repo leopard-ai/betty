@@ -59,6 +59,7 @@ class Parent(IterativeProblem):
     def training_step(self, batch, *args, **kwargs):
         inputs, targets = batch
         outs = self.inner(inputs)
+        print(self.params[0])
         loss = F.binary_cross_entropy_with_logits(outs, targets)
 
         if self.count % 10 == 0:
