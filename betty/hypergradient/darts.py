@@ -1,6 +1,6 @@
 import torch
 
-from betty.hypergradient.utils import concat, sub_none
+from betty.hypergradient.utils import concat, sub_with_none
 
 def darts(loss, params, child, create_graph=True, retain_graph=False, allow_unused=True):
     # direct grad
@@ -8,7 +8,7 @@ def darts(loss, params, child, create_graph=True, retain_graph=False, allow_unus
                                       params,
                                       create_graph=create_graph,
                                       retain_graph=retain_graph,
-                                      allow_unused=True)
+                                      allow_unused=allow_unused)
 
     # implicit grad
     R = 0.01
@@ -55,4 +55,4 @@ def darts(loss, params, child, create_graph=True, retain_graph=False, allow_unus
 
     implicit_grad = [(x - y).div_(2 * eps) for x, y in zip(grad_p, grad_n)]
 
-    return [sub_none(dg, ig) for dg, ig in zip(direct_grad, implicit_grad)]
+    return [sub_with_none(dg, ig) for dg, ig in zip(direct_grad, implicit_grad)]

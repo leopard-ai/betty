@@ -1,6 +1,6 @@
 import argparse
 import sys
-sys.path.insert(0, "./..")
+sys.path.insert(0, "./../..")
 
 import numpy as np
 import torch
@@ -8,20 +8,20 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-from betty.problems import IterativeProblem
-from betty.config_template import Config
 from betty.engine import Engine
+from betty.problems import ImplicitProblem
+from betty.config_template import Config
 
-from support.mini_imagenet import MiniImagenet
+from support.omniglot_loader import OmniglotNShot
 
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument('--n_way', type=int, help='n way', default=5)
-argparser.add_argument('--k_spt', type=int, help='k shot for support set', default=1)
+argparser.add_argument('--k_spt', type=int, help='k shot for support set', default=5)
 argparser.add_argument('--k_qry', type=int, help='k shot for query set', default=15)
-argparser.add_argument('--inner_steps', type=int, help='number of inner steps', default=5)
+argparser.add_argument('--inner_steps', type=int, help='number of inner steps', default=10)
 argparser.add_argument('--device', type=str, help='device', default='cuda')
-argparser.add_argument('--task_num',type=int, help='meta batch size, namely task num', default=4)
+argparser.add_argument('--task_num',type=int, help='meta batch size, namely task num', default=16)
 argparser.add_argument('--seed', type=int, help='random seed', default=1)
 arg = argparser.parse_args()
 
@@ -30,30 +30,24 @@ if torch.cuda.is_available():
     torch.cuda.manual_seed_all(arg.seed)
 np.random.seed(arg.seed)
 
-mini = MiniImagenet(
-        '/home/ubuntu/workspace/datasets/mini-imagenet',
-        batchsz=100,
-        n_way=arg.n_way,
-        k_shot=arg.k_spt,
-        k_query=arg.k_qry,
-        resize=84,
-        mode='train'
-    )
-db = torch.utils.data.DataLoader(
-    mini,
-    arg.task_num,
-    shuffle=True,
-    pin_memory=True,
-    num_workers=1
-)
-
-mini_test = MiniImagenet(
-        '/home/ubuntu/workspace/datasets/mini-imagenet',
+db = OmniglotNShot(
+        '/tmp/omniglot-data',
         batchsz=arg.task_num,
         n_way=arg.n_way,
         k_shot=arg.k_spt,
         k_query=arg.k_qry,
-        resize=84,
+        imgsz=28,
+        device=arg.device,
+    )
+
+db_test = OmniglotNShot(
+        '/tmp/omniglot-data-test',
+        batchsz=arg.task_num,
+        n_way=arg.n_way,
+        k_shot=arg.k_spt,
+        k_query=arg.k_qry,
+        imgsz=28,
+        device=arg.device,
         mode='test'
     )
 
@@ -63,38 +57,33 @@ class Flatten(nn.Module):
 
 
 class Net(nn.Module):
-    def __init__(self, n_way, device, hidden_dim=32):
+    def __init__(self, n_way, device):
         super(Net, self).__init__()
-        self.net = nn.Sequential(nn.Conv2d(3, hidden_dim, 3),
-                                 nn.BatchNorm2d(hidden_dim, momentum=1, affine=True),
+        self.net = nn.Sequential(nn.Conv2d(1, 64, 3),
+                                 nn.BatchNorm2d(64, momentum=1, affine=True),
                                  nn.ReLU(inplace=True),
                                  nn.MaxPool2d(2, 2),
-                                 nn.Conv2d(hidden_dim, hidden_dim, 3),
-                                 nn.BatchNorm2d(hidden_dim, momentum=1, affine=True),
+                                 nn.Conv2d(64, 64, 3),
+                                 nn.BatchNorm2d(64, momentum=1, affine=True),
                                  nn.ReLU(inplace=True),
                                  nn.MaxPool2d(2, 2),
-                                 nn.Conv2d(hidden_dim, hidden_dim, 3),
-                                 nn.BatchNorm2d(hidden_dim, momentum=1, affine=True),
+                                 nn.Conv2d(64, 64, 3),
+                                 nn.BatchNorm2d(64, momentum=1, affine=True),
                                  nn.ReLU(inplace=True),
                                  nn.MaxPool2d(2, 2),
-                                 nn.Conv2d(hidden_dim, hidden_dim, 3),
-                                 nn.BatchNorm2d(hidden_dim, momentum=1, affine=True),
-                                 nn.ReLU(inplace=True),
-                                 nn.MaxPool2d(2, 1),
                                  Flatten(),
-                                 nn.Linear(hidden_dim*5*5, n_way)).to(device)
+                                 nn.Linear(64, n_way)).to(device)
 
     def forward(self, x):
         return self.net.forward(x)
 
 
-class Parent(IterativeProblem):
+class Parent(ImplicitProblem):
     def forward(self, *args, **kwargs):
-        return self.params, self.buffers
+        return self.module(*args, **kwargs)
 
     def training_step(self, batch, *args, **kwargs):
         x_spt, y_spt, x_qry, y_qry = batch
-        x_spt, y_spt, x_qry, y_qry = x_spt.cuda(), y_spt.cuda(), x_qry.cuda(), y_qry.cuda()
         losses = []
         accs = []
         for idx in range(len(self._children)):
@@ -113,9 +102,8 @@ class Parent(IterativeProblem):
         return losses
 
     def configure_train_data_loader(self):
-        data_loader = iter(db)
+        data_loader = db
         x_spt, y_spt, x_qry, y_qry = next(data_loader)
-        x_spt, y_spt, x_qry, y_qry = x_spt.cuda(), y_spt.cuda(), x_qry.cuda(), y_qry.cuda()
         self.parent_batch = (x_qry, y_qry)
         self.child_batch = (x_spt, y_spt)
         return data_loader
@@ -124,30 +112,30 @@ class Parent(IterativeProblem):
         return Net(arg.n_way, self.device)
 
     def configure_optimizer(self):
-        return optim.Adam(self.module.parameters(), lr=0.001, betas=(0.5, 0.9))
+        return optim.Adam(self.module.parameters(), lr=0.001)
 
     def configure_scheduler(self):
-        return optim.lr_scheduler.StepLR(self.optimizer, step_size=20, gamma=0.95)
+        return optim.lr_scheduler.StepLR(self.optimizer, step_size=20, gamma=0.9)
 
 
-class Child(IterativeProblem):
+class Child(ImplicitProblem):
     def forward(self, x):
-        return self.fmodule(self.params, self.buffers, x)
+        return self.module(x)
 
     def training_step(self, batch, *args, **kwargs):
-        child_idx = self.parents[0].children.index(self)
-        inputs, targets = self.parents[0].child_batch
+        child_idx = self.outer.children.index(self)
+        inputs, targets = self.outer.child_batch
         inputs, targets = inputs[child_idx], targets[child_idx]
-        out = self.fmodule(self.params, self.buffers, inputs)
-        loss = F.cross_entropy(out, targets)
+        out = self.module(inputs)
+        loss = F.cross_entropy(out, targets) + self.reg_loss()
 
         return loss
 
+    def reg_loss(self):
+        return 0.25 * sum([(p1 - p2).pow(2).sum() for p1, p2 in zip(self.trainable_parameters(), self.outer.trainable_parameters())])
+
     def on_inner_loop_start(self):
-        assert len(self._parents) == 1
-        params, buffers = self._parents[0]()
-        self.params = tuple(p.clone() for p in params)
-        self.buffers = tuple(b.clone() for b in buffers)
+        self.module.load_state_dict(self.outer.module.state_dict())
 
     def configure_train_data_loader(self):
         return [None]
@@ -156,11 +144,11 @@ class Child(IterativeProblem):
         return Net(arg.n_way, self.device)
 
     def configure_optimizer(self):
-        return optim.SGD(self.module.parameters(), lr=0.01)
+        return optim.SGD(self.module.parameters(), lr=0.1)
 
-parent_config = Config(type='maml',
+parent_config = Config(type='neumann',
                        step=arg.inner_steps,
-                       first_order=False)
+                       first_order=True)
 child_config = Config(type='maml',
                       step=1,
                       first_order=False,

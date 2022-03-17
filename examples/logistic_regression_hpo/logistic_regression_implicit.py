@@ -1,6 +1,6 @@
 import sys
 from tkinter import W
-sys.path.insert(0, "./..")
+sys.path.insert(0, "./../..")
 
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -102,12 +102,12 @@ class Child(ImplicitProblem):
     def on_inner_loop_start(self):
         self.module.w.data.zero_()
 
-parent_config = Config(type='darts',
+parent_config = Config(type='neumann',
                        step=100,
                        first_order=True)
-child_config = Config(type='maml',
+child_config = Config(type='torch',
                       step=1,
-                      first_order=False,
+                      first_order=True,
                       retain_graph=True)
 parent = Parent(name='outer', config=parent_config, device=device)
 child = Child(name='inner', config=child_config, device=device)

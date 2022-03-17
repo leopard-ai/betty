@@ -1,6 +1,6 @@
 import argparse
 import sys
-sys.path.insert(0, "./..")
+sys.path.insert(0, "./../..")
 
 import numpy as np
 import torch
@@ -9,7 +9,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 from betty.engine import Engine
-from betty.problems import ImplicitProblem
+from betty.problems import IterativeProblem
 from betty.config_template import Config
 
 from support.omniglot_loader import OmniglotNShot
@@ -19,7 +19,7 @@ argparser = argparse.ArgumentParser()
 argparser.add_argument('--n_way', type=int, help='n way', default=5)
 argparser.add_argument('--k_spt', type=int, help='k shot for support set', default=5)
 argparser.add_argument('--k_qry', type=int, help='k shot for query set', default=15)
-argparser.add_argument('--inner_steps', type=int, help='number of inner steps', default=10)
+argparser.add_argument('--inner_steps', type=int, help='number of inner steps', default=5)
 argparser.add_argument('--device', type=str, help='device', default='cuda')
 argparser.add_argument('--task_num',type=int, help='meta batch size, namely task num', default=16)
 argparser.add_argument('--seed', type=int, help='random seed', default=1)
@@ -78,9 +78,9 @@ class Net(nn.Module):
         return self.net.forward(x)
 
 
-class Parent(ImplicitProblem):
+class Parent(IterativeProblem):
     def forward(self, *args, **kwargs):
-        return self.module(*args, **kwargs)
+        return self.params, self.buffers
 
     def training_step(self, batch, *args, **kwargs):
         x_spt, y_spt, x_qry, y_qry = batch
@@ -112,30 +112,30 @@ class Parent(ImplicitProblem):
         return Net(arg.n_way, self.device)
 
     def configure_optimizer(self):
-        return optim.Adam(self.module.parameters(), lr=0.001)
-
+        return optim.Adam(self.module.parameters(), lr=0.001, betas=(0.5, 0.95))
+    
     def configure_scheduler(self):
         return optim.lr_scheduler.StepLR(self.optimizer, step_size=20, gamma=0.9)
 
 
-class Child(ImplicitProblem):
+class Child(IterativeProblem):
     def forward(self, x):
-        return self.module(x)
+        return self.fmodule(self.params, self.buffers, x)
 
     def training_step(self, batch, *args, **kwargs):
         child_idx = self.outer.children.index(self)
         inputs, targets = self.outer.child_batch
         inputs, targets = inputs[child_idx], targets[child_idx]
-        out = self.module(inputs)
-        loss = F.cross_entropy(out, targets) + self.reg_loss()
+        out = self.fmodule(self.params, self.buffers, inputs)
+        loss = F.cross_entropy(out, targets)
 
         return loss
 
-    def reg_loss(self):
-        return 0.25 * sum([(p1 - p2).pow(2).sum() for p1, p2 in zip(self.trainable_parameters(), self.outer.trainable_parameters())])
-
     def on_inner_loop_start(self):
-        self.module.load_state_dict(self.outer.module.state_dict())
+        assert len(self._parents) == 1
+        params, buffers = self.outer()
+        self.params = tuple(p.clone() for p in params)
+        self.buffers = tuple(b.clone() for b in buffers)
 
     def configure_train_data_loader(self):
         return [None]
@@ -146,9 +146,9 @@ class Child(ImplicitProblem):
     def configure_optimizer(self):
         return optim.SGD(self.module.parameters(), lr=0.1)
 
-parent_config = Config(type='neumann',
+parent_config = Config(type='maml',
                        step=arg.inner_steps,
-                       first_order=True)
+                       first_order=False)
 child_config = Config(type='maml',
                       step=1,
                       first_order=False,

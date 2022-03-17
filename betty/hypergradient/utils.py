@@ -3,7 +3,7 @@ import torch
 def concat(xs):
     return torch.cat([x.view(-1) for x in xs])
 
-def sub_none(a, b):
+def sub_with_none(a, b):
     if a is None and b is None:
         raise ValueError
     if a is None:

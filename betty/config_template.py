@@ -7,4 +7,4 @@ class Config:
     step: int = 2
     first_order: bool = False
     retain_graph: bool = False
-    allow_unused: bool = False
+    allow_unused: bool = True
