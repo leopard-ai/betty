@@ -1,6 +1,16 @@
 import torch
 from betty.hypergradient.utils import concat
 
+def sub_none(a, b):
+    if a is None and b is None:
+        raise ValueError
+    if a is None:
+        return -b
+    elif b is None:
+        return a
+    else:
+        return a - b
+
 def darts(loss, params, child, create_graph=True, retain_graph=False, allow_unused=True):
     # direct grad
     direct_grad = torch.autograd.grad(loss,
@@ -54,8 +64,4 @@ def darts(loss, params, child, create_graph=True, retain_graph=False, allow_unus
 
     implicit_grad = [(x - y).div_(2 * eps) for x, y in zip(grad_p, grad_n)]
 
-    if direct_grad == (None,):
-        return [-ig for ig in implicit_grad]
-    else:
-        return [dg - ig for dg, ig in zip(direct_grad, implicit_grad)]
-
+    return [sub_none(dg, ig) for dg, ig in zip(direct_grad, implicit_grad)]

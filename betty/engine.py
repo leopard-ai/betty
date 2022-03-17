@@ -1,7 +1,5 @@
 import typing
 
-from betty.module import Module
-
 
 class Engine:
     def __init__(self, config, problems, dependencies=None):
