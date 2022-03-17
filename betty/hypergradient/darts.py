@@ -1,15 +1,6 @@
 import torch
-from betty.hypergradient.utils import concat
 
-def sub_none(a, b):
-    if a is None and b is None:
-        raise ValueError
-    if a is None:
-        return -b
-    elif b is None:
-        return a
-    else:
-        return a - b
+from betty.hypergradient.utils import concat, sub_none
 
 def darts(loss, params, child, create_graph=True, retain_graph=False, allow_unused=True):
     # direct grad
