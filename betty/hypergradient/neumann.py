@@ -2,7 +2,7 @@ import torch
 
 from betty.hypergradient.utils import sub_with_none
 
-def neumann(loss, params, child, create_graph=True, retain_graph=False, allow_unused=True):
+def neumann(loss, params, child, config, create_graph=True, retain_graph=False, allow_unused=True):
     # direct grad
     direct_grad = torch.autograd.grad(loss,
                                       params,
@@ -18,7 +18,9 @@ def neumann(loss, params, child, create_graph=True, retain_graph=False, allow_un
     # ! Mabye replace with child.loss by adding self.loss attribute to save computation
     in_loss = child.training_step(child.cur_batch)
     in_grad = torch.autograd.grad(in_loss, child.trainable_parameters(), create_graph=True)
-    v2 = approx_inverse_hvp(v1, in_grad, child.trainable_parameters())
+    v2 = approx_inverse_hvp(v1, in_grad, child.trainable_parameters(),
+                            iterations=config.neumann_iterations,
+                            alpha=config.neumann_alpha)
     implicit_grad = torch.autograd.grad(in_grad, params, grad_outputs=v2)
 
     return [sub_with_none(dg, ig) for dg, ig in zip(direct_grad, implicit_grad)]

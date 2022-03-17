@@ -147,6 +147,7 @@ class Child(ImplicitProblem):
         return optim.SGD(self.module.parameters(), lr=0.1)
 
 parent_config = Config(type='neumann',
+                       neumann_alpha=0.001,
                        step=arg.inner_steps,
                        first_order=True)
 child_config = Config(type='maml',

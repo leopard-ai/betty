@@ -87,13 +87,6 @@ class Problem:
             if self.configure_scheduler is not None:
                 self.scheduler = self.configure_scheduler()
 
-        # patch model, optimizer, lr_scheduler to follow functional programming paradigm
-        #self.initialize_optimizer_state()
-        #self.patch_models()
-        #self.patch_optimizer()
-        #self.patch_scheduler()
-        #self.zero_grad()
-
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
 
@@ -142,6 +135,7 @@ class Problem:
             self.backward(losses=losses,
                           params=self.trainable_parameters(),
                           children=self._children,
+                          config=self._config,
                           create_graph=not self._first_order,
                           retain_graph=self._retain_graph,
                           allow_unused=self._allow_unused)
@@ -173,6 +167,7 @@ class Problem:
                     self.backward(losses=losses,
                                   params=self.trainable_parameters(),
                                   children=self._children,
+                                  config=self._config,
                                   create_graph=not self._first_order,
                                   retain_graph=self._retain_graph,
                                   allow_unused=self._allow_unused)
@@ -212,6 +207,7 @@ class Problem:
                  losses,
                  params,
                  children,
+                 config,
                  create_graph=False,
                  retain_graph=True,
                  allow_unused=True):
@@ -219,6 +215,7 @@ class Problem:
             grads = self.get_grads(loss=sum(losses),
                                    params=params,
                                    child=None,
+                                   config=config,
                                    create_graph=create_graph,
                                    retain_graph=retain_graph,
                                    allow_unused=allow_unused)
@@ -229,6 +226,7 @@ class Problem:
                 grads = self.get_grads(loss=loss,
                                        params=params,
                                        child=child,
+                                       config=config,
                                        create_graph=create_graph,
                                        retain_graph=retain_graph,
                                        allow_unused=allow_unused)
@@ -238,6 +236,7 @@ class Problem:
                   loss,
                   params,
                   child=None,
+                  config=None,
                   create_graph=False,
                   retain_graph=True,
                   allow_unused=True):
@@ -249,7 +248,7 @@ class Problem:
         else:
             assert len(self._children) > 0
             grad_fn = hypergradient.get_grad_fn(self.config.type)
-            grads = grad_fn(loss, params, child,
+            grads = grad_fn(loss, params, child, config,
                             create_graph=create_graph,
                             retain_graph=retain_graph,
                             allow_unused=allow_unused)
