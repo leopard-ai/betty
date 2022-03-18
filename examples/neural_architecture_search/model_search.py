@@ -1,8 +1,10 @@
-import  torch
-from    torch import nn
-import  torch.nn.functional as F
-from    operations import OPS, FactorizedReduce, ReLUConvBN
-from    genotypes import PRIMITIVES, Genotype
+import torch
+from torch import nn
+import torch.nn.functional as F
+
+from operations import OPS, FactorizedReduce, ReLUConvBN
+from genotypes import PRIMITIVES, Genotype
+from utils import accuracy
 
 
 class MixedLayer(nn.Module):
@@ -53,11 +55,6 @@ class MixedLayer(nn.Module):
         return res
 
 
-
-
-
-
-
 class Cell(nn.Module):
 
     def __init__(self, steps, multiplier, cpp, cp, c, reduction, reduction_prev):
@@ -89,8 +86,8 @@ class Cell(nn.Module):
         self.preprocess1 = ReLUConvBN(cp, c, 1, 1, 0, affine=False)
 
         # steps inside a cell
-        self.steps = steps # 4
-        self.multiplier = multiplier # 4
+        self.steps = steps
+        self.multiplier = multiplier
 
         self.layers = nn.ModuleList()
 
@@ -110,34 +107,23 @@ class Cell(nn.Module):
         :param weights: [14, 8]
         :return:
         """
-        # print('s0:', s0.shape,end='=>')
-        s0 = self.preprocess0(s0) # [40, 48, 32, 32], [40, 16, 32, 32]
-        # print(s0.shape, self.reduction_prev)
-        # print('s1:', s1.shape,end='=>')
-        s1 = self.preprocess1(s1) # [40, 48, 32, 32], [40, 16, 32, 32]
-        # print(s1.shape)
+        s0 = self.preprocess0(s0)
+        s1 = self.preprocess1(s1)
 
         states = [s0, s1]
         offset = 0
         # for each node, receive input from all previous intermediate nodes and s0, s1
-        for i in range(self.steps): # 4
-            # [40, 16, 32, 32]
+        for _ in range(self.steps): # 4
             s = sum(self.layers[offset + j](h, weights[offset + j]) for j, h in enumerate(states))
             offset += len(states)
             # append one state since s is the elem-wise addition of all output
             states.append(s)
-            # print('node:',i, s.shape, self.reduction)
 
         # concat along dim=channel
-        return torch.cat(states[-self.multiplier:], dim=1) # 6 of [40, 16, 32, 32]
-
-
-
-
+        return torch.cat(states[-self.multiplier:], dim=1)
 
 
 class Network(nn.Module):
-
     """
     stack number:layer of cells and then flatten to fed a linear layer
     """
@@ -160,19 +146,18 @@ class Network(nn.Module):
         self.steps = steps
         self.multiplier = multiplier
 
-
         # stem_multiplier is for stem network,
         # and multiplier is for general cell
-        c_curr = stem_multiplier * c # 3*16
+        c_curr = stem_multiplier * c
         # stem network, convert 3 channel to c_curr
-        self.stem = nn.Sequential( # 3 => 48
+        self.stem = nn.Sequential(
             nn.Conv2d(3, c_curr, 3, padding=1, bias=False),
             nn.BatchNorm2d(c_curr)
         )
 
         # c_curr means a factor of the output channels of current cell
         # output channels = multiplier * c_curr
-        cpp, cp, c_curr = c_curr, c_curr, c # 48, 48, 16
+        cpp, cp, c_curr = c_curr, c_curr, c
         self.cells = nn.ModuleList()
         reduction_prev = False
         for i in range(layers):
@@ -200,37 +185,7 @@ class Network(nn.Module):
         # it indicates the input channel number
         self.classifier = nn.Linear(cp, num_classes)
 
-        # k is the total number of edges inside single cell, 14
-        k = sum(1 for i in range(self.steps) for j in range(2 + i))
-        num_ops = len(PRIMITIVES) # 8
-
-        # TODO
-        # this kind of implementation will add alpha into self.parameters()
-        # it has num k of alpha parameters, and each alpha shape: [num_ops]
-        # it requires grad and can be converted to cpu/gpu automatically
-        self.alpha_normal = nn.Parameter(torch.randn(k, num_ops))
-        self.alpha_reduce = nn.Parameter(torch.randn(k, num_ops))
-        with torch.no_grad():
-            # initialize to smaller value
-            self.alpha_normal.mul_(1e-3)
-            self.alpha_reduce.mul_(1e-3)
-        self._arch_parameters = [
-            self.alpha_normal,
-            self.alpha_reduce,
-        ]
-
-    def new(self):
-        """
-        create a new model and initialize it with current alpha parameters.
-        However, its weights are left untouched.
-        :return:
-        """
-        model_new = Network(self.c, self.num_classes, self.layers, self.criterion).cuda()
-        for x, y in zip(model_new.arch_parameters(), self.arch_parameters()):
-            x.data.copy_(y.data)
-        return model_new
-
-    def forward(self, x):
+    def forward(self, x, alphas):
         """
         in: torch.Size([3, 3, 32, 32])
         stem: torch.Size([3, 48, 32, 32])
@@ -247,52 +202,40 @@ class Network(nn.Module):
         :param x:
         :return:
         """
-        # print('in:', x.shape)
         # s0 & s1 means the last cells' output
-        s0 = s1 = self.stem(x) # [b, 3, 32, 32] => [b, 48, 32, 32]
-        # print('stem:', s0.shape)
+        s0 = s1 = self.stem(x)
+        alpha_reduce, alpha_normal = alphas
 
-        for i, cell in enumerate(self.cells):
+        for _, cell in enumerate(self.cells):
             # weights are shared across all reduction cell or normal cell
-            # according to current cell's type, it choose which architecture parameters
-            # to use
+            # according to current cell's type, it choose which architecture parameters to use
             if cell.reduction: # if current cell is reduction cell
-                weights = F.softmax(self.alpha_reduce, dim=-1)
+                weights = F.softmax(alpha_reduce, dim=-1)
             else:
-                weights = F.softmax(self.alpha_normal, dim=-1) # [14, 8]
+                weights = F.softmax(alpha_normal, dim=-1)
             # execute cell() firstly and then assign s0=s1, s1=result
-            s0, s1 = s1, cell(s0, s1, weights) # [40, 64, 32, 32]
-            # print('cell:',i, s1.shape, cell.reduction, cell.reduction_prev)
-            # print('\n')
+            s0, s1 = s1, cell(s0, s1, weights)
 
         # s1 is the last cell's output
         out = self.global_pooling(s1)
-        # print('pool', out.shape)
         logits = self.classifier(out.view(out.size(0), -1))
 
         return logits
 
-    def loss(self, x, target):
+    def loss(self, x, alphas, target):
         """
         :param x:
         :param target:
         :return:
         """
-        logits = self(x)
+        logits = self(x, alphas)
         return self.criterion(logits, target)
 
-
-
-    def arch_parameters(self):
-        return self._arch_parameters
-
-
-
-
-    def genotype(self):
+    def genotype(self, alphas):
         """
         :return:
         """
+        alpha_reduce, alpha_normal = alphas
         def _parse(weights):
             """
             :param weights: [14, 8]
@@ -320,8 +263,8 @@ class Network(nn.Module):
                 n += 1
             return gene
 
-        gene_normal = _parse(F.softmax(self.alpha_normal, dim=-1).data.cpu().numpy())
-        gene_reduce = _parse(F.softmax(self.alpha_reduce, dim=-1).data.cpu().numpy())
+        gene_normal = _parse(F.softmax(alpha_normal, dim=-1).data.cpu().numpy())
+        gene_reduce = _parse(F.softmax(alpha_reduce, dim=-1).data.cpu().numpy())
 
         concat = range(2 + self.steps - self.multiplier, self.steps + 2)
         genotype = Genotype(
@@ -330,3 +273,21 @@ class Network(nn.Module):
         )
 
         return genotype
+
+
+class Architecture(nn.Module):
+    def __init__(self, steps):
+        super(Architecture, self).__init__()
+
+        k = sum(1 for i in range(steps) for j in range(2 + i))
+        num_ops = len(PRIMITIVES)
+
+        self.alpha_normal = nn.Parameter(torch.randn(k, num_ops))
+        self.alpha_reduce = nn.Parameter(torch.randn(k, num_ops))
+        with torch.no_grad():
+            # initialize to smaller value
+            self.alpha_normal.mul_(1e-3)
+            self.alpha_reduce.mul_(1e-3)
+
+    def forward(self):
+        return self.alpha_reduce, self.alpha_normal

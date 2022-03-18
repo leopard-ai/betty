@@ -1,5 +1,4 @@
 import sys
-from tkinter import W
 sys.path.insert(0, "./../..")
 
 import numpy as np
@@ -102,7 +101,7 @@ class Child(ImplicitProblem):
     def on_inner_loop_start(self):
         self.module.w.data.zero_()
 
-parent_config = Config(type='neumann',
+parent_config = Config(type='darts',
                        step=100,
                        first_order=True)
 child_config = Config(type='torch',

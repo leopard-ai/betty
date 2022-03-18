@@ -1,5 +1,5 @@
-import  torch
-import  torch.nn as nn
+import torch
+import torch.nn as nn
 
 
 OPS = {
@@ -153,12 +153,6 @@ class FactorizedReduce(nn.Module):
 
     def forward(self, x):
         x = self.relu(x)
-
-        # x: torch.Size([32, 32, 32, 32])
-        # conv1: [b, c_out//2, d//2, d//2]
-        # conv2: []
-        # out: torch.Size([32, 32, 16, 16])
-
         out = torch.cat([self.conv_1(x), self.conv_2(x[:, :, 1:, 1:])], dim=1)
         out = self.bn(out)
         return out
