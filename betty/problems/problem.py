@@ -414,6 +414,13 @@ class Problem:
         return self._parents
 
     @property
+    def leaf(self):
+        """[summary]
+        Return whether the current problem is leaf or not.
+        """
+        return self._leaf
+
+    @property
     def count(self):
         """[summary]
         Return count for the current problem.

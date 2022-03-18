@@ -59,3 +59,26 @@ def get_param_index(param, param_list):
         if p is param:
             return idx
     print('no corresponding parameter found!')
+
+def get_multiplier(problem):
+    if problem.leaf:
+        return 1
+
+    assert len(problem.children) > 0
+    # stack to store all the nodes of tree
+    s1 = []
+    # stack to store all the leaf nodes
+    s2 = []
+
+    s1.append((problem, 1))
+    while len(s1) != 0:
+        curr, multiplier = s1.pop(0)
+
+        if len(curr.children) != 0:
+            for child in curr.children:
+                s1.append((child, multiplier * curr.config.step))
+        else:
+            s2.append(multiplier)
+
+    assert all(x == s2[0] for x in s2)
+    return s2[0]

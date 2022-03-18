@@ -1,4 +1,5 @@
 import typing
+from betty.utils import get_multiplier
 
 
 class Engine:
@@ -59,9 +60,12 @@ class Engine:
                 problem.set_leaf()
                 self.leaves.append(problem)
             self.set_problem_attr(problem)
-            problem.initialize()
 
-        # sanity check
+        # check & set multiplier for each problem
+        for problem in self.problems:
+            multiplier = get_multiplier(problem)
+            problem.multiplier = multiplier
+            problem.initialize()
 
     def train(self):
         for problem in self.problems:
