@@ -104,10 +104,7 @@ class Child(ImplicitProblem):
 parent_config = Config(type='darts',
                        step=100,
                        first_order=True)
-child_config = Config(type='torch',
-                      step=1,
-                      first_order=True,
-                      retain_graph=True)
+child_config = Config(type='torch')
 parent = Parent(name='outer', config=parent_config, device=device)
 child = Child(name='inner', config=child_config, device=device)
 

@@ -146,14 +146,11 @@ class Child(ImplicitProblem):
     def configure_optimizer(self):
         return optim.SGD(self.module.parameters(), lr=0.1)
 
-parent_config = Config(type='darts',
+parent_config = Config(type='neumann',
                        neumann_alpha=0.001,
                        step=arg.inner_steps,
                        first_order=True)
-child_config = Config(type='maml',
-                      step=1,
-                      first_order=False,
-                      retain_graph=True)
+child_config = Config(type='torch')
 
 parent = Parent(name='outer', config=parent_config, device=arg.device)
 children = [Child(name='inner', config=child_config, device=arg.device) for _ in range(arg.task_num)]

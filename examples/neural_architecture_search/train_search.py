@@ -137,10 +137,7 @@ outer_config = Config(type='darts',
                       step=1,
                       retain_graph=True,
                       first_order=True)
-inner_config = Config(type='torch',
-                      step=1,
-                      first_order=True,
-                      retain_graph=True)
+inner_config = Config(type='torch')
 outer = Outer(name='outer', config=outer_config, device=device)
 inner = Inner(name='inner', config=inner_config, device=device)
 
