@@ -10,6 +10,7 @@ class Engine:
 
         # problem
         self.problems = problems
+        self._problem_name_dict = {}
         self.leaves = []
 
         # dependencies
@@ -41,7 +42,7 @@ class Engine:
         """[summary]
         Initialize dependencies (computational graph) between problems.
         """
-        # parse config
+        # Parse config
         self.parse_config()
 
         # Set dependencies for problems
@@ -52,12 +53,15 @@ class Engine:
                 key.add_child(value)
                 value.add_parent(key)
 
-        # specify leaves
+        # Parse problems
         for problem in self.problems:
             if len(self.dependencies.get(problem, [])) == 0:
                 problem.set_leaf()
                 self.leaves.append(problem)
+            self.set_problem_attr(problem)
             problem.initialize()
+
+        # sanity check
 
     def train(self):
         for problem in self.problems:
@@ -69,3 +73,28 @@ class Engine:
 
     def is_implemented(self, fn_name):
         return callable(getattr(self, fn_name, None))
+
+    def set_problem_attr(self, problem):
+        """[summary]
+        Set class attributed for parent/children problems based on their names
+        """
+        name = problem.name
+        if name not in self._problem_name_dict:
+            assert not hasattr(self, name), f'Problem already has an attribute named {name}!'
+            self._problem_name_dict[name] = 0
+            setattr(self, name, problem)
+        elif self._problem_name_dict[name] == 0:
+            # rename first problem
+            first_problem = getattr(self, name)
+            delattr(self, name)
+            setattr(self, name + '_0', first_problem)
+
+            self._problem_name_dict[name] += 1
+            name = name + '_' + str(self._problem_name_dict[name])
+            setattr(self, name, problem)
+        else:
+            self._problem_name_dict[name] += 1
+            name = name + '_' + str(self._problem_name_dict[name])
+            setattr(self, name, problem)
+
+        return name

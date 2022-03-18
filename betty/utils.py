@@ -1,3 +1,4 @@
+from collections import deque
 from typing import List
 
 import torch
@@ -16,7 +17,6 @@ def _del_nested_attr(obj: nn.Module, names: List[str]) -> None:
     else:
         _del_nested_attr(getattr(obj, names[0]), names[1:])
 
-
 def _set_nested_attr(obj: nn.Module, names: List[str], value: Tensor) -> None:
     """
     Set the attribute specified by the given list of names to value.
@@ -28,17 +28,14 @@ def _set_nested_attr(obj: nn.Module, names: List[str], value: Tensor) -> None:
     else:
         _set_nested_attr(getattr(obj, names[0]), names[1:], value)
 
-
 def _get_nested_attr(obj: nn.Module, names: List[str]) -> None:
     if len(names) == 1:
         return getattr(obj, names[0])
     else:
         _get_nested_attr(getattr(obj, names[0]), names[1:])
 
-
 def make_split_names(lst):
     return [name.split('.') for name in lst]
-
 
 def swap_state(mod: nn.Module, split_names: List[str], elems):
     result = []
@@ -48,7 +45,6 @@ def swap_state(mod: nn.Module, split_names: List[str], elems):
         _set_nested_attr(mod, split_name, elem)
     return result
 
-
 def flatten_list(regular_list):
     """[summary]
     Flatten list of lists
@@ -56,7 +52,6 @@ def flatten_list(regular_list):
     if type(regular_list[0] == list):
         return [item for sublist in regular_list for item in sublist]
     return regular_list
-
 
 def get_param_index(param, param_list):
     param_list = list(param_list)

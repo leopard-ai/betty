@@ -36,6 +36,9 @@ class Problem:
         self.optimizer = optimizer
         self.scheduler = scheduler
 
+        # logging
+        self.loggers = {}
+
         # misc
         self._leaf = False
         self._first_order = False
@@ -44,7 +47,8 @@ class Problem:
         self._inner_loop_start = True
         self._training = True
         self.ready = None
-        self.count = 0
+        self._count = 0
+        self._multiplier = 1
 
     def initialize(self):
         """[summary]
@@ -105,6 +109,7 @@ class Problem:
         raise NotImplementedError
 
     def step(self,
+             batch=None,
              backpropagate=True,
              param_update=True):
         """[summary]
@@ -119,14 +124,14 @@ class Problem:
 
             # increase count
             if self._training and backpropagate:
-                self.count += 1
+                self._count += 1
 
             # copy current parameters, buffers, optimizer states
             if not param_update:
                 self.cache_states()
 
             # load data
-            self.cur_batch = self.get_batch()
+            self.cur_batch = self.get_batch() if batch is None else batch
 
             # calculate loss
             losses = self.get_losses()
@@ -152,7 +157,7 @@ class Problem:
             # call parent step function
             if self._training and backpropagate:
                 for problem in self._parents:
-                    if self.count % problem.config.step == 0:
+                    if self._count % problem.config.step == 0:
                         idx = problem.children.index(self)
                         problem.ready[idx] = True
                         problem.step()
@@ -303,6 +308,14 @@ class Problem:
         """
         return all(self.ready)
 
+    def log(self, dictionary):
+        global_step = self._multiplier * self._count
+        for key, value in dictionary.items():
+            if key not in self.loggers:
+                self.loggers[key] = [(global_step, value)]
+            else:
+                self.loggers[key].append((global_step, value))
+
     def set_problem_attr(self, problem):
         """[summary]
         Set class attributed for parent/children problems based on their names
@@ -399,3 +412,22 @@ class Problem:
         Return parent problemss for the current problem.
         """
         return self._parents
+
+    @property
+    def count(self):
+        """[summary]
+        Return count for the current problem.
+        """
+        return self._count
+
+    @property
+    def multiplier(self):
+        """[summary]
+        Return multiplier for the current problem.
+        """
+        return self._multiplier
+
+    @multiplier.setter
+    def multiplier(self, multiplier):
+        assert isinstance(multiplier, int)
+        self._multiplier = multiplier
