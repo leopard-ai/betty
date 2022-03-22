@@ -1,6 +1,7 @@
 import torch
 
-from betty.hypergradient.utils import concat, sub_with_none
+from betty.hypergradient.utils import to_vec, sub_with_none
+
 
 def darts(loss, params, child, config, create_graph=True, retain_graph=False, allow_unused=True):
     # direct grad
@@ -13,7 +14,7 @@ def darts(loss, params, child, config, create_graph=True, retain_graph=False, al
     # implicit grad
     R = config.darts_alpha
     delta = torch.autograd.grad(loss, child.trainable_parameters())
-    eps = R / concat(delta).norm()
+    eps = R / to_vec(delta).norm()
 
     # positie
     for p, v in zip(child.trainable_parameters(), delta):

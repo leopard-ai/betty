@@ -17,4 +17,5 @@ class Config:
     neumann_alpha: float = 1.
 
     # cg
-    cg_iterations: int = 5
+    cg_iterations: int = 3
+    cg_alpha: float = 1.

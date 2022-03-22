@@ -146,9 +146,8 @@ class Child(ImplicitProblem):
     def configure_optimizer(self):
         return optim.SGD(self.module.parameters(), lr=0.1)
 
-parent_config = Config(type='neumann',
-                       neumann_alpha=0.001,
-                       step=arg.inner_steps,
+parent_config = Config(type='darts',
+                       step=1,
                        first_order=True)
 child_config = Config(type='torch')
 

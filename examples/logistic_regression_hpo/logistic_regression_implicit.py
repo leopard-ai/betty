@@ -101,7 +101,8 @@ class Child(ImplicitProblem):
     def on_inner_loop_start(self):
         self.module.w.data.zero_()
 
-parent_config = Config(type='darts',
+parent_config = Config(type='cg',
+                       cg_iterations=5,
                        step=100,
                        first_order=True)
 child_config = Config(type='torch')
