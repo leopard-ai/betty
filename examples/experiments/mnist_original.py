@@ -144,8 +144,8 @@ def main():
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
         test(model, device, test_loader)
-        if epoch % 1 == 0:
-             scheduler.step()
+        #if epoch % 1 == 0:
+        #     scheduler.step()
 
     if args.save_model:
         torch.save(model.state_dict(), "mnist_cnn.pt")

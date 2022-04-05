@@ -94,8 +94,9 @@ class Inner(ImplicitProblem):
         outputs = self.forward(inputs)
         loss_vector = F.cross_entropy(outputs, labels.long(), reduction='none')
         loss_vector_reshape = torch.reshape(loss_vector, (-1, 1))
-        weight = self.outer(loss_vector_reshape)
+        weight = self.outer(loss_vector_reshape.detach())
         loss = torch.mean(weight * loss_vector_reshape)
+        self.scheduler.step()
 
         return loss
 
@@ -113,6 +114,12 @@ class Inner(ImplicitProblem):
                               weight_decay=args.weight_decay,
                               nesterov=args.nesterov)
         return optimizer
+
+    def configure_scheduler(self):
+        scheduler = optim.lr_scheduler.MultiStepLR(self.optimizer,
+                                                   milestones=[7500, 12000],
+                                                   gamma=0.1)
+        return scheduler
 
 outer_config = Config(type='darts',
                       step=5,

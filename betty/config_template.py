@@ -10,7 +10,7 @@ class Config:
     allow_unused: bool = True
 
     # darts
-    darts_alpha = 0.01
+    darts_alpha: float = 0.01
 
     # neumann
     neumann_iterations: int = 3

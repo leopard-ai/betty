@@ -22,7 +22,7 @@ class Engine:
 
     def parse_config(self):
         self.train_iters = self.config.get('train_iters', 50000)
-        self.valid_step = self.config.get('valid_step', 200)
+        self.valid_step = self.config.get('valid_step', 500)
 
     def train_step(self):
         for leaf in self.leaves:
@@ -46,20 +46,8 @@ class Engine:
         # Parse config
         self.parse_config()
 
-        # Set dependencies for problems
-        for key, value_list in self.dependencies.items():
-            assert key in self.problems
-            for value in value_list:
-                assert value in self.problems
-                key.add_child(value)
-                value.add_parent(key)
-
-        # Parse problems
-        for problem in self.problems:
-            if len(self.dependencies.get(problem, [])) == 0:
-                problem.set_leaf()
-                self.leaves.append(problem)
-            self.set_problem_attr(problem)
+        # Parse dependency
+        self.parse_dependency()
 
         # check & set multiplier for each problem
         for problem in self.problems:
@@ -75,8 +63,33 @@ class Engine:
         for problem in self.problems:
             problem.eval()
 
-    def is_implemented(self, fn_name):
-        return callable(getattr(self, fn_name, None))
+    def parse_dependency(self, set_attr=True):
+        # Set dependencies for problems
+        for key, value_list in self.dependencies.items():
+            assert key in self.problems
+            for value in value_list:
+                assert value in self.problems
+                key.add_child(value, set_attr)
+                value.add_parent(key, set_attr)
+
+        # Parse problems
+        for problem in self.problems:
+            if len(self.dependencies.get(problem, [])) == 0:
+                problem.leaf = True
+                self.leaves.append(problem)
+            if set_attr:
+                self.set_problem_attr(problem)
+
+    def set_dependency(self, dependencies, set_attr=False):
+        self.dependencies = dependencies
+        self.leaves = []
+
+        # clear existing dependencies
+        for problem in self.problems:
+            problem.leaf = False
+            problem.clear_dependencies()
+
+        self.parse_dependency(set_attr=set_attr)
 
     def set_problem_attr(self, problem):
         """[summary]
@@ -102,3 +115,6 @@ class Engine:
             setattr(self, name, problem)
 
         return name
+
+    def is_implemented(self, fn_name):
+        return callable(getattr(self, fn_name, None))

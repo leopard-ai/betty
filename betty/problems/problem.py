@@ -122,13 +122,14 @@ class Problem:
                     self.on_inner_loop_start()
                 self._inner_loop_start = False
 
+                # copy current parameters, buffers, optimizer states
+                if not param_update:
+                    self.cache_states()
+
             # increase count
             if self._training and backpropagate:
                 self._count += 1
 
-            # copy current parameters, buffers, optimizer states
-            if not param_update:
-                self.cache_states()
 
             # load data
             self.cur_batch = self.get_batch() if batch is None else batch
@@ -156,7 +157,7 @@ class Problem:
 
             # call parent step function
             if self._training and backpropagate:
-                for problem in self._parents:
+                for parent_idx, problem in enumerate(self._parents):
                     if self._count % problem.config.step == 0:
                         idx = problem.children.index(self)
                         problem.ready[idx] = True
@@ -164,25 +165,25 @@ class Problem:
 
                         self._inner_loop_start = True
 
-                if not param_update:
-                    self.recover_states()
+                        if (not param_update) and (parent_idx == len(self._parents) - 1):
+                            self.recover_states()
 
-                    losses = self.get_losses()
+                            losses = self.get_losses()
 
-                    self.backward(losses=losses,
-                                  params=self.trainable_parameters(),
-                                  children=self._children,
-                                  config=self._config,
-                                  create_graph=not self._first_order,
-                                  retain_graph=self._retain_graph,
-                                  allow_unused=self._allow_unused)
+                            self.backward(losses=losses,
+                                          params=self.trainable_parameters(),
+                                          children=self._children,
+                                          config=self._config,
+                                          create_graph=not self._first_order,
+                                          retain_graph=self._retain_graph,
+                                          allow_unused=self._allow_unused)
 
-                    self.optimizer_step()
+                            self.optimizer_step()
 
-                    if self.is_implemented('param_callback'):
-                        self.param_callback(self.trainable_parameters())
+                            if self.is_implemented('param_callback'):
+                                self.param_callback(self.trainable_parameters())
 
-                    self.zero_grad()
+                            self.zero_grad()
 
             self.ready = [False for _ in range(len(self._children))]
 
@@ -341,22 +342,24 @@ class Problem:
 
         return name
 
-    def add_child(self, problem):
+    def add_child(self, problem, set_attr=True):
         """[summary]
         Add a new problem to the children node list.
         """
         assert problem not in self._children
         assert problem not in self._parents
-        self.set_problem_attr(problem)
+        if set_attr:
+            self.set_problem_attr(problem)
         self._children.append(problem)
 
-    def add_parent(self, problem):
+    def add_parent(self, problem, set_attr=True):
         """[summary]
         Add a new problem to the parent node list.
         """
         assert problem not in self._children
         assert problem not in self._parents
-        self.set_problem_attr(problem)
+        if set_attr:
+            self.set_problem_attr(problem)
         self._parents.append(problem)
 
     @abc.abstractmethod
@@ -373,11 +376,9 @@ class Problem:
         """
         raise NotImplementedError
 
-    def set_leaf(self):
-        """[summary]
-        Set the current problem as a leaf problem
-        """
-        self._leaf = True
+    def clear_dependencies(self):
+        self._children = []
+        self._parents = []
 
     def train(self):
         self._training = True
@@ -438,3 +439,10 @@ class Problem:
     def multiplier(self, multiplier):
         assert isinstance(multiplier, int)
         self._multiplier = multiplier
+
+    @leaf.setter
+    def leaf(self, leaf):
+        """[summary]
+        Set the current problem as a leaf problem
+        """
+        self._leaf = leaf
