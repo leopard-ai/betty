@@ -22,6 +22,7 @@ class Problem:
         # ! dependency can be defined both in ``Module'' class and ``Engine'' class
         self._parents = []
         self._children = []
+        self._paths = []
         self._problem_name_dict = {}
 
         # data loader
@@ -41,6 +42,7 @@ class Problem:
 
         # misc
         self._leaf = False
+        self._default_grad = False
         self._first_order = False
         self._retain_graph = config.retain_graph
         self._allow_unused = config.allow_unused
@@ -57,7 +59,17 @@ class Problem:
         # initialize update ready to False
         if self._leaf:
             assert len(self._children) == 0
+        if len(self._paths) == 0:
+            self._default_grad = True
         self.ready = [False for _ in range(len(self._children))]
+        path_str = [[node.name for node in path] for path in self._paths]
+        children_str = [node.name for node in self._children]
+        parents_str = [node.name for node in self._parents]
+        print('[*] Problem INFO')
+        print(f'Name: {self._name}')
+        print(f'Parents: {parents_str}')
+        print(f'Children: {children_str}')
+        print(f'Paths: {path_str}')
 
         # initialize whether to track higher-order gradient for parameter update
         first_order = []
@@ -116,6 +128,12 @@ class Problem:
         Perform gradient calculation and update parameters accordingly
         """
         if self.check_ready():
+            #if self._name == 'outer':
+            #    print('name:', self._name)
+            #    print('path:', self._paths)
+            #    print(self.inner)
+            #    print(self.inner.module)
+            #    print(self._paths[0][1].module)
             # loop start
             if self._inner_loop_start:
                 if self.is_implemented('on_inner_loop_start'):
@@ -140,7 +158,7 @@ class Problem:
             # calculate gradient (a.k.a backward)
             self.backward(losses=losses,
                           params=self.trainable_parameters(),
-                          children=self._children,
+                          paths=self._paths,
                           config=self._config,
                           create_graph=not self._first_order,
                           retain_graph=self._retain_graph,
@@ -172,7 +190,7 @@ class Problem:
 
                             self.backward(losses=losses,
                                           params=self.trainable_parameters(),
-                                          children=self._children,
+                                          paths=self._paths,
                                           config=self._config,
                                           create_graph=not self._first_order,
                                           retain_graph=self._retain_graph,
@@ -212,7 +230,7 @@ class Problem:
     def backward(self,
                  losses,
                  params,
-                 children,
+                 paths,
                  config,
                  create_graph=False,
                  retain_graph=True,
@@ -220,18 +238,18 @@ class Problem:
         if self._leaf:
             grads = self.get_grads(loss=sum(losses),
                                    params=params,
-                                   child=None,
+                                   path=None,
                                    config=config,
                                    create_graph=create_graph,
                                    retain_graph=retain_graph,
                                    allow_unused=allow_unused)
             self.set_grads(params, grads)
         else:
-            for idx, child in enumerate(children):
-                loss = losses[0] if len(losses) == 0 else losses[idx]
+            for idx, path in enumerate(paths):
+                loss = losses[0] if len(losses) == 1 else losses[idx]
                 grads = self.get_grads(loss=loss,
                                        params=params,
-                                       child=child,
+                                       path=path,
                                        config=config,
                                        create_graph=create_graph,
                                        retain_graph=retain_graph,
@@ -241,12 +259,12 @@ class Problem:
     def get_grads(self,
                   loss,
                   params,
-                  child=None,
+                  path=None,
                   config=None,
                   create_graph=False,
                   retain_graph=True,
                   allow_unused=True):
-        if self._leaf or self.config.type == 'torch':
+        if self._default_grad or self.config.type == 'torch':
             grads = torch.autograd.grad(loss, params,
                                         create_graph=create_graph,
                                         retain_graph=retain_graph,
@@ -254,7 +272,7 @@ class Problem:
         else:
             assert len(self._children) > 0
             grad_fn = hypergradient.get_grad_fn(self.config.type)
-            grads = grad_fn(loss, params, child, config,
+            grads = grad_fn(loss, params, path, config,
                             create_graph=create_graph,
                             retain_graph=retain_graph,
                             allow_unused=allow_unused)
@@ -342,25 +360,25 @@ class Problem:
 
         return name
 
-    def add_child(self, problem, set_attr=True):
+    def add_child(self, problem):
         """[summary]
         Add a new problem to the children node list.
         """
         assert problem not in self._children
-        assert problem not in self._parents
-        if set_attr:
-            self.set_problem_attr(problem)
         self._children.append(problem)
 
-    def add_parent(self, problem, set_attr=True):
+    def add_parent(self, problem):
         """[summary]
         Add a new problem to the parent node list.
         """
-        assert problem not in self._children
         assert problem not in self._parents
-        if set_attr:
-            self.set_problem_attr(problem)
         self._parents.append(problem)
+
+    def add_paths(self, paths):
+        """[summary]
+        Add new backpropagation paths.
+        """
+        self._paths.extend(paths)
 
     @abc.abstractmethod
     def parameters(self):
@@ -379,6 +397,7 @@ class Problem:
     def clear_dependencies(self):
         self._children = []
         self._parents = []
+        self._paths = []
 
     def train(self):
         self._training = True

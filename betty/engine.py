@@ -1,3 +1,4 @@
+import copy
 import typing
 from betty.utils import get_multiplier
 
@@ -51,8 +52,8 @@ class Engine:
 
         # check & set multiplier for each problem
         for problem in self.problems:
-            multiplier = get_multiplier(problem)
-            problem.multiplier = multiplier
+            #multiplier = get_multiplier(problem)
+            #problem.multiplier = multiplier
             problem.initialize()
 
     def train(self):
@@ -63,22 +64,66 @@ class Engine:
         for problem in self.problems:
             problem.eval()
 
+    def check_leaf(self, problem):
+        for _, value_list in self.dependencies['l2h'].items():
+            if problem in set(value_list):
+                return False
+
+        return True
+
+    def find_paths(self, src, dst):
+        results = []
+        path = [src]
+        self.dfs(src, dst, path, results)
+        assert len(results) > 0, f'No path from {src.name} to {dst.name}!'
+
+        for i in range(len(results)):
+            results[i].reverse()
+            results[i].append(dst)
+
+        return results
+
+    def dfs(self, src, dst, path, results):
+        if src is dst:
+            assert len(path) > 1
+            result = [node for node in path]
+            results.append(result)
+        else:
+            for adj in self.dependencies['l2h'][src]:
+                path.append(adj)
+                self.dfs(adj, dst, path, results)
+                path.pop()
+
     def parse_dependency(self, set_attr=True):
-        # Set dependencies for problems
-        for key, value_list in self.dependencies.items():
-            assert key in self.problems
+        # Set dependencies for high-to-low dependencies
+        for key, value_list in self.dependencies['h2l'].items():
             for value in value_list:
-                assert value in self.problems
-                key.add_child(value, set_attr)
-                value.add_parent(key, set_attr)
+                # set the problelm attribute for key problem in value problem
+                if set_attr:
+                    value.set_problem_attr(key)
+
+                # find all paths from low to high for backpropagation
+                paths = self.find_paths(src=value, dst=key)
+                key.add_paths(paths)
+
+        # Set dependencies for low-to-high dependencies
+        for key, value_list in self.dependencies['l2h'].items():
+            for value in value_list:
+                # set the problelm attribute for key problem in value problem
+                if set_attr:
+                    value.set_problem_attr(key)
+
+                # add value problem to parents of key problem for backpropgation
+                key.add_parent(value)
+                value.add_child(key)
 
         # Parse problems
         for problem in self.problems:
-            if len(self.dependencies.get(problem, [])) == 0:
-                problem.leaf = True
-                self.leaves.append(problem)
             if set_attr:
                 self.set_problem_attr(problem)
+            if self.check_leaf(problem):
+                problem.leaf = True
+                self.leaves.append(problem)
 
     def set_dependency(self, dependencies, set_attr=False):
         self.dependencies = dependencies

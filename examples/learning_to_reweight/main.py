@@ -130,7 +130,9 @@ outer = Outer(name='outer', config=outer_config, device=args.device)
 inner = Inner(name='inner', config=inner_config, device=args.device)
 
 problems = [outer, inner]
-dependencies = {outer: [inner]}
+h2l = {outer: [inner]}
+l2h = {inner: [outer]}
+dependencies = {'l2h': l2h, 'h2l': h2l}
 
 engine = Engine(config=None, problems=problems, dependencies=dependencies)
 engine.run()

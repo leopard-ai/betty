@@ -101,7 +101,7 @@ class Child(ImplicitProblem):
     def on_inner_loop_start(self):
         self.module.w.data.zero_()
 
-parent_config = Config(type='cg',
+parent_config = Config(type='darts',
                        cg_iterations=5,
                        step=100,
                        first_order=True)
@@ -110,7 +110,9 @@ parent = Parent(name='outer', config=parent_config, device=device)
 child = Child(name='inner', config=child_config, device=device)
 
 problems = [parent, child]
-dependencies = {parent: [child]}
+h2l = {parent: [child]}
+l2h = {child: [parent]}
+dependencies = {'l2h': l2h, 'h2l': h2l}
 
 engine = Engine(config=None, problems=problems, dependencies=dependencies)
 engine.run()
