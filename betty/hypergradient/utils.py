@@ -5,7 +5,7 @@ def to_vec(tensor_list, alpha=1.):
 
 def sub_with_none(a, b):
     if a is None and b is None:
-        raise ValueError
+        return 0
     if a is None:
         return -b
     elif b is None:

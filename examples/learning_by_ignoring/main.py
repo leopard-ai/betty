@@ -7,8 +7,8 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 
-from betty.engine import engine
-from betty.problems import ImplicitProblem, IteratvieProblem
+from betty.engine import Engine
+from betty.problems import ImplicitProblem, IterativeProblem
 from betty.config_template import Config
 
 from utils.utils import set_random_seed, evaluate
@@ -126,7 +126,7 @@ optimizer_src = getOptim(model_src, args)
 scheduler_src = optim.lr_scheduler.StepLR(optimizer_src, step_size=args.step_size, gamma=1e-1)
 
 
-class Pretrain(ImplicitProblem):
+class Pretraining(ImplicitProblem):
     def forward(self, x):
         return self.module(x)
 
@@ -207,3 +207,24 @@ class Reweighting(ImplicitProblem):
 
     def configure_optimizer(self):
         return optim.Adam(self.module.parameters(), lr=0.01, betas=(0.5, 0.999))
+
+
+# Define configs
+reweight_config = Config(type='darts',
+                            step=1,
+                            retain_graph=True,
+                            first_order=True)
+finetune_config = Config(type='torch', step=1)
+pretrain_config = Config(type='torch', step=1)
+
+reweight = Reweighting(name='reweight', config=reweight_config, devcie=device)
+finetune = Finetuning(name='finetune', config=finetune_config, devcie=device)
+pretrain = Pretraining(name='pretrain', config=pretrain_config, devcie=device)
+problems = [reweight, finetune, pretrain]
+
+h2l = {reweight: [pretrain]}
+l2h = {pretrain: [finetune], finetune: [reweight]}
+dependencies = {'h2l': h2l, 'l2h': l2h}
+
+engine = Engine(config=None, problems=problems, dependencies=dependencies)
+engine.run()
