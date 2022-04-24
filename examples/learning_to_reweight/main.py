@@ -121,6 +121,17 @@ class Inner(ImplicitProblem):
                                                    gamma=0.1)
         return scheduler
 
+
+class ReweightingEngine(Engine):
+    def validation(self):
+        acc = 0
+        for x, target in test_dataloader:
+            x, target = x.to(args.device), target.to(args.device)
+            out = self.outer(x)
+            acc += (out.argmax(dim=1) == target.long()).float().mean().item() / len(x)
+        acc /= len(test_dataloader)
+        print(f'[*] Validation Acc.: {acc}')
+
 outer_config = Config(type='darts',
                       step=5,
                       retain_graph=True,

@@ -23,7 +23,7 @@ def darts_helper(vector, curr, prev, config):
     R = config.darts_alpha
     eps = R / to_vec(vector).norm()
 
-    # positie
+    # positive
     for p, v in zip(curr.trainable_parameters(), vector):
         p.data.add_(eps, v.data)
 

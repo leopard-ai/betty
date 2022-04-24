@@ -22,7 +22,7 @@ import utils
 
 parser = argparse.ArgumentParser("cifar")
 parser.add_argument('--data', type=str, default='../data', help='location of the data corpus')
-parser.add_argument('--batchsz', type=int, default=32, help='batch size')
+parser.add_argument('--batchsz', type=int, default=64, help='batch size')
 parser.add_argument('--lr', type=float, default=0.025, help='init learning rate')
 parser.add_argument('--lr_min', type=float, default=0.001, help='min learning rate')
 parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
@@ -50,6 +50,10 @@ device = torch.device('cuda:0')
 
 train_transform, valid_transform = utils.data_transforms_cifar10(args)
 train_data = dset.CIFAR10(root=args.data, train=True, download=True, transform=train_transform)
+valid_data = dset.CIFAR10(root=args.data, train=False, download=True, transform=valid_transform)
+
+valid_queue = torch.utils.data.DataLoader(
+    valid_data, batch_size=args.batchsz, shuffle=False, pin_memory=True, num_workers=2)
 
 num_train = len(train_data) # 50000
 indices = list(range(num_train))
@@ -133,6 +137,19 @@ class Inner(ImplicitProblem):
                                                          eta_min=args.lr_min)
         return scheduler
 
+
+class NASEngine(Engine):
+    def validation(self):
+        losses = 0
+        for x, target in valid_queue:
+            x, target = x.to(device), target.to(device, non_blocking=True)
+            with torch.no_grad():
+                alphas = self.outer()
+                loss = self.inner.module.loss(x, alphas, target)
+            losses += loss.item()
+        print('[*] Valid loss:', losses / len(valid_queue))
+
+
 outer_config = Config(type='darts',
                       step=1,
                       retain_graph=True,
@@ -142,7 +159,9 @@ outer = Outer(name='outer', config=outer_config, device=device)
 inner = Inner(name='inner', config=inner_config, device=device)
 
 problems = [outer, inner]
-dependencies = {outer: [inner]}
+l2h = {inner: [outer]}
+h2l = {outer: [inner]}
+dependencies = {'l2h': l2h, 'h2l': h2l}
 
-engine = Engine(config=None, problems=problems, dependencies=dependencies)
+engine = NASEngine(config=None, problems=problems, dependencies=dependencies)
 engine.run()

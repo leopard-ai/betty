@@ -219,6 +219,20 @@ class Reweighting(ImplicitProblem):
 
     def configure_optimizer(self):
         return optim.Adam(self.module.parameters(), lr=0.01, betas=(0.5, 0.999))
+        
+
+class LBIEngine(Engine):
+    def validation(self):
+        correct = 0
+        total = 0
+        for batch in test_loader:
+            inputs = batch[0].to(device)
+            targets = batch[1].to(device)
+            outputs = self.finetune(inputs)
+            correct += (outputs.argmax(dim=1) == targets).sum().item()
+            total += inputs.size(0)
+        acc = correct / total
+        return acc
 
 
 # Define configs
@@ -238,5 +252,5 @@ h2l = {reweight: [pretrain]}
 l2h = {pretrain: [finetune], finetune: [reweight]}
 dependencies = {'h2l': h2l, 'l2h': l2h}
 
-engine = Engine(config=None, problems=problems, dependencies=dependencies)
+engine = LBIEngine(config=None, problems=problems, dependencies=dependencies)
 engine.run()
