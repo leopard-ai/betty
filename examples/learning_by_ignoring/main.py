@@ -82,11 +82,22 @@ class DatasetwithIndice(torch.utils.data.Dataset):
         self.base = base_dataset
 
     def __getitem__(self, index):
-        data, target = self.base[index]
-        return data, target, index
+        data, target, domain_idx = self.base[index]
+        return data, target, domain_idx, index
 
     def __len__(self):
         return len(self.base)
+
+
+class DataWeights(torch.nn.Module):
+    def __init__(self, dim):
+        super(DataWeights, self).__init__()
+
+        self.weights = torch.nn.Parameter(torch.zeros(dim))
+
+    def forward(self, indexes):
+        return self.weights[indexes]
+
 
 train_source_dataset_patch = DatasetwithIndice(train_source_dataset)
 
@@ -125,6 +136,8 @@ model_src = Resnet(num_classes=train_source_dataset.num_classes).to(device)
 optimizer_src = getOptim(model_src, args)
 scheduler_src = optim.lr_scheduler.StepLR(optimizer_src, step_size=args.step_size, gamma=1e-1)
 
+dataweight = DataWeights(len(train_source_dataset)).to(device)
+
 
 class Pretraining(ImplicitProblem):
     def forward(self, x):
@@ -137,7 +150,7 @@ class Pretraining(ImplicitProblem):
         loss_raw = F.cross_entropy(outs, targets, reduction='none')
 
         # reweighting
-        indexes = batch[2]
+        indexes = batch[3]
         weights = torch.sigmoid(self.reweight(indexes))
         scale = weights.sum().detach().item()
         loss = torch.dot(loss_raw, weights) / scale
@@ -188,7 +201,7 @@ class Finetuning(ImplicitProblem):
 
 class Reweighting(ImplicitProblem):
     def forward(self, indexes):
-        return self.module[indexes]
+        return self.module(indexes)
 
     def training_step(self, batch):
         inputs = batch[0].to(device)
@@ -202,8 +215,7 @@ class Reweighting(ImplicitProblem):
         return valid_loader
 
     def configure_module(self):
-        weights = torch.nn.Parameter(torch.zeros(len(train_source_dataset)))
-        return weights.to(device)
+        return dataweight
 
     def configure_optimizer(self):
         return optim.Adam(self.module.parameters(), lr=0.01, betas=(0.5, 0.999))
@@ -217,9 +229,9 @@ reweight_config = Config(type='darts',
 finetune_config = Config(type='torch', step=1)
 pretrain_config = Config(type='torch', step=1)
 
-reweight = Reweighting(name='reweight', config=reweight_config, devcie=device)
-finetune = Finetuning(name='finetune', config=finetune_config, devcie=device)
-pretrain = Pretraining(name='pretrain', config=pretrain_config, devcie=device)
+reweight = Reweighting(name='reweight', config=reweight_config, device=device)
+finetune = Finetuning(name='finetune', config=finetune_config, device=device)
+pretrain = Pretraining(name='pretrain', config=pretrain_config, device=device)
 problems = [reweight, finetune, pretrain]
 
 h2l = {reweight: [pretrain]}
