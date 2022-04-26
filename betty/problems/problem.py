@@ -51,6 +51,7 @@ class Problem:
         self.ready = None
         self._count = 0
         self._multiplier = 1
+        self._parent_step = 1
 
     def initialize(self):
         """[summary]
@@ -62,21 +63,18 @@ class Problem:
         if len(self._paths) == 0:
             self._default_grad = True
         self.ready = [False for _ in range(len(self._children))]
-        path_str = [[node.name for node in path] for path in self._paths]
-        children_str = [node.name for node in self._children]
-        parents_str = [node.name for node in self._parents]
-        print('[*] Problem INFO')
-        print(f'Name: {self._name}')
-        print(f'Parents: {parents_str}')
-        print(f'Children: {children_str}')
-        print(f'Paths: {path_str}')
 
-        # initialize whether to track higher-order gradient for parameter update
+        # compile parents configurations
         first_order = []
+        parent_steps = []
         for problem in self._parents:
             hgconfig = problem.config
             first_order.append(hgconfig.first_order)
+            parent_steps.append(hgconfig.step)
         self._first_order = all(first_order)
+        if len(parent_steps) > 0:
+            assert all(s == parent_steps[0] for s in parent_steps)
+            self._parent_step = parent_steps[0]
 
         self._inner_loop_start = True
 
@@ -103,6 +101,19 @@ class Problem:
             if self.configure_scheduler is not None:
                 self.scheduler = self.configure_scheduler()
 
+        # Logging INFO
+        # TODO: Replace print with logging
+        path_str = [[node.name for node in path] for path in self._paths]
+        children_str = [node.name for node in self._children]
+        parents_str = [node.name for node in self._parents]
+        print('[*] Problem INFO')
+        print(f'Name: {self._name}')
+        print(f'Parents: {parents_str}')
+        print(f'Children: {children_str}')
+        print(f'Paths: {path_str}')
+        print(f'Update parent problems every {self._parent_step} steps')
+        print()
+
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
 
@@ -122,18 +133,11 @@ class Problem:
 
     def step(self,
              batch=None,
-             backpropagate=True,
              param_update=True):
         """[summary]
         Perform gradient calculation and update parameters accordingly
         """
         if self.check_ready():
-            #if self._name == 'outer':
-            #    print('name:', self._name)
-            #    print('path:', self._paths)
-            #    print(self.inner)
-            #    print(self.inner.module)
-            #    print(self._paths[0][1].module)
             # loop start
             if self._inner_loop_start:
                 if self.is_implemented('on_inner_loop_start'):
@@ -145,9 +149,8 @@ class Problem:
                     self.cache_states()
 
             # increase count
-            if self._training and backpropagate:
+            if self._training:
                 self._count += 1
-
 
             # load data
             self.cur_batch = self.get_batch() if batch is None else batch
@@ -166,6 +169,8 @@ class Problem:
 
             # calculate parameter update
             self.optimizer_step()
+            if self.scheduler is not None and param_update:
+                self.scheduler.step()
 
             if self.is_implemented('param_callback'):
                 self.param_callback(self.trainable_parameters())
@@ -174,34 +179,36 @@ class Problem:
             self.zero_grad()
 
             # call parent step function
-            if self._training and backpropagate:
-                for parent_idx, problem in enumerate(self._parents):
-                    if self._count % problem.config.step == 0:
+            if self._training:
+                if self._count % self._parent_step == 0:
+                    for problem in self._parents:
                         idx = problem.children.index(self)
                         problem.ready[idx] = True
                         problem.step()
 
                         self._inner_loop_start = True
 
-                        if (not param_update) and (parent_idx == len(self._parents) - 1):
-                            self.recover_states()
+                    if not param_update:
+                        self.recover_states()
 
-                            losses = self.get_losses()
+                        losses = self.get_losses()
 
-                            self.backward(losses=losses,
-                                          params=self.trainable_parameters(),
-                                          paths=self._paths,
-                                          config=self._config,
-                                          create_graph=not self._first_order,
-                                          retain_graph=self._retain_graph,
-                                          allow_unused=self._allow_unused)
+                        self.backward(losses=losses,
+                                      params=self.trainable_parameters(),
+                                      paths=self._paths,
+                                      config=self._config,
+                                      create_graph=not self._first_order,
+                                      retain_graph=self._retain_graph,
+                                      allow_unused=self._allow_unused)
 
-                            self.optimizer_step()
+                        self.optimizer_step()
+                        if self.scheduler is not None and not param_update:
+                            self.scheduler.step()
 
-                            if self.is_implemented('param_callback'):
-                                self.param_callback(self.trainable_parameters())
+                        if self.is_implemented('param_callback'):
+                            self.param_callback(self.trainable_parameters())
 
-                            self.zero_grad()
+                    self.zero_grad()
 
             self.ready = [False for _ in range(len(self._children))]
 

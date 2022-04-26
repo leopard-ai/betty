@@ -1,12 +1,14 @@
 import copy
 import typing
+
 from betty.utils import get_multiplier
+from betty.config_template import EngineConfig
 
 
 class Engine:
     def __init__(self, config, problems, dependencies=None):
         # config
-        self.config = config if config is not None else {}
+        self.config = config if config is not None else EngineConfig()
         self.train_iters = 0
         self.valid_step = 0
 
@@ -22,8 +24,8 @@ class Engine:
         self.initialize()
 
     def parse_config(self):
-        self.train_iters = self.config.get('train_iters', 50000)
-        self.valid_step = self.config.get('valid_step', 500)
+        self.train_iters = self.config.train_iters
+        self.valid_step = self.config.valid_step
 
     def train_step(self):
         for leaf in self.leaves:

@@ -19,3 +19,9 @@ class Config:
     # cg
     cg_iterations: int = 3
     cg_alpha: float = 1.
+
+
+@dataclass
+class EngineConfig:
+    train_iters: int = 50000
+    valid_step: int = 500

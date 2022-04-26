@@ -26,7 +26,6 @@ class IterativeProblem(Problem):
         self.params_cache = None
         self.buffers_cache = None
         self.opitmizer_state_dict_cache = None
-        self.scheduler_state_dict_cache = None
 
     def initialize(self):
         super().initialize()
@@ -85,8 +84,6 @@ class IterativeProblem(Problem):
         self.buffers_cache = deepcopy(self.buffers)
         if self.optimizer is not None:
             self.opitmizer_state_dict_cache = deepcopy(self.optimizer.state)
-        if self.scheduler is not None:
-            self.scheduler_state_dict_cache = self.scheduler.state_dict()
 
     def recover_states(self):
         # TODO: change loading mechanism based on state_dict
@@ -94,10 +91,7 @@ class IterativeProblem(Problem):
         self.buffers, self.buffers_cache = self.buffers_cache, None
         if self.optimizer is not None:
             self.optimizer.state = self.opitmizer_state_dict_cache
-        if self.scheduler is not None:
-            self.scheduler.load_state_dict(self.scheduler_state_dict_cache)
         self.opitmizer_state_dict_cache = None
-        self.scheduler_state_dict_cache = None
 
     def parameters(self):
         return self.params

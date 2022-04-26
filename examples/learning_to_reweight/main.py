@@ -63,7 +63,7 @@ class Outer(ImplicitProblem):
         outputs = self.inner(inputs)
         loss = F.cross_entropy(outputs, labels.long())
 
-        if self.count % 10 == 0:
+        if self.count % 50 == 0:
             acc = (outputs.argmax(dim=1) == labels.long()).float().mean().item() * 100
             print(f"step {self.count} || acc: {acc}")
 
@@ -96,7 +96,6 @@ class Inner(ImplicitProblem):
         loss_vector_reshape = torch.reshape(loss_vector, (-1, 1))
         weight = self.outer(loss_vector_reshape.detach())
         loss = torch.mean(weight * loss_vector_reshape)
-        self.scheduler.step()
 
         return loss
 
@@ -117,20 +116,27 @@ class Inner(ImplicitProblem):
 
     def configure_scheduler(self):
         scheduler = optim.lr_scheduler.MultiStepLR(self.optimizer,
-                                                   milestones=[7500, 12000],
+                                                   milestones=[4000, 6000, 8000],
                                                    gamma=0.1)
         return scheduler
 
 
 class ReweightingEngine(Engine):
     def validation(self):
-        acc = 0
+        correct = 0
+        total = 0
         for x, target in test_dataloader:
             x, target = x.to(args.device), target.to(args.device)
-            out = self.outer(x)
-            acc += (out.argmax(dim=1) == target.long()).float().mean().item() / len(x)
-        acc /= len(test_dataloader)
-        print(f'[*] Validation Acc.: {acc}')
+            with torch.no_grad():
+                out = self.inner(x)
+            correct += (out.argmax(dim=1) == target).sum().item()
+            total += x.size(0)
+        acc = correct / total * 100
+        print(f'[*] Validation Acc.: {acc}%')
+
+    def train_step(self):
+        for leaf in self.leaves:
+            leaf.step(param_update=False)
 
 outer_config = Config(type='darts',
                       step=5,
@@ -145,5 +151,5 @@ h2l = {outer: [inner]}
 l2h = {inner: [outer]}
 dependencies = {'l2h': l2h, 'h2l': h2l}
 
-engine = Engine(config=None, problems=problems, dependencies=dependencies)
+engine = ReweightingEngine(config=None, problems=problems, dependencies=dependencies)
 engine.run()
