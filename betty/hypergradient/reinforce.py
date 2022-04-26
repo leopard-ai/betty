@@ -1,6 +1,6 @@
 import torch
 
-from betty.hypergradient.utils import sub_with_none
+from betty.hypergradient.utils import add_with_none, neg_with_none
 
 
 def reinforce(loss, params, path, config, create_graph=True, retain_graph=False, allow_unused=True):
@@ -19,7 +19,7 @@ def reinforce(loss, params, path, config, create_graph=True, retain_graph=False,
     #for i in range(1, len(path)-1):
     #    implicit_grad = darts_helper(implicit_grad, path[i], path[i+1], config)
 
-    return [sub_with_none(dg, ig) for dg, ig in zip(direct_grad, implicit_grad)]
+    return [add_with_none(dg, ig) for dg, ig in zip(direct_grad, implicit_grad)]
 
 
 def reinforce_helper(vector, curr, prev, config):

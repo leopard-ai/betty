@@ -1,6 +1,6 @@
 import torch
 
-from betty.hypergradient.utils import to_vec, sub_with_none
+from betty.hypergradient.utils import to_vec, add_with_none
 
 
 def darts(loss, params, path, config, create_graph=True, retain_graph=False, allow_unused=True):
@@ -16,7 +16,7 @@ def darts(loss, params, path, config, create_graph=True, retain_graph=False, all
     for i in range(1, len(path)-1):
         implicit_grad = darts_helper(implicit_grad, path[i], path[i+1], config)
 
-    return [sub_with_none(dg, ig) for dg, ig in zip(direct_grad, implicit_grad)]
+    return [add_with_none(dg, ig) for dg, ig in zip(direct_grad, implicit_grad)]
 
 
 def darts_helper(vector, curr, prev, config):
@@ -61,6 +61,6 @@ def darts_helper(vector, curr, prev, config):
     for p, v in zip(curr.trainable_parameters(), vector):
         p.data.add(eps, v.data)
 
-    implicit_grad = [(x - y).div_(2 * eps) for x, y in zip(grad_p, grad_n)]
+    implicit_grad = [(x - y).div_(2 * eps) for x, y in zip(grad_n, grad_p)]
 
     return implicit_grad

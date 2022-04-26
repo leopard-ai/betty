@@ -1,6 +1,6 @@
 import torch
 
-from betty.hypergradient.utils import to_vec, sub_with_none
+from betty.hypergradient.utils import neg_with_none, to_vec, add_with_none
 
 
 def cg(loss, params, path, config, create_graph=True, retain_graph=False, allow_unused=True):
@@ -18,7 +18,7 @@ def cg(loss, params, path, config, create_graph=True, retain_graph=False, allow_
     for i in range(1, len(path)-1):
         implicit_grad = cg_helper(implicit_grad, path[i], path[i+1], config)
 
-    return [sub_with_none(dg, ig) for dg, ig in zip(direct_grad, implicit_grad)]
+    return [add_with_none(dg, ig) for dg, ig in zip(direct_grad, implicit_grad)]
 
 
 def cg_helper(vector, curr, prev, config):
@@ -48,6 +48,6 @@ def cg_helper(vector, curr, prev, config):
     x = [config.cg_alpha * xx for xx in x]
 
     implicit_grad = torch.autograd.grad(in_grad, prev.trainable_parameters(), grad_outputs=x)
+    implicit_grad = [neg_with_none(ig) for ig in implicit_grad]
 
     return implicit_grad
-

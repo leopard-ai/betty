@@ -116,7 +116,7 @@ class Inner(ImplicitProblem):
 
     def configure_scheduler(self):
         scheduler = optim.lr_scheduler.MultiStepLR(self.optimizer,
-                                                   milestones=[4000, 6000, 8000],
+                                                   milestones=[5000, 7500],
                                                    gamma=0.1)
         return scheduler
 

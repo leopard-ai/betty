@@ -1,6 +1,6 @@
 import torch
 
-from betty.hypergradient.utils import sub_with_none
+from betty.hypergradient.utils import add_with_none, neg_with_none
 
 
 def neumann(loss, params, path, config, create_graph=True, retain_graph=False, allow_unused=True):
@@ -18,7 +18,7 @@ def neumann(loss, params, path, config, create_graph=True, retain_graph=False, a
     for i in range(1, len(path)-1):
         implicit_grad = neumann_helper(implicit_grad, path[i], path[i+1], config)
 
-    return [sub_with_none(dg, ig) for dg, ig in zip(direct_grad, implicit_grad)]
+    return [add_with_none(dg, ig) for dg, ig in zip(direct_grad, implicit_grad)]
 
 
 def neumann_helper(vector, curr, prev, config):
@@ -29,6 +29,7 @@ def neumann_helper(vector, curr, prev, config):
                             iterations=config.neumann_iterations,
                             alpha=config.neumann_alpha)
     implicit_grad = torch.autograd.grad(in_grad, prev.trainable_parameters(), grad_outputs=v2)
+    implicit_grad = [neg_with_none(ig) for ig in implicit_grad]
 
     return implicit_grad
 
