@@ -17,11 +17,11 @@ Our code is developed/tested on:
 - torchvision 1.11
 
 ## Scripts
-ResNet32 on CIFAR-10 with imbalance ratio of 50
+ResNet32 on CIFAR-10 with the imbalance ratio of 50:
 ```
 python main.py --imbalanced_factor 50
 ```
-ResNet32 on CIFAR-10 with 40% uniform noise:
+ResNet32 on CIFAR-10 with the 40% uniform noise:
 ```
 python main.py --meta_lr 1e-3 --meta_weight_decay 1e-4 --corruption_type uniform --corruption_ratio 0.4
 ```
@@ -30,8 +30,8 @@ python main.py --meta_lr 1e-3 --meta_weight_decay 1e-4 --corruption_type uniform
 We present the long-tailed CIFAR-10 image classification in the below table.
 |          | Imbalanced factor 200 | Imbalanced factor 100 | Imbalanced factor 50 | GPU Memory |
 |----------|:---------------------:|:---------------------:|:--------------------:|:----------:|
-| Original |         68.91%        |         75.21%        |        80.06%        |    2250    |
-| Ours     |           %           |           %           |           %          |    2051    |
+| Original |         68.91%        |         75.21%        |        80.06%        |   2250MiB  |
+| Ours     |       **75.91%**      |       **78.21%**      |      **80.26%**      | **2051MiB**|
 
 
 ## Acknowledgements
