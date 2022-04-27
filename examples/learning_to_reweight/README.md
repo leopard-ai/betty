@@ -31,7 +31,7 @@ We present the long-tailed CIFAR-10 image classification in the below table.
 |          | Imbalanced factor 200 | Imbalanced factor 100 | Imbalanced factor 50 | GPU Memory |
 |----------|:---------------------:|:---------------------:|:--------------------:|:----------:|
 | Original |         68.91%        |         75.21%        |        80.06%        |   2250MiB  |
-| Ours     |       **75.91%**      |       **78.21%**      |      **80.26%**      | **2051MiB**|
+| Ours     |       **75.56%**      |       **77.73%**      |      **80.26%**      | **2051MiB**|
 
 
 ## Acknowledgements

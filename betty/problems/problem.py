@@ -436,9 +436,16 @@ class Problem:
     @property
     def parents(self):
         """[summary]
-        Return parent problemss for the current problem.
+        Return parent problems for the current problem.
         """
         return self._parents
+
+    @property
+    def paths(self):
+        """[summary]
+        Return hypergradient calculation paths for the current problem.
+        """
+        return self._paths
 
     @property
     def leaf(self):
