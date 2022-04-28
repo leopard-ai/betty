@@ -1,11 +1,11 @@
 from .darts import darts
 from .cg import cg
-from .maml import maml
+from .default import default
 from .neumann import neumann
 from .reinforce import reinforce
 
 grad_fn_mapping = {
-    'maml': maml,
+    'default': default,
     'darts': darts,
     'neumann': neumann,
     'cg': cg,

@@ -1,7 +1,7 @@
 import torch
 
 
-def maml(loss, params, child, config, create_graph=True, retain_graph=False, allow_unused=False):
+def default(loss, params, path, config, create_graph=True, retain_graph=False, allow_unused=False):
     grad = torch.autograd.grad(
         loss,
         params,

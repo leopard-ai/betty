@@ -273,17 +273,15 @@ class Problem:
                   create_graph=False,
                   retain_graph=True,
                   allow_unused=True):
-        if self._default_grad or self.config.type == 'torch':
-            grads = torch.autograd.grad(loss, params,
-                                        create_graph=create_graph,
-                                        retain_graph=retain_graph,
-                                        allow_unused=allow_unused)
-        else:
-            grad_fn = hypergradient.get_grad_fn(self.config.type)
-            grads = grad_fn(loss, params, path, config,
-                            create_graph=create_graph,
-                            retain_graph=retain_graph,
-                            allow_unused=allow_unused)
+        grad_fn_type = self.config.type
+        if self._default_grad or self.config.type in ['maml', 'torch']:
+            grad_fn_type = 'default'
+        grad_fn = hypergradient.get_grad_fn(grad_fn_type)
+
+        grads = grad_fn(loss, params, path, config,
+                        create_graph=create_graph,
+                        retain_graph=retain_graph,
+                        allow_unused=allow_unused)
 
         return grads
 
