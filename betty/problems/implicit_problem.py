@@ -37,3 +37,11 @@ class ImplicitProblem(Problem):
 
     def trainable_parameters(self):
         return list(self.module.parameters())
+
+    def train(self):
+        super().train()
+        self.module.train()
+    
+    def eval(self):
+        super().eval()
+        self.module.eval()

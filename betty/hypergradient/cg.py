@@ -22,7 +22,7 @@ def cg(loss, params, path, config, create_graph=True, retain_graph=False, allow_
 
 
 def cg_helper(vector, curr, prev, config):
-    assert len(curr.paths()) == 0, 'cg method is not supported for higher order MLO!'
+    assert len(curr.paths) == 0, 'cg method is not supported for higher order MLO!'
     in_loss = curr.training_step(curr.cur_batch)
     in_grad = torch.autograd.grad(in_loss, curr.trainable_parameters(), create_graph=True)
 

@@ -111,7 +111,8 @@ class Problem:
         print(f'Parents: {parents_str}')
         print(f'Children: {children_str}')
         print(f'Paths: {path_str}')
-        print(f'Update parent problems every {self._parent_step} steps')
+        if len(self._parents) > 0:
+            print(f'Update parent problems every {self._parent_step} steps')
         print()
 
     def __call__(self, *args, **kwargs):
@@ -242,7 +243,7 @@ class Problem:
                  create_graph=False,
                  retain_graph=True,
                  allow_unused=True):
-        if self._leaf:
+        if self._default_grad:
             grads = self.get_grads(loss=sum(losses),
                                    params=params,
                                    path=None,
@@ -252,6 +253,7 @@ class Problem:
                                    allow_unused=allow_unused)
             self.set_grads(params, grads)
         else:
+            assert len(paths) > 0
             for idx, path in enumerate(paths):
                 loss = losses[0] if len(losses) == 1 else losses[idx]
                 grads = self.get_grads(loss=loss,
@@ -277,7 +279,6 @@ class Problem:
                                         retain_graph=retain_graph,
                                         allow_unused=allow_unused)
         else:
-            assert len(self._children) > 0
             grad_fn = hypergradient.get_grad_fn(self.config.type)
             grads = grad_fn(loss, params, path, config,
                             create_graph=create_graph,
