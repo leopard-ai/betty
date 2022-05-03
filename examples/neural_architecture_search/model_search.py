@@ -222,14 +222,17 @@ class Network(nn.Module):
 
         return logits
 
-    def loss(self, x, alphas, target):
+    def loss(self, x, alphas, target, acc=False):
         """
         :param x:
         :param target:
         :return:
         """
         logits = self(x, alphas)
-        return self.criterion(logits, target)
+        if not acc:
+            return self.criterion(logits, target)
+        correct = (logits.argmax(dim=1) == target).float().sum().item()
+        return self.criterion(logits, target), correct
 
     def genotype(self, alphas):
         """

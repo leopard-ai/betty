@@ -13,7 +13,7 @@ import torchvision.datasets as dset
 import torch.backends.cudnn as cudnn
 
 from betty.engine import Engine
-from betty.config_template import Config
+from betty.config_template import Config, EngineConfig
 from betty.problems import ImplicitProblem
 
 from model_search import Network, Architecture
@@ -52,12 +52,14 @@ train_transform, valid_transform = utils.data_transforms_cifar10(args)
 train_data = dset.CIFAR10(root=args.data, train=True, download=True, transform=train_transform)
 valid_data = dset.CIFAR10(root=args.data, train=False, download=True, transform=valid_transform)
 
-valid_queue = torch.utils.data.DataLoader(
+test_queue = torch.utils.data.DataLoader(
     valid_data, batch_size=args.batchsz, shuffle=False, pin_memory=True, num_workers=2)
 
 num_train = len(train_data) # 50000
 indices = list(range(num_train))
 split = int(np.floor(args.train_portion * num_train))
+
+train_iters = int(args.epochs * (num_train * args.train_portion // args.batchsz + 1))
 
 
 class Outer(ImplicitProblem):
@@ -133,28 +135,31 @@ class Inner(ImplicitProblem):
 
     def configure_scheduler(self):
         scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer,
-                                                         float(args.epochs),
+                                                         float(train_iters),
                                                          eta_min=args.lr_min)
         return scheduler
 
 
 class NASEngine(Engine):
+    @torch.no_grad()
     def validation(self):
-        losses = 0
-        for x, target in valid_queue:
+        corrects = 0
+        total = 0
+        for x, target in test_queue:
             x, target = x.to(device), target.to(device, non_blocking=True)
-            with torch.no_grad():
-                alphas = self.outer()
-                loss = self.inner.module.loss(x, alphas, target)
-            losses += loss.item()
-        print('[*] Valid loss:', losses / len(valid_queue))
+            alphas = self.outer()
+            _, correct = self.inner.module.loss(x, alphas, target, acc=True)
+            corrects += correct
+            total += x.size(0)
+        acc = corrects / total
+            
+        print('[*] Valid Acc.:', acc)
+        torch.save({'genotype': self.inner.module.genotype()}, 'genotype.t7')
 
 
-outer_config = Config(type='darts',
-                      step=1,
-                      retain_graph=True,
-                      first_order=True)
+outer_config = Config(type='darts', step=1, retain_graph=True, first_order=True)
 inner_config = Config(type='torch')
+engine_config = EngineConfig(valid_step=100, train_iters=train_iters)
 outer = Outer(name='outer', config=outer_config, device=device)
 inner = Inner(name='inner', config=inner_config, device=device)
 
@@ -163,5 +168,5 @@ l2h = {inner: [outer]}
 h2l = {outer: [inner]}
 dependencies = {'l2h': l2h, 'h2l': h2l}
 
-engine = NASEngine(config=None, problems=problems, dependencies=dependencies)
+engine = NASEngine(config=engine_config, problems=problems, dependencies=dependencies)
 engine.run()

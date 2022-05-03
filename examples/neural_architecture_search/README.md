@@ -1,5 +1,5 @@
 # Differentiable Neural Architecture Search (DARTS)
----
+
 ## Introduction
 We re-implement [DARTS: Differentiable Architecture Search](https://arxiv.org/abs/1806.09055) where
 they developed the continuous relaxation of the discrete architecture representation so as to allow 
@@ -14,7 +14,7 @@ Interested users can refer to
 [Optimizing Millions of Hyperparameters by Implicit Differentiation](https://arxiv.org/pdf/1911.02590)
 .
 
-This also allows to unroll the inner loop more than one iterations as opposed to one-step unrolled
+This also allows us to unroll the inner loop more than one iteration as opposed to one-step unrolled
 learning used in the original paper. We present the result for different unrolling steps in the 
 below Results Section.
 
@@ -40,6 +40,11 @@ python train.py
 We present the CIFAR-10 image classification results in the below table.
 |                      | Test Acc. |
 |----------------------|-----------|
-| DARTS (original)     | --.--%    |
+| DARTS (original)     | 97.24%    |
 | DARTS (ours, step=1) | --.--%    |
 | DARTS (ours, step=3) | --.--%    |
+
+## Acknowledgements
+Our code is heavily built upon:
+- https://github.com/quark0/darts
+- https://github.com/dragen1860/DARTS-PyTorch
