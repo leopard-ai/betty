@@ -19,11 +19,15 @@ Learning by Ignoring:
 ```
 python main.py --gpu=0 --source_domain=Cl --target_domain=Ar --lam=7e-3
 ```
+Run all experiments:
+```
+bash run.sh
+```
 
 ## Results
 We present the long-tailed CIFAR-10 image classification in the below table.
 
 |            | Cl-Ar  | Ar-Pr  | Pr-Rw  | Rw-Cl  |
 |------------|--------|--------|--------|--------|
-| Baseline   | 65.43% | 88.06% | 76.98% | 69.49% |
-| LBI (Ours) | **66.46%** | **88.29%** | **77.09%** | **70.86%** |
+| Baseline   | 65.63% | 87.35% | 77.88% | 68.00% |
+| LBI (Ours) | **66.87%** | **88.88%** | **78.77%** | **70.17%** |
