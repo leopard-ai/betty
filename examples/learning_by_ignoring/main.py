@@ -3,8 +3,6 @@ sys.path.insert(0, "./../..")
 import argparse
 import os
 
-import numpy as np
-
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
@@ -185,7 +183,6 @@ class Reweighting(ImplicitProblem):
     def forward(self, x):
         out = self.module(x).squeeze()
         return out
-        #return self.module()
 
     def training_step(self, batch):
         inputs = batch[0].to(device)

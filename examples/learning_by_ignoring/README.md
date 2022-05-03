@@ -1,7 +1,17 @@
-# Learning by Ignoring
+# Data Reweighting for Pre-training
 ---
 ## Introduction
-
+Pretraining/finetuning frameworks are getting popularized with the recent advancement in
+self-supervised learning.
+However, pretraining data are oftentimes from a different distribution than finetuning data,
+which could potentially cause negative transfer.
+To overcome this issue,
+[Learning by Ignoring](https://arxiv.org/pdf/2012.14288.pdf) combines a data reweighting shceme with
+pretraining/finetuning frameworks to automatically suppress the weight of pretraining data samples
+that cause negative transfer while increase the weight of others.
+The similar idea was also proposed in
+[Meta-Learning to Improve Pre-TrainingMeta-learning](https://arxiv.org/abs/2111.01754)
+(NeurIPS 2021).
 
 ## Environment
 Our code is developed/tested on:
@@ -25,7 +35,7 @@ bash run.sh
 ```
 
 ## Results
-We present the long-tailed CIFAR-10 image classification in the below table.
+We present the result of Learning by Ignoring on the OfficeHome datset.
 
 |            | Cl-Ar  | Ar-Pr  | Pr-Rw  | Rw-Cl  |
 |------------|--------|--------|--------|--------|

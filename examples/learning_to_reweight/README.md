@@ -2,8 +2,8 @@
 
 We re-implemented the data reweighting algorithm from [Meta-Weight-Net: Learning an Explicit Mapping For Sample Weighting](https://arxiv.org/abs/1902.07379)
 
----
 
+### Differences
 While the original paper experiments with long-tailed/noisy CIFAR-10/100 image classification tasks, we only report the results for the long-tailed CIFAR-10 image classification task.
 Interested users can easily run other tasks following below scripts.
 
