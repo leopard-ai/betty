@@ -41,7 +41,7 @@ class ImplicitProblem(Problem):
     def train(self):
         super().train()
         self.module.train()
-    
+
     def eval(self):
         super().eval()
         self.module.eval()

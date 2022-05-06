@@ -33,7 +33,7 @@ python train_search.py
 ```
 Training the network with the *learned* architecture:
 ```
-python train.py
+python train.py --cutout --auxiliary
 ```
 
 ## Results
