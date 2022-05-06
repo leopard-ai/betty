@@ -154,7 +154,12 @@ class NASEngine(Engine):
         acc = corrects / total
             
         print('[*] Valid Acc.:', acc)
-        torch.save({'genotype': self.inner.module.genotype()}, 'genotype.t7')
+        alphas = self.outer()
+        torch.save({'genotype': self.inner.module.genotype(alphas)}, 'genotype.t7')
+
+    def train_step(self):
+        for leaf in self.leaves():
+            leaf.step(param_update=False)
 
 
 outer_config = Config(type='darts', step=1, retain_graph=True, first_order=True)

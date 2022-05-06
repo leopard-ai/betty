@@ -77,3 +77,6 @@ def drop_path(x, drop_prob):
         x.div_(keep_prob)
         x.mul_(mask)
     return x
+
+def count_parameters_in_MB(model):
+    return np.sum(v.numel() for name, v in model.named_parameters() if "auxiliary" not in name)/1e6

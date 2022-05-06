@@ -36,3 +36,69 @@ parser.add_argument('--seed', type=int, default=0, help='random seed')
 parser.add_argument('--arch', type=str, default='DARTS', help='which architecture to use')
 parser.add_argument('--grad_clip', type=float, default=5, help='gradient clipping')
 args = parser.parse_args()
+
+
+genotype = torch.load('genotype.t7')['genotype']
+model = Network(args.init_ch, 10, args.layers, args.auxiliary, genotype).cuda()
+
+print(f'[*] Number of parameters: {utils.count_parameters_in_MB(model)}')
+
+criterion = nn.CrossEntropyLoss().cuda()
+optimizer = torch.optim.SGD(
+    model.parameters(),
+    args.lr,
+    momentum=args.momentum,
+    weight_decay=args.wd
+)
+
+train_transform, valid_transform = utils.data_transforms_cifar10(args)
+train_data = dset.CIFAR10(root=args.data, train=True, download=True, transform=train_transform)
+valid_data = dset.CIFAR10(root=args.data, train=False, download=True, transform=valid_transform)
+
+train_queue = torch.utils.data.DataLoader(
+    train_data, batch_size=args.batchsz, shuffle=True, pin_memory=True, num_workers=2)
+valid_queue = torch.utils.data.DataLoader(
+    valid_data, batch_size=args.batchsz, shuffle=False, pin_memory=True, num_workers=2)
+
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, float(args.epochs))
+
+def train(train_loader, model, criterion, optimizer):
+    model.train()
+
+    for x, target in train_loader:
+        x = x.cuda()
+        target = target.cuda(non_blocking=True)
+
+        optimizer.zero_grad()
+        logits, logits_aux = model(x)
+        loss = criterion(logits, target)
+        if args.auxiliary:
+            loss_aux = criterion(logits_aux, target)
+            loss += args.auxiliary_weight * loss_aux
+        loss.backward()
+        nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip)
+        optimizer.step()
+
+def infer(valid_loader, model):
+    model.eval()
+
+    correct = 0
+    total = 0
+    for x, target in valid_loader:
+        x = x.cuda()
+        target = target.cuda(non_blocking=True)
+
+        with torch.no_grad():
+            logits, _ = model(x)
+            correct += (logits.argmax(dim=1) == target).float().sum().item()
+            total += x.size(0)
+
+    acc = correct / total * 100
+    print(f'[*] Validation Acc.: {acc}')
+
+for epoch in range(args.epochs):
+    scheduler.step()
+    model.drop_path_prob = args.drop_path_prob * epoch / args.epochs
+
+    train(train_queue, model, criterion, optimizer)
+    infer(valid_queue, model)
