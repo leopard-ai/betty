@@ -158,7 +158,7 @@ class NASEngine(Engine):
         torch.save({'genotype': self.inner.module.genotype(alphas)}, 'genotype.t7')
 
     def train_step(self):
-        for leaf in self.leaves():
+        for leaf in self.leaves:
             leaf.step(param_update=False)
 
 
