@@ -42,7 +42,7 @@ We present the CIFAR-10 image classification results in the below table.
 |----------------------|-----------|------------|
 | DARTS (original)     | 97.24%    | 3.3        |
 | DARTS (ours, step=1) | 97.35%    | 3.7        |
-| DARTS (ours, step=3) | --.--%    | -.-        |
+| DARTS (ours, step=3) | 97.22%    | 3.2        |
 
 ## Acknowledgements
 Our code is heavily built upon:
