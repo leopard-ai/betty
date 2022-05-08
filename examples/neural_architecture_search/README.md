@@ -38,11 +38,11 @@ python train.py --cutout --auxiliary
 
 ## Results
 We present the CIFAR-10 image classification results in the below table.
-|                      | Test Acc. |
-|----------------------|-----------|
-| DARTS (original)     | 97.24%    |
-| DARTS (ours, step=1) | --.--%    |
-| DARTS (ours, step=3) | --.--%    |
+|                      | Test Acc. | Params (M) |
+|----------------------|-----------|------------|
+| DARTS (original)     | 97.24%    | 3.3        |
+| DARTS (ours, step=1) | 97.35%    | 3.7        |
+| DARTS (ours, step=3) | --.--%    | -.-        |
 
 ## Acknowledgements
 Our code is heavily built upon:
