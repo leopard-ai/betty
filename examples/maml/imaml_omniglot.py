@@ -94,7 +94,6 @@ class Parent(ImplicitProblem):
             accs.append((out.argmax(dim=1) == self.parent_batch[1][idx]).detach())
         self.parent_batch = (x_qry, y_qry)
         self.child_batch = (x_spt, y_spt)
-        self.scheduler.step()
         if self.count % 10 == 0:
             acc = 100. * torch.cat(accs).float().mean().item()
             print('step:', self.count, '|| loss:', sum(losses).clone().detach().item(), ' || acc:', acc)
@@ -146,14 +145,20 @@ class Child(ImplicitProblem):
     def configure_optimizer(self):
         return optim.SGD(self.module.parameters(), lr=0.1)
 
-parent_config = Config(type='darts',
-                       step=1,
+parent_config = Config(type='cg',
+                       cg_alpha=0.00001,
+                       cg_iterations=2,
+                       step=5,
                        first_order=True)
 child_config = Config(type='torch')
 
 parent = Parent(name='outer', config=parent_config, device=arg.device)
 children = [Child(name='inner', config=child_config, device=arg.device) for _ in range(arg.task_num)]
 problems = children + [parent]
-dependencies = {parent: children}
+h2l = {parent: children}
+l2h = {}
+for c in children:
+    l2h[c] = [parent]
+dependencies = {'h2l': h2l, 'l2h': l2h}
 engine = Engine(config=None, problems=problems, dependencies=dependencies)
 engine.run()

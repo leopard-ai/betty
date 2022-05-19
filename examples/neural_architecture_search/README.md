@@ -29,7 +29,7 @@ Our code is developed/tested on:
 ## Scripts
 Learning the architecture along with the network parameters:
 ```
-python train_search.py
+python train_search.py --unroll_steps=1
 ```
 Training the network with the *learned* architecture:
 ```

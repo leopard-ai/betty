@@ -13,11 +13,11 @@ class Config:
     darts_alpha: float = 0.01
 
     # neumann
-    neumann_iterations: int = 3
+    neumann_iterations: int = 1
     neumann_alpha: float = 1.
 
     # cg
-    cg_iterations: int = 3
+    cg_iterations: int = 1
     cg_alpha: float = 1.
 
 

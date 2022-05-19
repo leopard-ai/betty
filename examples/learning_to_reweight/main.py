@@ -12,7 +12,7 @@ from utils import *
 
 from betty.engine import Engine
 from betty.problems import ImplicitProblem
-from betty.config_template import Config
+from betty.config_template import Config, EngineConfig
 
 
 parser = argparse.ArgumentParser(description='Meta_Weight_Net')
@@ -139,10 +139,11 @@ class ReweightingEngine(Engine):
             leaf.step(param_update=False)
 
 outer_config = Config(type='darts',
-                      step=5,
+                      step=1,
                       retain_graph=True,
                       first_order=True)
 inner_config = Config(type='torch')
+engine_config = EngineConfig(train_iters=10000, valid_step=100)
 outer = Outer(name='outer', config=outer_config, device=args.device)
 inner = Inner(name='inner', config=inner_config, device=args.device)
 
@@ -151,5 +152,5 @@ h2l = {outer: [inner]}
 l2h = {inner: [outer]}
 dependencies = {'l2h': l2h, 'h2l': h2l}
 
-engine = ReweightingEngine(config=None, problems=problems, dependencies=dependencies)
+engine = ReweightingEngine(config=engine_config, problems=problems, dependencies=dependencies)
 engine.run()

@@ -27,22 +27,19 @@ parser.add_argument('--lr', type=float, default=0.025, help='init learning rate'
 parser.add_argument('--lr_min', type=float, default=0.001, help='min learning rate')
 parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
 parser.add_argument('--wd', type=float, default=3e-4, help='weight decay')
-parser.add_argument('--report_freq', type=float, default=50, help='report frequency')
+parser.add_argument('--report_freq', type=int, default=100, help='report frequency')
 parser.add_argument('--gpu', type=int, default=0, help='gpu device id')
 parser.add_argument('--epochs', type=int, default=50, help='num of training epochs')
 parser.add_argument('--init_ch', type=int, default=16, help='num of init channels')
 parser.add_argument('--layers', type=int, default=8, help='total number of layers')
-parser.add_argument('--model_path', type=str, default='saved_models', help='path to save the model')
 parser.add_argument('--cutout', action='store_true', default=False, help='use cutout')
 parser.add_argument('--cutout_len', type=int, default=16, help='cutout length')
 parser.add_argument('--drop_path_prob', type=float, default=0.3, help='drop path probability')
-parser.add_argument('--exp_path', type=str, default='search', help='experiment name')
-parser.add_argument('--seed', type=int, default=2, help='random seed')
-parser.add_argument('--grad_clip', type=float, default=5, help='gradient clipping range')
 parser.add_argument('--train_portion', type=float, default=0.5, help='portion of training/val splitting')
 parser.add_argument('--arch_lr', type=float, default=3e-4, help='learning rate for arch encoding')
 parser.add_argument('--arch_wd', type=float, default=1e-3, help='weight decay for arch encoding')
 parser.add_argument('--arch_steps', type=int, default=4, help='architecture steps')
+parser.add_argument('--unroll_steps', type=int, default=1, help='unrolling steps')
 args = parser.parse_args()
 
 os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu)
@@ -59,7 +56,7 @@ num_train = len(train_data) # 50000
 indices = list(range(num_train))
 split = int(np.floor(args.train_portion * num_train))
 
-train_iters = int(args.epochs * (num_train * args.train_portion // args.batchsz + 1))
+train_iters = int(args.epochs * (num_train * args.train_portion // args.batchsz + 1) * args.unroll_steps)
 
 
 class Outer(ImplicitProblem):
@@ -73,7 +70,7 @@ class Outer(ImplicitProblem):
         alphas = self.forward()
         loss = self.inner.module.loss(x, alphas, target)
 
-        if self.count % 10 == 0:
+        if self.count % 50 == 0:
             print(f"step {self.count} || loss: {loss.item()}")
 
         return loss
@@ -135,7 +132,7 @@ class Inner(ImplicitProblem):
 
     def configure_scheduler(self):
         scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer,
-                                                         float(train_iters),
+                                                         float(train_iters // args.unroll_steps),
                                                          eta_min=args.lr_min)
         return scheduler
 
@@ -152,7 +149,7 @@ class NASEngine(Engine):
             corrects += correct
             total += x.size(0)
         acc = corrects / total
-            
+
         print('[*] Valid Acc.:', acc)
         alphas = self.outer()
         torch.save({'genotype': self.inner.module.genotype(alphas)}, 'genotype.t7')
@@ -162,9 +159,9 @@ class NASEngine(Engine):
             leaf.step(param_update=False)
 
 
-outer_config = Config(type='darts', step=1, retain_graph=True, first_order=True)
+outer_config = Config(type='darts', step=args.unroll_steps, retain_graph=True, first_order=True)
 inner_config = Config(type='torch')
-engine_config = EngineConfig(valid_step=100, train_iters=train_iters)
+engine_config = EngineConfig(valid_step=args.report_freq*args.unroll_steps, train_iters=train_iters)
 outer = Outer(name='outer', config=outer_config, device=device)
 inner = Inner(name='inner', config=inner_config, device=device)
 

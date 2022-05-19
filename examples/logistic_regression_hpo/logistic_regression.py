@@ -101,13 +101,8 @@ class Child(IterativeProblem):
     def on_inner_loop_start(self):
         self.params = (torch.nn.Parameter(torch.zeros(DATA_DIM)).to(device),)
 
-parent_config = Config(type='darts',
-                       step=100,
-                       first_order=True)
-child_config = Config(type='maml',
-                      step=1,
-                      first_order=False,
-                      retain_graph=True)
+parent_config = Config(type='default', step=100, first_order=False)
+child_config = Config(type='default', step=1, first_order=True, retain_graph=True)
 parent = Parent(name='outer', config=parent_config, device=device)
 child = Child(name='inner', config=child_config, device=device)
 
