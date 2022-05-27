@@ -128,7 +128,7 @@ class Pretraining(ImplicitProblem):
         else:
             logit = self.reweight(inputs)
             weight = torch.sigmoid(logit)
-            loss = torch.mean(loss_raw * weight)
+            loss = torch.mean(loss_raw * weight)#/ weight.detach().mean().item()
 
         return loss
 
@@ -205,9 +205,11 @@ class Reweighting(ImplicitProblem):
         return optim.lr_scheduler.StepLR(self.optimizer, step_size=args.step_size, gamma=args.gamma)
 
 
+best_acc = -1
 class LBIEngine(Engine):
     @torch.no_grad()
     def validation(self):
+        global best_acc
         correct = 0
         loss = 0
         total = 0
@@ -220,7 +222,9 @@ class LBIEngine(Engine):
             total += inputs.size(0)
         acc = correct / total
         avgloss = loss / total
-        print(f'[*] Validation Acc.: {acc} || Validation Loss: {avgloss}')
+        if best_acc < acc:
+            best_acc = acc
+        #print(f'[*] Validation Acc.: {acc} || Validation Loss: {avgloss}')
 
 
 # Define configs
@@ -247,3 +251,6 @@ dependencies = {'h2l': h2l, 'l2h': l2h}
 
 engine = LBIEngine(config=engine_config, problems=problems, dependencies=dependencies)
 engine.run()
+print('='*30)
+print(f'{args.source_domain} --> {args.target_domain} || best_acc: {best_acc}')
+print('='*30)

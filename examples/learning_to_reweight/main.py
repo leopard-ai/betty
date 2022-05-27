@@ -17,7 +17,7 @@ from betty.config_template import Config, EngineConfig
 
 parser = argparse.ArgumentParser(description='Meta_Weight_Net')
 parser.add_argument('--device', type=str, default='cuda')
-parser.add_argument('--seed', type=int, default=1)
+parser.add_argument('--seed', type=int, default=0)
 parser.add_argument('--meta_net_hidden_size', type=int, default=100)
 parser.add_argument('--meta_net_num_layers', type=int, default=1)
 
@@ -42,6 +42,7 @@ parser.add_argument('--paint_interval', type=int, default=20)
 
 args = parser.parse_args()
 print(args)
+set_seed(args.seed)
 
 train_dataloader, meta_dataloader, test_dataloader, imbalanced_num_list = build_dataloader(
     seed=args.seed,
@@ -63,7 +64,7 @@ class Outer(ImplicitProblem):
         outputs = self.inner(inputs)
         loss = F.cross_entropy(outputs, labels.long())
 
-        if self.count % 50 == 0:
+        if self.count % 1000 == 0:
             acc = (outputs.argmax(dim=1) == labels.long()).float().mean().item() * 100
             print(f"step {self.count} || acc: {acc}")
 
@@ -121,10 +122,12 @@ class Inner(ImplicitProblem):
         return scheduler
 
 
+best_acc = -1
 class ReweightingEngine(Engine):
     def validation(self):
         correct = 0
         total = 0
+        global best_acc
         for x, target in test_dataloader:
             x, target = x.to(args.device), target.to(args.device)
             with torch.no_grad():
@@ -132,7 +135,8 @@ class ReweightingEngine(Engine):
             correct += (out.argmax(dim=1) == target).sum().item()
             total += x.size(0)
         acc = correct / total * 100
-        print(f'[*] Validation Acc.: {acc}%')
+        if best_acc < acc:
+            best_acc = acc
 
     def train_step(self):
         for leaf in self.leaves:
@@ -154,3 +158,4 @@ dependencies = {'l2h': l2h, 'h2l': h2l}
 
 engine = ReweightingEngine(config=engine_config, problems=problems, dependencies=dependencies)
 engine.run()
+print(f'IF {args.imbalanced_factor} || Best Acc.: {best_acc}')

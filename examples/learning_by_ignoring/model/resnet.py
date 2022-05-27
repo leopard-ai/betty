@@ -12,11 +12,14 @@ def build_model(num_classes):
     nn.init.constant_(model.fc.bias, 0.)
     return model
 
-
-def build_optimizer(model, args):
+def build_optimizer(model, args, betas=None, weight_decay=None, lrs=None):
+    wd = weight_decay if weight_decay is not None else args.weight_decay
+    b = betas if betas is not None else (0.9, 0.999)
+    lr1 = lrs[0] if lrs is not None else args.features_lr
+    lr2 = lrs[1] if lrs is not None else args.classifier_lr
     optimizer = optim.Adam(
-        [{'params': [param for name, param in model.named_parameters() if 'fc' not in name], 'lr': args.features_lr},
-         {'params': model.fc.parameters(), 'lr': args.classifier_lr}], weight_decay=args.weight_decay
+        [{'params': [param for name, param in model.named_parameters() if 'fc' not in name], 'lr': lr1},
+         {'params': model.fc.parameters(), 'lr': lr2}], weight_decay=wd, betas=b
     )
     return optimizer
 
