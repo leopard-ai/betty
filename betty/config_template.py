@@ -9,6 +9,10 @@ class Config:
     retain_graph: bool = False
     allow_unused: bool = True
 
+    # memory optimization
+    fp16: bool = False
+    gradient_accumulation: int = 1
+
     # darts
     darts_alpha: float = 0.01
 

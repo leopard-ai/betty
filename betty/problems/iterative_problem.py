@@ -37,6 +37,7 @@ class IterativeProblem(Problem):
         self.patch_scheduler()
 
     def optimizer_step(self, *args, **kwargs):
+        assert not self._fp16, '[!] FP16 training is not supported for IterativeProblem.'
         if self.is_implemented('custom_optimizer_step'):
             params = self.custom_optimizer_step(*args, **kwargs)
         else:

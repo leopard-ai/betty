@@ -40,6 +40,13 @@ class Problem:
         # logging
         self.loggers = {}
 
+        # fp16
+        self._fp16 = config.fp16
+        self._init_loss_scale = 2**32
+
+        # gradient accumulation
+        self.gas = config.gradient_accumulation
+
         # misc
         self._leaf = False
         self._default_grad = False
@@ -100,6 +107,8 @@ class Problem:
         if self.is_implemented('configure_scheduler'):
             if self.configure_scheduler is not None:
                 self.scheduler = self.configure_scheduler()
+
+        # set up fp 16
 
         # Logging INFO
         # TODO: Replace print with logging
@@ -169,19 +178,20 @@ class Problem:
                           allow_unused=self._allow_unused)
 
             # calculate parameter update
-            self.optimizer_step()
-            if self.scheduler is not None and param_update:
-                self.scheduler.step()
+            if self._count % self.gas == 0:
+                self.optimizer_step()
+                if self.scheduler is not None and param_update:
+                    self.scheduler.step()
 
-            if self.is_implemented('param_callback'):
-                self.param_callback(self.trainable_parameters())
+                if self.is_implemented('param_callback'):
+                    self.param_callback(self.trainable_parameters())
 
-            # zero-out grad
-            self.zero_grad()
+                # zero-out grad
+                self.zero_grad()
 
             # call parent step function
             if self._training:
-                if self._count % self._parent_step == 0:
+                if self._count % (self._parent_step * self.gas) == 0:
                     for problem in self._parents:
                         idx = problem.children.index(self)
                         problem.ready[idx] = True
@@ -229,9 +239,8 @@ class Problem:
         losses = self.training_step(self.cur_batch)
         if not (isinstance(losses, tuple) or isinstance(losses, list)):
             losses = (losses,)
-        # TODO: Add custom loss aggregation
         # aggregate loss
-        losses = tuple(loss / len(losses) for loss in losses)
+        losses = tuple(loss / (len(losses) * self.gas) for loss in losses)
 
         return losses
 

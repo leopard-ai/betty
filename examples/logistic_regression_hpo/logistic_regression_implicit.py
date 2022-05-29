@@ -102,7 +102,6 @@ class Child(ImplicitProblem):
         self.module.w.data.zero_()
 
 parent_config = Config(type='darts',
-                       cg_iterations=5,
                        step=100,
                        first_order=True)
 child_config = Config(type='torch')
