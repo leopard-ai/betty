@@ -9,7 +9,7 @@ import torch.optim as optim
 
 from betty.engine import Engine
 from betty.problems import ImplicitProblem
-from betty.config_template import Config, EngineConfig
+from betty.configs import Config, EngineConfig
 
 from utils.utils import set_random_seed
 from utils.data_transform import transform

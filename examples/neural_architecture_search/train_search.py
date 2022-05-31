@@ -13,7 +13,7 @@ import torchvision.datasets as dset
 import torch.backends.cudnn as cudnn
 
 from betty.engine import Engine
-from betty.config_template import Config, EngineConfig
+from betty.configs import Config, EngineConfig
 from betty.problems import ImplicitProblem
 
 from model_search import Network, Architecture

@@ -12,7 +12,7 @@ from utils import *
 
 from betty.engine import Engine
 from betty.problems import ImplicitProblem
-from betty.config_template import Config, EngineConfig
+from betty.configs import Config, EngineConfig
 
 
 parser = argparse.ArgumentParser(description='Meta_Weight_Net')

@@ -8,7 +8,7 @@ import torch
 import torch.nn.functional as F
 
 from betty.engine import Engine
-from betty.config_template import Config
+from betty.configs import Config
 from betty.problems import ImplicitProblem
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'

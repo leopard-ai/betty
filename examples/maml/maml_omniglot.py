@@ -10,7 +10,7 @@ import torch.optim as optim
 
 from betty.engine import Engine
 from betty.problems import IterativeProblem
-from betty.config_template import Config
+from betty.configs import Config
 
 from support.omniglot_loader import OmniglotNShot
 

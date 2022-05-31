@@ -1,4 +1,4 @@
-from betty.config_template import EngineConfig
+from betty.configs import EngineConfig
 from betty.logging import logger
 
 
@@ -8,7 +8,10 @@ class Engine:
         self.config = config if config is not None else EngineConfig()
         self.train_iters = 0
         self.valid_step = 0
+
+        # logger
         self.logger_type = None
+        self.logger = None
 
         # problem
         self.problems = problems
@@ -47,13 +50,14 @@ class Engine:
         """
         # Parse config
         self.parse_config()
+        self.logger = logger(logger_type=self.logger_type)
 
         # Parse dependency
         self.parse_dependency()
 
         # check & set multiplier for each problem
         for problem in self.problems:
-            problem.add_logger(logger(logger_type=self.logger_type))
+            problem.add_logger(self.logger)
             problem.initialize()
 
     def train(self):

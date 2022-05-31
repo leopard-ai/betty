@@ -9,13 +9,17 @@ class Config:
     retain_graph: bool = False
     allow_unused: bool = True
 
+    # gradient accumulation
     gradient_accumulation: int = 1
 
-    # memory optimization
+    # fp16 training
     fp16: bool = False
     dynamic_loss_scale: bool = False
     initial_dynamic_scale: int = 2**32
     static_loss_scale: float = 1.
+
+    # logging
+    log_step: int = -1
 
     # darts
     darts_alpha: float = 0.01

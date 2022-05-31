@@ -1,15 +1,19 @@
-import atexit
+import socket
 
 import torch
-from torch.utils.tensorboard import SummaryWriter
 
 from betty.logging.logger_base import LoggerBase
 
 
+try:
+    import wandb
+except ImportError:
+    wandb = None
+
+
 class WandBLogger(LoggerBase):
     def __init__(self):
-        self.writer = SummaryWriter()
-
+        wandb.init(project='betty', entity=socket.gethostname())
 
     def log(self, stats, tag=None, step=None):
         for key, value in stats.items():
@@ -17,4 +21,4 @@ class WandBLogger(LoggerBase):
             full_key = prefix + key
             if torch.is_tensor(value):
                 value = value.item()
-            self.writer.add_scalar(full_key, value, step)
+            wandb.log({full_key: value})

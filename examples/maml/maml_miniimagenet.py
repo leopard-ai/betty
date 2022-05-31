@@ -9,7 +9,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 from betty.problems import IterativeProblem
-from betty.config_template import Config
+from betty.configs import Config
 from betty.engine import Engine
 
 from support.mini_imagenet import MiniImagenet
