@@ -1,8 +1,11 @@
 import abc
+from sys import prefix
 
 import torch
 
 import betty.hypergradient as hypergradient
+from betty.utils import convert_tensor
+from betty.optim import FP16_Optimizer
 
 
 class Problem:
@@ -42,10 +45,16 @@ class Problem:
 
         # fp16
         self._fp16 = config.fp16
-        self._init_loss_scale = 2**32
+        if self._fp16:
+            self.dynamic_loss_scale = config.dynamic_loss_scale
+            self.initial_dynamic_scale = config.initial_dynamic_scale
+            self.static_loss_scale = config.static_loss_scale
 
         # gradient accumulation
         self.gas = config.gradient_accumulation
+
+        # logger
+        self.logger = None
 
         # misc
         self._leaf = False
@@ -57,7 +66,6 @@ class Problem:
         self._training = True
         self.ready = None
         self._count = 0
-        self._multiplier = 1
         self._parent_step = 1
 
     def initialize(self):
@@ -97,6 +105,9 @@ class Problem:
             if self.configure_module() is not None:
                 self.module = self.configure_module()
         assert self.module is not None, "Module must be specified!"
+        self.module.to(self.device)
+        if self._fp16:
+            self.module.half()
 
         # set up optimizer
         if self.is_implemented('configure_optimizer'):
@@ -107,21 +118,26 @@ class Problem:
         if self.is_implemented('configure_scheduler'):
             if self.configure_scheduler is not None:
                 self.scheduler = self.configure_scheduler()
-
-        # set up fp 16
+        if self._fp16:
+            self.optimizer = FP16_Optimizer(
+                init_optimizer=self.optimizer,
+                dynamic_loss_scale=self.dynamic_loss_scale,
+                static_loss_scale=self.static_loss_scale,
+                initial_dynamic_scale=self.initial_dynamic_scale
+            )
 
         # Logging INFO
         # TODO: Replace print with logging
         path_str = [[node.name for node in path] for path in self._paths]
         children_str = [node.name for node in self._children]
         parents_str = [node.name for node in self._parents]
-        print('[*] Problem INFO')
-        print(f'Name: {self._name}')
-        print(f'Parents: {parents_str}')
-        print(f'Children: {children_str}')
-        print(f'Paths: {path_str}')
+        self.logger.info('*** Problem Information ***')
+        self.logger.info(f'Name: {self._name}')
+        self.logger.info(f'Parents: {parents_str}')
+        self.logger.info(f'Children: {children_str}')
+        self.logger.info(f'Paths: {path_str}')
         if len(self._parents) > 0:
-            print(f'Update parent problems every {self._parent_step} steps')
+            self.logger.info(f'Update parent problems every {self._parent_step} steps')
         print()
 
     def __call__(self, *args, **kwargs):
@@ -232,6 +248,7 @@ class Problem:
                 train_data_loader = self.configure_train_data_loader()
             self.train_data_iterator = iter(train_data_loader)
             batch = next(self.train_data_iterator)
+        batch = tuple(convert_tensor(item, self.device, self._fp16) for item in batch)
 
         return batch
 
@@ -240,7 +257,8 @@ class Problem:
         if not (isinstance(losses, tuple) or isinstance(losses, list)):
             losses = (losses,)
         # aggregate loss
-        losses = tuple(loss / (len(losses) * self.gas) for loss in losses)
+        scale = self.loss_scale() if self._fp16 else 1
+        losses = tuple(loss * scale / (len(losses) * self.gas) for loss in losses)
 
         return losses
 
@@ -316,6 +334,10 @@ class Problem:
             if hasattr(param, 'grad'):
                 del param.grad
 
+    def loss_scale(self):
+        assert self._fp16
+        return self.optimizer.cur_scale
+
     @abc.abstractmethod
     def cache_states(self):
         """[summary]
@@ -342,13 +364,8 @@ class Problem:
         """
         return all(self.ready)
 
-    def log(self, dictionary):
-        global_step = self._multiplier * self._count
-        for key, value in dictionary.items():
-            if key not in self.loggers:
-                self.loggers[key] = [(global_step, value)]
-            else:
-                self.loggers[key].append((global_step, value))
+    def log(self, stats, step):
+        self.logger.log(stats, prefix=self._name, step=step)
 
     def set_problem_attr(self, problem):
         """[summary]
@@ -394,6 +411,10 @@ class Problem:
         Add new backpropagation paths.
         """
         self._paths.extend(paths)
+
+    def add_logger(self, logger):
+        if self.logger is None:
+            self.logger = logger
 
     @abc.abstractmethod
     def parameters(self):
@@ -468,18 +489,6 @@ class Problem:
         Return count for the current problem.
         """
         return self._count
-
-    @property
-    def multiplier(self):
-        """[summary]
-        Return multiplier for the current problem.
-        """
-        return self._multiplier
-
-    @multiplier.setter
-    def multiplier(self, multiplier):
-        assert isinstance(multiplier, int)
-        self._multiplier = multiplier
 
     @leaf.setter
     def leaf(self, leaf):

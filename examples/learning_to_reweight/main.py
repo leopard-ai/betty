@@ -17,6 +17,7 @@ from betty.config_template import Config, EngineConfig
 
 parser = argparse.ArgumentParser(description='Meta_Weight_Net')
 parser.add_argument('--device', type=str, default='cuda')
+parser.add_argument('--fp16', actio='store_true')
 parser.add_argument('--seed', type=int, default=0)
 parser.add_argument('--meta_net_hidden_size', type=int, default=100)
 parser.add_argument('--meta_net_num_layers', type=int, default=1)
@@ -130,6 +131,8 @@ class ReweightingEngine(Engine):
         global best_acc
         for x, target in test_dataloader:
             x, target = x.to(args.device), target.to(args.device)
+            if args.fp16:
+                x, target = x.half(), target.half()
             with torch.no_grad():
                 out = self.inner(x)
             correct += (out.argmax(dim=1) == target).sum().item()
@@ -143,11 +146,12 @@ class ReweightingEngine(Engine):
             leaf.step(param_update=False)
 
 outer_config = Config(type='darts',
+                      fp16=args.fp16,
                       step=1,
                       retain_graph=True,
                       first_order=True)
-inner_config = Config(type='torch')
-engine_config = EngineConfig(train_iters=10000, valid_step=100)
+inner_config = Config(type='torch', fp16=args.fp16)
+engine_config = EngineConfig(train_iters=100, valid_step=100)
 outer = Outer(name='outer', config=outer_config, device=args.device)
 inner = Inner(name='inner', config=inner_config, device=args.device)
 

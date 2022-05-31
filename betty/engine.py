@@ -1,8 +1,5 @@
-import copy
-import typing
-
-from betty.utils import get_multiplier
 from betty.config_template import EngineConfig
+from betty.logging import logger
 
 
 class Engine:
@@ -11,6 +8,7 @@ class Engine:
         self.config = config if config is not None else EngineConfig()
         self.train_iters = 0
         self.valid_step = 0
+        self.logger_type = None
 
         # problem
         self.problems = problems
@@ -26,6 +24,7 @@ class Engine:
     def parse_config(self):
         self.train_iters = self.config.train_iters
         self.valid_step = self.config.valid_step
+        self.logger_type = self.config.logger_type
 
     def train_step(self):
         for leaf in self.leaves:
@@ -54,8 +53,7 @@ class Engine:
 
         # check & set multiplier for each problem
         for problem in self.problems:
-            #multiplier = get_multiplier(problem)
-            #problem.multiplier = multiplier
+            problem.add_logger(logger(logger_type=self.logger_type))
             problem.initialize()
 
     def train(self):
@@ -79,7 +77,7 @@ class Engine:
         self.dfs(src, dst, path, results)
         assert len(results) > 0, f'No path from {src.name} to {dst.name}!'
 
-        for i in range(len(results)):
+        for i, _ in enumerate(results):
             results[i].reverse()
             results[i].append(dst)
 

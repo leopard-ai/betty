@@ -4,6 +4,7 @@ from .sgd import DifferentiableSGD
 from .adam import DifferentiableAdam
 from .adamw import DifferentiableAdamW
 from .lr_scheduler import patch_scheduler
+from .fp16.fp16_optimizer import FP16_Optimizer
 
 optimizer_mapping = {
     torch.optim.SGD: DifferentiableSGD,
@@ -13,7 +14,7 @@ optimizer_mapping = {
 
 def patch_optimizer(optimizer, module):
     """[summary]
-    Return dofferentiable optimizer for the given optimizer
+    Return differentiable optimizer for the given optimizer
     """
     assert type(optimizer) in optimizer_mapping
 

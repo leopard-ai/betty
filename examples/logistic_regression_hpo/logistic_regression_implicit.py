@@ -101,10 +101,14 @@ class Child(ImplicitProblem):
     def on_inner_loop_start(self):
         self.module.w.data.zero_()
 
+fp16 = False
+dynamic_loss_scale = True
 parent_config = Config(type='darts',
+                       dynamic_loss_scale=dynamic_loss_scale,
+                       fp16=fp16,
                        step=100,
                        first_order=True)
-child_config = Config(type='torch')
+child_config = Config(type='torch', fp16=fp16, dynamic_loss_scale=dynamic_loss_scale)
 parent = Parent(name='outer', config=parent_config, device=device)
 child = Child(name='inner', config=child_config, device=device)
 

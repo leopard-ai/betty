@@ -1,48 +1,44 @@
-from typing import List
-
 import torch
-import torch.nn as nn
-from torch import Tensor
 
 
-def _del_nested_attr(obj: nn.Module, names: List[str]) -> None:
-    """
-    Deletes the attribute specified by the given list of names.
-    For example, to delete the attribute obj.conv.weight,
-    use _del_nested_attr(obj, ['conv', 'weight'])
-    """
-    if len(names) == 1:
-        delattr(obj, names[0])
-    else:
-        _del_nested_attr(getattr(obj, names[0]), names[1:])
+def convert_tensor(item, device=None, fp16=False):
+    if not isinstance(item, torch.Tensor):
+        return item
+    if fp16:
+        return item.to(device).half()
+    return item.to(device)
 
-def _set_nested_attr(obj: nn.Module, names: List[str], value: Tensor) -> None:
-    """
-    Set the attribute specified by the given list of names to value.
-    For example, to set the attribute obj.conv.weight,
-    use _del_nested_attr(obj, ['conv', 'weight'], value)
-    """
-    if len(names) == 1:
-        setattr(obj, names[0], value)
-    else:
-        _set_nested_attr(getattr(obj, names[0]), names[1:], value)
 
-def _get_nested_attr(obj: nn.Module, names: List[str]) -> None:
-    if len(names) == 1:
-        return getattr(obj, names[0])
-    else:
-        _get_nested_attr(getattr(obj, names[0]), names[1:])
+def get_grad_norm(parameters):
+    if isinstance(parameters, torch.Tensor):
+        parameters = [parameters]
+    parameters = list(filter(lambda p: p.grad is not None, parameters))
 
-def make_split_names(lst):
-    return [name.split('.') for name in lst]
+    total_norm = 0.
+    for p in parameters:
+        param_norm = p.grad.data.float().norm()
+        total_norm += param_norm.item()**2
 
-def swap_state(mod: nn.Module, split_names: List[str], elems):
-    result = []
-    for split_name, elem in zip(split_names, elems):
-        result.append(_get_nested_attr(mod, split_name))
-        _del_nested_attr(mod, split_name)
-        _set_nested_attr(mod, split_name, elem)
-    return result
+    if total_norm == float(
+            'inf') or total_norm == -float('inf') or total_norm != total_norm:
+        total_norm = -1
+
+    return total_norm
+
+def get_weight_norm(parameters):
+    if isinstance(parameters, torch.Tensor):
+        parameters = [parameters]
+
+    total_norm = 0.
+    for p in parameters:
+        param_norm = torch.norm(p, dtype=torch.float32)
+        total_norm += param_norm.item()**2
+
+    if total_norm == float(
+            'inf') or total_norm == -float('inf') or total_norm != total_norm:
+        total_norm = -1
+
+    return total_norm
 
 def flatten_list(regular_list):
     """[summary]
