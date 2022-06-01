@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*-:q coding: utf-8 -*-
 #
 # Configuration file for the Sphinx documentation builder.
 #
@@ -40,6 +40,14 @@ release = ''
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.extlinks",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.todo",
+    "sphinx.ext.viewcode",
+    'myst_parser',
+    "sphinx_inline_tabs"
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -81,12 +89,19 @@ html_theme = 'furo'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    "light_css_variables": {
+    },
+
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+html_css_files = [
+    'css/custom.css',
+]
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.

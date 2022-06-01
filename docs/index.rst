@@ -3,20 +3,34 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to betty's documentation!
+Betty Documentation
 =================================
 
+Betty is an automatic differentiation library for multilevel optimization.
+Betty provides a PyTorch-like programming interface for users to write general
+multilevel optimization code.
+
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :caption: Docs
+   :hidden:
 
-   module
+   betty.problems<betty/betty.problems.rst>
+   betty.hypergradient<betty/betty.hypergradient.rst>
+   betty.optim<betty/betty.optim.rst>
+
+.. toctree::
+   :caption: Tutorial
+   :hidden:
+
+   examples<tutorial/examples.rst>
 
 
 
-Indices and tables
-==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+
+.. Indices and tables
+.. ==================
+
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`

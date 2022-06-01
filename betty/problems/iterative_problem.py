@@ -66,8 +66,6 @@ class IterativeProblem(Problem):
     def patch_optimizer(self):
         """[summary]
         Patch optimizer to avoid in-place operations so that gradient flows through param update.
-        Raises:
-            NotImplementedError: [description]
         """
         if self.optimizer is not None:
             self.optimizer = optim.patch_optimizer(self.optimizer, self.module)

@@ -2,3 +2,4 @@ __pycache__
 data
 *.t7
 betty_tensorboard
+_build
