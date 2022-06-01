@@ -17,7 +17,7 @@ from betty.configs import Config, EngineConfig
 
 parser = argparse.ArgumentParser(description='Meta_Weight_Net')
 parser.add_argument('--device', type=str, default='cuda')
-parser.add_argument('--fp16', actio='store_true')
+parser.add_argument('--fp16', action='store_true')
 parser.add_argument('--seed', type=int, default=0)
 parser.add_argument('--meta_net_hidden_size', type=int, default=100)
 parser.add_argument('--meta_net_num_layers', type=int, default=1)
@@ -64,12 +64,9 @@ class Outer(ImplicitProblem):
         inputs, labels = inputs.to(args.device), labels.to(args.device)
         outputs = self.inner(inputs)
         loss = F.cross_entropy(outputs, labels.long())
+        acc = (outputs.argmax(dim=1) == labels.long()).float().mean().item() * 100
 
-        if self.count % 1000 == 0:
-            acc = (outputs.argmax(dim=1) == labels.long()).float().mean().item() * 100
-            print(f"step {self.count} || acc: {acc}")
-
-        return loss
+        return {'loss': loss, 'acc': acc}
 
     def configure_train_data_loader(self):
         return meta_dataloader
@@ -125,6 +122,7 @@ class Inner(ImplicitProblem):
 
 best_acc = -1
 class ReweightingEngine(Engine):
+    @torch.no_grad()
     def validation(self):
         correct = 0
         total = 0
@@ -140,6 +138,8 @@ class ReweightingEngine(Engine):
         acc = correct / total * 100
         if best_acc < acc:
             best_acc = acc
+        return {'acc': acc, 'best_acc': best_acc}
+
 
     def train_step(self):
         for leaf in self.leaves:
@@ -148,17 +148,18 @@ class ReweightingEngine(Engine):
 outer_config = Config(type='darts',
                       fp16=args.fp16,
                       step=1,
+                      log_step=100,
                       retain_graph=True,
                       first_order=True)
 inner_config = Config(type='torch', fp16=args.fp16)
-engine_config = EngineConfig(train_iters=100, valid_step=100)
+engine_config = EngineConfig(train_iters=10000, valid_step=100)
 outer = Outer(name='outer', config=outer_config, device=args.device)
 inner = Inner(name='inner', config=inner_config, device=args.device)
 
 problems = [outer, inner]
-h2l = {outer: [inner]}
-l2h = {inner: [outer]}
-dependencies = {'l2h': l2h, 'h2l': h2l}
+u2l = {outer: [inner]}
+l2u = {inner: [outer]}
+dependencies = {'l2u': l2u, 'u2l': u2l}
 
 engine = ReweightingEngine(config=engine_config, problems=problems, dependencies=dependencies)
 engine.run()

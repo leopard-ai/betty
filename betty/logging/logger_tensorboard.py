@@ -22,9 +22,14 @@ class TensorBoardLogger(LoggerBase):
         self.writer.close()
 
     def log(self, stats, tag=None, step=None):
-        for key, value in stats.items():
+        if stats is None:
+            return
+        for key, values in stats.items():
             prefix = "" if tag is None else tag + '/'
-            full_key = prefix + key
-            if torch.is_tensor(value):
-                value = value.item()
-            self.writer.add_scalar(full_key, value, step)
+            key_extended = prefix + key
+            if isinstance(values, tuple) or isinstance(values, list):
+                for value_idx, value in enumerate(values):
+                    full_key = key_extended + '_' + str(value_idx)
+                    if torch.is_tensor(value):
+                        value = value.item()
+                    self.writer.add_scalar(full_key, value, step)

@@ -242,12 +242,12 @@ else:
     problems = [reweight, finetune, pretrain]
 
 if args.baseline:
-    l2h = {pretrain: [finetune]}
-    h2l = {}
+    l2u = {pretrain: [finetune]}
+    u2l = {}
 else:
-    h2l = {reweight: [pretrain]}
-    l2h = {pretrain: [finetune], finetune: [reweight]}
-dependencies = {'h2l': h2l, 'l2h': l2h}
+    u2l = {reweight: [pretrain]}
+    l2u = {pretrain: [finetune], finetune: [reweight]}
+dependencies = {'u2l': u2l, 'l2u': l2u}
 
 engine = LBIEngine(config=engine_config, problems=problems, dependencies=dependencies)
 engine.run()

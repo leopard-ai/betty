@@ -16,6 +16,8 @@ class WandBLogger(LoggerBase):
         wandb.init(project='betty', entity=socket.gethostname())
 
     def log(self, stats, tag=None, step=None):
+        if stats is None:
+            return
         for key, value in stats.items():
             prefix = "" if tag is None else tag + '/'
             full_key = prefix + key

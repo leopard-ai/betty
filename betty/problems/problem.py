@@ -3,7 +3,7 @@ import abc
 import torch
 
 import betty.hypergradient as hypergradient
-from betty.utils import convert_tensor
+from betty.utils import convert_tensor, log_from_loss_dict
 from betty.optim import FP16_Optimizer
 
 
@@ -38,9 +38,6 @@ class Problem:
         # optimizer & lr scheduler
         self.optimizer = optimizer
         self.scheduler = scheduler
-
-        # logging
-        self.loggers = {}
 
         # fp16
         self._fp16 = config.fp16
@@ -184,15 +181,26 @@ class Problem:
             self.cur_batch = self.get_batch() if batch is None else batch
 
             # calculate loss
-            losses = self.get_losses()
+            losses_dict = self.get_losses()
+            losses = losses_dict['loss']
+
+            # logging
             if self.log_step > 0 and self._count % self.log_step == 0:
-                cur_step = global_step or self._count
-                if self.log_local_step:
+                loss_log = log_from_loss_dict(losses_dict)
+                if global_step is None:
+                    self.logger.info(
+                        f'[Problem "{self._name}"] [Local Step {self._count}] '
+                        f'{loss_log}'
+                    )
+                else:
+                    self.logger.info(
+                        f'[Problem "{self._name}"] [Global Step {global_step}] '
+                        f'[Local Step {self._count}] '
+                        f'{loss_log}'
+                    )
+                cur_step = global_step
+                if global_step is None or self.log_local_step:
                     cur_step = self._count
-                loss_sum = sum(losses).item()
-                losses_dict = {'loss': loss_sum}
-                self.logger.info(f'[Problem "{self._name}"] [step {cur_step}] '
-                                 f'Train Loss: {loss_sum}')
                 self.log(losses_dict, cur_step)
 
             # calculate gradient (a.k.a backward)
@@ -229,7 +237,8 @@ class Problem:
                     if not param_update:
                         self.recover_states()
 
-                        losses = self.get_losses()
+                        losses_dict = self.get_losses()
+                        losses = losses_dict['loss']
 
                         self.backward(losses=losses,
                                       params=self.trainable_parameters(),
@@ -264,14 +273,23 @@ class Problem:
         return batch
 
     def get_losses(self):
-        losses = self.training_step(self.cur_batch)
+        maybe_losses_dict = self.training_step(self.cur_batch)
+        is_dict = isinstance(maybe_losses_dict, dict)
+        losses = maybe_losses_dict['loss'] if is_dict else maybe_losses_dict
         if not (isinstance(losses, tuple) or isinstance(losses, list)):
             losses = (losses,)
         # aggregate loss
         scale = self.loss_scale() if self._fp16 else 1
         losses = tuple(loss * scale / (len(losses) * self.gas) for loss in losses)
 
-        return losses
+        # construct loss dict
+        losses_dict = {'loss': losses}
+        if is_dict:
+            for key, value in maybe_losses_dict.items():
+                if key != 'loss':
+                    losses_dict[key] = value
+
+        return losses_dict
 
     def backward(self,
                  losses,

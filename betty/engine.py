@@ -1,5 +1,7 @@
+from cv2 import log
 from betty.configs import EngineConfig
 from betty.logging import logger
+from betty.utils import log_from_loss_dict
 
 
 class Engine:
@@ -44,6 +46,11 @@ class Engine:
                 if self.is_implemented('validation'):
                     self.eval()
                     validation_stats = self.validation() or {}
+                    log_loss = log_from_loss_dict(validation_stats)
+                    self.logger.info(
+                        f'[Validation] [Global Step {self.global_step}] '
+                        f'{log_loss}'
+                    )
                     self.logger.log(validation_stats, tag='validation', step=self.global_step)
                     self.train()
 
@@ -72,7 +79,7 @@ class Engine:
             problem.eval()
 
     def check_leaf(self, problem):
-        for _, value_list in self.dependencies['l2h'].items():
+        for _, value_list in self.dependencies['l2u'].items():
             if problem in set(value_list):
                 return False
 
@@ -96,14 +103,14 @@ class Engine:
             result = [node for node in path]
             results.append(result)
         else:
-            for adj in self.dependencies['l2h'][src]:
+            for adj in self.dependencies['l2u'][src]:
                 path.append(adj)
                 self.dfs(adj, dst, path, results)
                 path.pop()
 
     def parse_dependency(self, set_attr=True):
         # Set dependencies for high-to-low dependencies
-        for key, value_list in self.dependencies['h2l'].items():
+        for key, value_list in self.dependencies['u2l'].items():
             for value in value_list:
                 # set the problelm attribute for key problem in value problem
                 if set_attr:
@@ -114,7 +121,7 @@ class Engine:
                 key.add_paths(paths)
 
         # Set dependencies for low-to-high dependencies
-        for key, value_list in self.dependencies['l2h'].items():
+        for key, value_list in self.dependencies['l2u'].items():
             for value in value_list:
                 # set the problelm attribute for key problem in value problem
                 if set_attr:

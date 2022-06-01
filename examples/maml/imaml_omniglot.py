@@ -155,10 +155,10 @@ child_config = Config(type='torch')
 parent = Parent(name='outer', config=parent_config, device=arg.device)
 children = [Child(name='inner', config=child_config, device=arg.device) for _ in range(arg.task_num)]
 problems = children + [parent]
-h2l = {parent: children}
-l2h = {}
+u2l = {parent: children}
+l2u = {}
 for c in children:
-    l2h[c] = [parent]
-dependencies = {'h2l': h2l, 'l2h': l2h}
+    l2u[c] = [parent]
+dependencies = {'u2l': u2l, 'l2u': l2u}
 engine = Engine(config=None, problems=problems, dependencies=dependencies)
 engine.run()

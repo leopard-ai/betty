@@ -111,9 +111,9 @@ parent = Parent(name='outer', config=parent_config, device=device)
 child = Child(name='inner', config=child_config, device=device)
 
 problems = [parent, child]
-h2l = {parent: [child]}
-l2h = {child: [parent]}
-dependencies = {'l2h': l2h, 'h2l': h2l}
+u2l = {parent: [child]}
+l2u = {child: [parent]}
+dependencies = {'l2u': l2u, 'u2l': u2l}
 
 engine = Engine(config=None, problems=problems, dependencies=dependencies)
 engine.run()

@@ -166,9 +166,9 @@ outer = Outer(name='outer', config=outer_config, device=device)
 inner = Inner(name='inner', config=inner_config, device=device)
 
 problems = [outer, inner]
-l2h = {inner: [outer]}
-h2l = {outer: [inner]}
-dependencies = {'l2h': l2h, 'h2l': h2l}
+l2u = {inner: [outer]}
+u2l = {outer: [inner]}
+dependencies = {'l2u': l2u, 'u2l': u2l}
 
 engine = NASEngine(config=engine_config, problems=problems, dependencies=dependencies)
 engine.run()

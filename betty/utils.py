@@ -77,3 +77,22 @@ def get_multiplier(problem):
 
     assert all(x == s2[0] for x in s2)
     return s2[0]
+
+
+def log_from_loss_dict( loss_dict):
+    outputs = []
+    for key, values in loss_dict.items():
+        if key == 'loss':
+            value = sum(values).item()
+            output = f'{key}: {value}'
+            outputs.append(output)
+        else:
+            if isinstance(values, dict) or isinstance(values, list):
+                for value_idx, value in enumerate(values):
+                    full_key = key + '_' + str(value_idx)
+                    output = f'{full_key}: {value}'
+                    outputs.append(output)
+            else:
+                output = f'{key}: {values}'
+                outputs.append(output)
+    return " || ".join(outputs)
