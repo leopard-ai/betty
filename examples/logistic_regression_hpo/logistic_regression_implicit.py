@@ -60,9 +60,6 @@ class Parent(ImplicitProblem):
         inputs, targets = batch
         outs = self.inner(inputs)[0]
         loss = F.binary_cross_entropy_with_logits(outs, targets)
-
-        if self.count % 10 == 0:
-            print('count:', self.count, '|| val loss:', loss.item())
         return loss
 
     def configure_train_data_loader(self):
@@ -106,6 +103,7 @@ dynamic_loss_scale = True
 parent_config = Config(type='darts',
                        dynamic_loss_scale=dynamic_loss_scale,
                        fp16=fp16,
+                       log_step=10,
                        step=100,
                        first_order=True)
 child_config = Config(type='torch', fp16=fp16, dynamic_loss_scale=dynamic_loss_scale)

@@ -8,6 +8,7 @@ class Engine:
         self.config = config if config is not None else EngineConfig()
         self.train_iters = 0
         self.valid_step = 0
+        self.global_step = 0
 
         # logger
         self.logger_type = None
@@ -31,17 +32,19 @@ class Engine:
 
     def train_step(self):
         for leaf in self.leaves:
-            leaf.step()
+            leaf.step(global_step=self.global_step)
 
     def run(self):
         self.train()
         for it in range(1, self.train_iters + 1):
+            self.global_step += 1
             self.train_step()
 
             if it % self.valid_step == 0:
                 if self.is_implemented('validation'):
                     self.eval()
-                    self.validation()
+                    validation_stats = self.validation() or {}
+                    self.logger.log(validation_stats, tag='validation', step=self.global_step)
                     self.train()
 
     def initialize(self):

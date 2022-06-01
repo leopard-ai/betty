@@ -1,5 +1,4 @@
 import abc
-from sys import prefix
 
 import torch
 
@@ -55,6 +54,8 @@ class Problem:
 
         # logger
         self.logger = None
+        self.log_step = config.log_step
+        self.log_local_step = config.log_local_step
 
         # misc
         self._leaf = False
@@ -83,9 +84,9 @@ class Problem:
         first_order = []
         parent_steps = []
         for problem in self._parents:
-            hgconfig = problem.config
-            first_order.append(hgconfig.first_order)
-            parent_steps.append(hgconfig.step)
+            parent_config = problem.config
+            first_order.append(parent_config.first_order)
+            parent_steps.append(parent_config.step)
         self._first_order = all(first_order)
         if len(parent_steps) > 0:
             assert all(s == parent_steps[0] for s in parent_steps)
@@ -159,7 +160,8 @@ class Problem:
 
     def step(self,
              batch=None,
-             param_update=True):
+             param_update=True,
+             global_step=None):
         """[summary]
         Perform gradient calculation and update parameters accordingly
         """
@@ -183,6 +185,15 @@ class Problem:
 
             # calculate loss
             losses = self.get_losses()
+            if self.log_step > 0 and self._count % self.log_step == 0:
+                cur_step = global_step or self._count
+                if self.log_local_step:
+                    cur_step = self._count
+                loss_sum = sum(losses).item()
+                losses_dict = {'loss': loss_sum}
+                self.logger.info(f'[Problem "{self._name}"] [step {cur_step}] '
+                                 f'Train Loss: {loss_sum}')
+                self.log(losses_dict, cur_step)
 
             # calculate gradient (a.k.a backward)
             self.backward(losses=losses,
@@ -211,7 +222,7 @@ class Problem:
                     for problem in self._parents:
                         idx = problem.children.index(self)
                         problem.ready[idx] = True
-                        problem.step()
+                        problem.step(global_step=global_step)
 
                         self._inner_loop_start = True
 
@@ -365,7 +376,7 @@ class Problem:
         return all(self.ready)
 
     def log(self, stats, step):
-        self.logger.log(stats, prefix=self._name, step=step)
+        self.logger.log(stats, tag=self._name, step=step)
 
     def set_problem_attr(self, problem):
         """[summary]

@@ -12,8 +12,7 @@ def get_logger():
         return _logger
     logger = logging.getLogger('betty')
     log_format = logging.Formatter(
-        "[%(asctime)s] [%(levelname)s] "
-        "[%(filename)s:%(lineno)d] %(message)s",
+        "[%(asctime)s] [%(levelname)s] %(message)s",
         "%Y-%m-%d %H:%M:%S"
     )
 

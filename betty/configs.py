@@ -20,6 +20,7 @@ class Config:
 
     # logging
     log_step: int = -1
+    log_local_step: bool = False
 
     # darts
     darts_alpha: float = 0.01
