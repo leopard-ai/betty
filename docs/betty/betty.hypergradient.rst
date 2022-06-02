@@ -1,32 +1,33 @@
 betty.hypergradient
 ===========================
 
-.. automodule:: betty.hypergradient.cg
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-
-.. automodule:: betty.hypergradient.darts
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-
+default
+-------
 .. automodule:: betty.hypergradient.default
    :members:
    :undoc-members:
-   :show-inheritance:
 
+finite difference
+-----------------
+.. automodule:: betty.hypergradient.darts
+   :members: darts
+   :undoc-members:
 
+neumann series
+--------------
 .. automodule:: betty.hypergradient.neumann
-   :members:
+   :members: neumann
    :undoc-members:
-   :show-inheritance:
 
+conjugate gradient
+------------------
+.. automodule:: betty.hypergradient.cg
+   :members: cg
+   :undoc-members:
 
+reinforce
+---------
 .. automodule:: betty.hypergradient.reinforce
-   :members:
+   :members: reinforce
    :undoc-members:
-   :show-inheritance:
 

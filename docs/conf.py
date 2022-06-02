@@ -47,6 +47,7 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.viewcode",
     'myst_parser',
+    "sphinx_design",
     "sphinx_inline_tabs"
 ]
 
@@ -84,16 +85,13 @@ pygments_style = None
 # a list of builtin themes.
 #
 html_theme = 'furo'
+html_title = "Betty"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-html_theme_options = {
-    "light_css_variables": {
-    },
-
-}
+# html_theme_options = {}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

@@ -17,12 +17,15 @@ multilevel optimization code.
    betty.problems<betty/betty.problems.rst>
    betty.hypergradient<betty/betty.hypergradient.rst>
    betty.optim<betty/betty.optim.rst>
+   betty.logging<betty/betty.logging.rst>
 
 .. toctree::
    :caption: Tutorial
    :hidden:
 
-   examples<tutorial/examples.rst>
+   Hyperparameter Optimization<tutorial/hyperparameter_optimization.rst>
+   Neural Architecture Search<tutorial/neural_architecture_search.rst>
+   Data Reweighting<tutorial/data_reweighting.rst>
 
 
 

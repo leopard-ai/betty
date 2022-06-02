@@ -1,25 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap');
+
 h1 {
-  font-family: 'Arial', sans-serif;
-  font-size: 2em
+  font-family: 'Roboto', sans-serif;
+  font-size: 2em;
+  text-transform: uppercase;
 }
 
 h2 {
-  font-family: 'Arial', sans-serif;
-  font-size: 1.33em
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.5em;
+  text-transform: uppercase;
 }
 
 h3 {
-  font-family: 'Arial', sans-serif;
-  font-size: 1em
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.25em
 }
 
 
 h4 {
-  font-family: 'Arial', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 1em
 }
 
 h5 {
-  font-family: 'Arial', sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-size: 0.8em
 }
