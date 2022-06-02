@@ -12,6 +12,7 @@ multilevel optimization code.
 
 .. toctree::
    :caption: Docs
+   :maxdepth: 2
    :hidden:
 
    betty.problems<betty/betty.problems.rst>

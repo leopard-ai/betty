@@ -6,6 +6,11 @@ from betty.optim.optimizer import DifferentiableOptimizerBase
 
 
 class DifferentiableAdam(DifferentiableOptimizerBase):
+    """
+    Differentiable version of PyTorch's
+    `Adam <https://pytorch.org/docs/stable/generated/torch.optim.Adam.html#adam>`_ optimizer.
+    All in-place operations are replaced.
+    """
     def step(self, params):
         for param_group, param_mapping in zip(self.param_groups, self.param_mappings):
             amsgrad = param_group['amsgrad']

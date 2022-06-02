@@ -2,6 +2,11 @@ from betty.optim.optimizer import DifferentiableOptimizerBase
 
 
 class DifferentiableSGD(DifferentiableOptimizerBase):
+    """
+    Differentiable version of PyTorch's
+    `SGD <https://pytorch.org/docs/stable/generated/torch.optim.SGD.html#sgd>`_ optimizer.
+    All in-place operations are replaced.
+    """
     def step(self, params):
         for param_group, param_mapping in zip(self.param_groups, self.param_mappings):
             weight_decay = param_group['weight_decay']
