@@ -3,6 +3,9 @@ from betty.problems import Problem
 
 #pylint: disable=W0223
 class ImplicitProblem(Problem):
+    """
+    ``ImplicitProblem`` is sublassed from ``Problem``.
+    """
     def __init__(self,
                  name,
                  config,

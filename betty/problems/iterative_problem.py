@@ -9,6 +9,9 @@ import betty.optim as optim
 
 #pylint: disable=W0223
 class IterativeProblem(Problem):
+    """
+    ``IterativeProblem`` is sublassed from ``Problem``.
+    """
     def __init__(self,
                  name,
                  config,
@@ -32,7 +35,7 @@ class IterativeProblem(Problem):
         # patch module to be functional so that gradient flows through param update
         # optimizer & scheduler should accordingly be patched as module gets patched
         self.initialize_optimizer_state()
-        self.patch_models()
+        self.patch_modules()
         self.patch_optimizer()
         self.patch_scheduler()
 
@@ -46,17 +49,15 @@ class IterativeProblem(Problem):
         self.params = params
 
     def initialize_optimizer_state(self):
-        """[summary]
-        Initialize optimizer state
-        """
         for param_group in self.optimizer.param_groups:
             for param in param_group['params']:
                 param.grad = torch.zeros_like(param.data)
         self.optimizer.step()
 
-    def patch_models(self):
-        """[summary]
-        Patch models to support functional forward that takes params as an input
+    def patch_modules(self):
+        """
+        Patch PyTorch's native stateful module into the stateless module so as to support
+        functional forward that takes params as its input.
         """
         fmodule, params, buffers = functorch.make_functional_with_buffers(self.module)
         self.fmodule = fmodule
@@ -64,15 +65,16 @@ class IterativeProblem(Problem):
         self.buffers = buffers
 
     def patch_optimizer(self):
-        """[summary]
-        Patch optimizer to avoid in-place operations so that gradient flows through param update.
+        """
+        Patch PyTorch's native optimizer by replacing all involved in-place operations to allow
+        gradient flow through the parameter update process.
         """
         if self.optimizer is not None:
             self.optimizer = optim.patch_optimizer(self.optimizer, self.module)
 
     def patch_scheduler(self):
-        """[summary]
-        Patch scheduler to work on patched optimizer
+        """
+        Patch scheduler to be compatible with the patched optimizer
         """
         if self.scheduler is not None:
             self.scheduler = optim.patch_scheduler(self.scheduler, self.optimizer)

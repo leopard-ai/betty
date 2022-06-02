@@ -1,13 +1,18 @@
 import abc
 
-import torch
-
 import betty.hypergradient as hypergradient
 from betty.utils import convert_tensor, log_from_loss_dict
 from betty.optim import FP16_Optimizer
 
 
 class Problem:
+    """
+    This is the base class for an optimization problem in multilevel optimization.
+    Specifically, each problem is defined by the parameter (or module), the sets of the upper
+    and lower constraining problems, the dataset, the loss function, the optimizer, and other
+    optimization configurations (e.g. best-response Jacobian calculation algorithm, number of
+    unrolling steps, etc.).
+    """
     def __init__(self,
                  name,
                  config,
@@ -68,7 +73,8 @@ class Problem:
 
     def initialize(self):
         """[summary]
-        Initialize basic things
+        ``initialize`` patches/sets up module, optimizer, data loader, etc. after compiling a
+        user-provided configuration (e.g., fp16 training, iterative differentiation)
         """
         # initialize update ready to False
         if self._leaf:
@@ -143,15 +149,15 @@ class Problem:
 
     @abc.abstractmethod
     def forward(self, *args, **kwargs):
-        """[summary]
-        Users define how forward call is defined for the current problem.
+        """
+        Users define how forward (or call) function is defined for the problem here.
         """
         raise NotImplementedError
 
     @abc.abstractmethod
     def training_step(self, batch):
-        """[summary]
-        Users define how loss is calculated for the current problem.
+        """
+        Users define the loss function of the problem here.
         """
         raise NotImplementedError
 
@@ -159,8 +165,24 @@ class Problem:
              batch=None,
              param_update=True,
              global_step=None):
-        """[summary]
-        Perform gradient calculation and update parameters accordingly
+        """
+        ``step`` method abstracts a one-step gradient descent update with four sub-steps:
+        1) data loading, 2) cost calculation, 3) gradient calculation, and 4) parameter update.
+        It also calls upper-level problems' step methods after unrolling gradient steps based on
+        the hierarchical dependency graph.
+
+        :param batch:
+            training batch for a one-step gradient descent update. If ``None``, it will
+            automatically load batch from the internal user-provided data loader.
+            Defaults to None.
+        :type batch: Any, optional
+        :param param_update:
+            If ``False``, it will recover the parameter/optimizer states once
+            the unrolling process is done, and perform a one-step gradient descent
+            with recovered states. Defaults to True.
+        :type param_update: bool, optional
+        :param global_step: global step of the whole multilevel optimization. Defaults to None.
+        :type global_step: int, optional
         """
         if self.check_ready():
             # loop start
@@ -260,6 +282,12 @@ class Problem:
             self.ready = [False for _ in range(len(self._children))]
 
     def get_batch(self):
+        """
+        Load training batch from the user-provided data loader
+
+        :return: New training batch
+        :rtype: Any
+        """
         try:
             batch = next(self.train_data_iterator)
         except StopIteration:
@@ -273,6 +301,13 @@ class Problem:
         return batch
 
     def get_losses(self):
+        """
+        Calculate loss and log metrics for the current batch based on the user-defined loss
+        function.
+
+        :return: loss and log metrics (e.g. classification accuracy)
+        :rtype: dict
+        """
         maybe_losses_dict = self.training_step(self.cur_batch)
         is_dict = isinstance(maybe_losses_dict, dict)
         losses = maybe_losses_dict['loss'] if is_dict else maybe_losses_dict
@@ -299,6 +334,32 @@ class Problem:
                  create_graph=False,
                  retain_graph=True,
                  allow_unused=True):
+        """
+        Calculate the gradient of ``loss`` with respect to ``params`` based on a user-defined
+        ``config``.
+
+        :param loss: Outputs of the differentiated function.
+        :type loss: Tensor
+        :param params: Inputs with respect to which the gradient will be returned.
+        :type params: Sequence of Tensor
+        :param paths: Paths on which the gradient will be calculated.
+        :type paths: List of list of Problem
+        :param config: Hyperparameters for the best-response Jacobian approximation
+        :type config: Config
+        :param create_graph:
+            If ``True``, graph of the derivative will be constructed, allowing to compute higher order
+            derivative products. Default: ``True``.
+        :type create_graph: bool, optional
+        :param retain_graph:
+            If ``False``, the graph used to compute the grad will be freed. Note that in nearly all
+            cases setting this option to ``True`` is not needed and often can be worked around in a much
+            more efficient way. Defaults to the value of ``create_graph``.
+        :type retain_graph: bool, optional
+        :param allow_unused:
+            If ``False``, specifying inputs that were not used when computing outputs (and therefore
+            their grad is always zero) is an error. Defaults to ``False``.
+        :type allow_unused: bool, optional
+        """
         if self._default_grad:
             grads = self.get_grads(loss=sum(losses),
                                    params=params,
@@ -329,6 +390,32 @@ class Problem:
                   create_graph=False,
                   retain_graph=True,
                   allow_unused=True):
+        """
+        Calculate the gradient of ``loss`` with respect to ``params`` based on a user-defined
+        ``config`` for the specific path.
+
+        :param loss: Outputs of the differentiated function.
+        :type loss: Tensor
+        :param params: Inputs with respect to which the gradient will be returned.
+        :type params: Sequence of Tensor
+        :param path: Path on which the gradient will be calculated.
+        :type path: List of list of Problem
+        :param config: Hyperparameters for the best-response Jacobian approximation
+        :type config: Config
+        :param create_graph:
+            If ``True``, graph of the derivative will be constructed, allowing to compute higher order
+            derivative products. Default: ``True``.
+        :type create_graph: bool, optional
+        :param retain_graph:
+            If ``False``, the graph used to compute the grad will be freed. Note that in nearly all
+            cases setting this option to ``True`` is not needed and often can be worked around in a much
+            more efficient way. Defaults to the value of ``create_graph``.
+        :type retain_graph: bool, optional
+        :param allow_unused:
+            If ``False``, specifying inputs that were not used when computing outputs (and therefore
+            their grad is always zero) is an error. Defaults to ``False``.
+        :type allow_unused: bool, optional
+        """
         grad_fn_type = self.config.type
         if self._default_grad or self.config.type in ['maml', 'torch']:
             grad_fn_type = 'default'
@@ -342,6 +429,14 @@ class Problem:
         return grads
 
     def set_grads(self, params, grads):
+        """
+        Set gradients for trainable parameters. ``params.grad = grads``
+
+        :param params: Trainable parameters
+        :type params: Sequence of Tensor
+        :param grads: Calculated gradient
+        :type grads: Sequence of Tensor
+        """
         for param, grad in zip(params, grads):
             if hasattr(param, 'grad') and param.grad is not None:
                 param.grad = param.grad + grad
@@ -350,55 +445,83 @@ class Problem:
 
     @abc.abstractmethod
     def optimizer_step(self, *args, **kwargs):
-        """[summary]
-        Update weights as in native PyTorch's optim.step()
+        """
+        Update weights as in PyTorch's native ``optim.step()``
         """
         raise NotImplementedError
 
     def zero_grad(self):
-        """[summary]
+        """
         Set gradients for trainable parameters for the current problem to 0.
+        Similar with PyTorch's ``optim.zero_grad()`` or ``module.zero_grad()``.
         """
         for param in list(self.trainable_parameters()):
             if hasattr(param, 'grad'):
                 del param.grad
 
     def loss_scale(self):
+        """
+        Return (dynamic) loss scale for fp16 training
+
+        :return: fp16 training loss scale
+        :rtype: float
+        """
         assert self._fp16
         return self.optimizer.cur_scale
 
     @abc.abstractmethod
     def cache_states(self):
-        """[summary]
-        Cache params, buffers, optimizer states for the later use.
+        """
+        Cache params, buffers, optimizer states when ``param_update`` is set to ``False`` in
+        ``step``.
         """
         raise NotImplementedError
 
     @abc.abstractmethod
     def recover_states(self):
-        """[summary]
-        Recover params, buffers, optimizer states from the cache.
+        """
+        Recover params, buffers, optimizer states when ``param_update`` is set to ``False`` in
+        ``step``.
         """
         raise NotImplementedError
 
     def is_implemented(self, fn_name):
-        """[summary]
-        Check if `fn_name` method is implemented in the class
+        """
+        Check if ``fn_name`` method is implemented in the class
+
+        :rtype: bool
         """
         return callable(getattr(self, fn_name, None))
 
     def check_ready(self):
-        """[summary]
-        Check if parameter updates in all children are ready
+        """
+        Check if unrolling processes of lower level problems in the hierarchical dependency
+        graph are all ready/done. ``step`` function is only excuted when this method returns
+        ``True``.
+
+        :rtype: bool
         """
         return all(self.ready)
 
     def log(self, stats, step):
+        """
+        Log (training) stats to the ``self.logger``
+
+        :param stats: log metrics such as loss and classification accuracy.
+        :type stats: Any
+        :param step: global/local step associated with the ``stats``.
+        :type step: int
+        """
         self.logger.log(stats, tag=self._name, step=step)
 
     def set_problem_attr(self, problem):
-        """[summary]
-        Set class attributed for parent/children problems based on their names
+        """
+        Set class attributes for upper-/lower-level problems based on their names.
+
+        :param problem: lower- or upper-level problem in the dependency graph
+        :type problem: Problem
+        :return: name of ``problem``
+        :rtype: str
         """
         name = problem.name
         if name not in self._problem_name_dict:
@@ -422,106 +545,132 @@ class Problem:
         return name
 
     def add_child(self, problem):
-        """[summary]
-        Add a new problem to the children node list.
+        """
+        Add ``problem`` to the lower-level problem list.
+
+        :param problem: lower-level problem in the dependency graph
+        :type problem: Problem
         """
         assert problem not in self._children
         self._children.append(problem)
 
     def add_parent(self, problem):
-        """[summary]
-        Add a new problem to the parent node list.
+        """
+        Add ``problem`` to the upper-level problem list.
+
+        :param problem: upper-level problem in the dependency graph
+        :type problem: Problem
         """
         assert problem not in self._parents
         self._parents.append(problem)
 
     def add_paths(self, paths):
-        """[summary]
-        Add new backpropagation paths.
+        """
+        Add new hypergradient backpropagation paths.
         """
         self._paths.extend(paths)
 
     def add_logger(self, logger):
+        """
+        Add logger to the current problem.
+
+        :param logger: logger defined by users in ``Engine``.
+        """
         if self.logger is None:
             self.logger = logger
 
     @abc.abstractmethod
     def parameters(self):
-        """[summary]
+        """
         Return all parameters for the current problem.
         """
         raise NotImplementedError
 
     @abc.abstractmethod
     def trainable_parameters(self):
-        """[summary]
-        Return all parameters for the current problem.
+        """
+        Define all *trainable* parameters for the current problem.
         """
         raise NotImplementedError
 
     def clear_dependencies(self):
+        """
+        Clear the dependencies of the current problem.
+        """
         self._children = []
         self._parents = []
         self._paths = []
 
     def train(self):
+        """
+        Set the current problem to the training mode.
+        """
         self._training = True
 
     def eval(self):
+        """
+        Set the current problem to the evaluation mode.
+        """
         self._training = False
 
     @property
     def name(self):
         """[summary]
-        Return the user-defined name of the module
+        Return the user-defined name of the module.
         """
         return self._name
 
     @property
     def config(self):
-        """[summary]
-        Return the hypergradient configuration for the current problem.
+        """
+        Return the configuration for the current problem.
         """
         return self._config
 
     @property
     def children(self):
-        """[summary]
-        Return children problems for the current problem.
+        """
+        Return lower-level problems for the current problem.
         """
         return self._children
 
     @property
     def parents(self):
-        """[summary]
-        Return parent problems for the current problem.
+        """
+        Return upper-level problems for the current problem.
         """
         return self._parents
 
     @property
     def paths(self):
-        """[summary]
+        """
         Return hypergradient calculation paths for the current problem.
         """
         return self._paths
 
     @property
     def leaf(self):
-        """[summary]
+        """
         Return whether the current problem is leaf or not.
+
+        :return: leaf
+        :rtype: bool
         """
         return self._leaf
 
     @property
     def count(self):
-        """[summary]
-        Return count for the current problem.
+        """
+        Return the local step for the current problem.
+
+        :return: local step
+        :rtype: int
         """
         return self._count
 
     @leaf.setter
     def leaf(self, leaf):
-        """[summary]
+        """
         Set the current problem as a leaf problem
         """
         self._leaf = leaf
