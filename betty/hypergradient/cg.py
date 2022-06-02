@@ -5,12 +5,13 @@ from betty.hypergradient.utils import neg_with_none, to_vec, add_with_none
 
 def cg(loss, params, path, config, create_graph=True, retain_graph=False, allow_unused=True):
     """Approximate the matrix-vector multiplication with the best response Jacobian by the
-    (PyTorch's) default autograd method.
+    (PyTorch's) default autograd method. Users may need to specify learning rate (``cg_alpha``) and
+    conjugate gradient descent iterations (``cg_iterations``) in ``Config``.
 
     :param loss: Outputs of the differentiated function.
-    :type loss: `Tensor <https://pytorch.org/docs/stable/tensors.html#torch-tensor>`_
+    :type loss: Tensor
     :param params: Inputs with respect to which the gradient will be returned.
-    :type params: Sequence of `Tensor <https://pytorch.org/docs/stable/tensors.html#torch-tensor>`_
+    :type params: Sequence of Tensor
     :param path: Path on which the gradient will be calculated.
     :type path: List of Problem
     :param config: Hyperparameters for the best-response Jacobian approximation
@@ -18,18 +19,18 @@ def cg(loss, params, path, config, create_graph=True, retain_graph=False, allow_
     :param create_graph:
         If ``True``, graph of the derivative will be constructed, allowing to compute higher order
         derivative products. Default: ``True``.
-    :type create_graph: `bool <https://docs.python.org/3/library/functions.html#bool>`_, optional
+    :type create_graph: bool, optional
     :param retain_graph:
         If ``False``, the graph used to compute the grad will be freed. Note that in nearly all
         cases setting this option to ``True`` is not needed and often can be worked around in a much
         more efficient way. Defaults to the value of ``create_graph``.
-    :type retain_graph: `bool <https://docs.python.org/3/library/functions.html#bool>`_, optional
+    :type retain_graph: bool, optional
     :param allow_unused:
         If ``False``, specifying inputs that were not used when computing outputs (and therefore
         their grad is always zero) is an error. Defaults to ``False``.
-    :type allow_unused: `bool <https://docs.python.org/3/library/functions.html#bool>`_, optional
+    :type allow_unused: bool, optional
     :return: The gradient of ``loss`` with respect to ``params``
-    :rtype: List of `Tensor <https://pytorch.org/docs/stable/tensors.html#torch-tensor>`_
+    :rtype: List of Tensor
     """
     # direct grad
     direct_grad = torch.autograd.grad(loss,
