@@ -16,6 +16,16 @@ class WandBLogger(LoggerBase):
         wandb.init(project='betty', entity=socket.gethostname())
 
     def log(self, stats, tag=None, step=None):
+        """
+        Log metrics/stats to Weight & Biases (wandb) logger
+
+        :param stats: Dictoinary of values and their names to be recorded
+        :type stats: dict
+        :param tag:  Data identifier
+        :type tag: str, optional
+        :param step: step value associated with ``stats`` to record
+        :type step: int, optional
+        """
         if stats is None:
             return
         for key, value in stats.items():

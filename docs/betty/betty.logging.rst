@@ -1,37 +1,28 @@
 betty.logging package
 =====================
 
-Submodules
-----------
+Betty provides an automatic logging feature to easily track train loss, validation accuracy, etc.
+Users can specify metrics to be logged through ``train_step`` method of ``Problem`` class, and
+``validation`` method of ``Engine`` class. Currently, Betty supports two types of loggers:
+``TensorBoardLogger`` and ``WandBLogger``.
 
-betty.logging.logger\_base module
+Tensorboard Logger
+------------------
+
+.. automodule:: betty.logging.logger_tensorboard
+   :members:
+   :undoc-members:
+
+WandB Logger
+------------
+
+.. automodule:: betty.logging.logger_wandb
+   :members:
+   :undoc-members:
+
+Base Logger
 ---------------------------------
 
 .. automodule:: betty.logging.logger_base
    :members:
    :undoc-members:
-   :show-inheritance:
-
-betty.logging.logger\_tensorboard module
-----------------------------------------
-
-.. automodule:: betty.logging.logger_tensorboard
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-betty.logging.logger\_wandb module
-----------------------------------
-
-.. automodule:: betty.logging.logger_wandb
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: betty.logging
-   :members:
-   :undoc-members:
-   :show-inheritance:

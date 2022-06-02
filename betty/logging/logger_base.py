@@ -6,7 +6,9 @@ import logging
 _logger = None
 
 def get_logger():
-    """Get betty logger."""
+    """
+    Get global logger.
+    """
     global _logger
     if _logger:
         return _logger
@@ -30,20 +32,54 @@ def get_logger():
 class LoggerBase:
     @abc.abstractmethod
     def log(self, stats, tag=None, step=None):
+        """
+        Log metrics/stats to a visualization logger (e.g. tensorboard, wandb)
+
+        :param stats: Dictoinary of values and their names to be recorded
+        :type stats: dict
+        :param tag:  Data identifier
+        :type tag: str, optional
+        :param step: step value associated with ``stats`` to record
+        :type step: int, optional
+        """
         raise NotImplementedError
 
     @staticmethod
     def debug(msg, *args, **kwargs):
+        """
+        Logs a message with level DEBUG on the global logger
+
+        :param msg: debugg message
+        :type msg: str
+        """
         get_logger().debug(msg, *args, **kwargs)
 
     @staticmethod
     def info(msg, *args, **kwargs):
+        """
+        Logs a message with level INFO on the global logger
+
+        :param msg: info message
+        :type msg: str
+        """
         get_logger().info(msg, *args, **kwargs)
 
     @staticmethod
     def warning(msg, *args, **kwargs):
+        """
+        Logs a message with level WARNING on the global logger
+
+        :param msg: warning message
+        :type msg: str
+        """
         get_logger().warning(msg, *args, **kwargs)
 
     @staticmethod
     def error(msg, *args, **kwargs):
+        """
+        Logs a message with level ERROR on the global logger
+
+        :param msg: error message
+        :type msg: str
+        """
         get_logger().error(msg, *args, **kwargs)

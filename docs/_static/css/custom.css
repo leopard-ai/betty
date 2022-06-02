@@ -43,3 +43,7 @@ h5 {
 body {
   font-size: 0.975em;
 }
+
+.theme-toggle-container {
+  display: none
+}

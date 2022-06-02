@@ -19,9 +19,22 @@ class TensorBoardLogger(LoggerBase):
         self.writer = SummaryWriter(log_dir=log_dir)
 
     def close(self):
+        """
+        Close PyTorch's tensorboard ``SummaryWriter``.
+        """
         self.writer.close()
 
     def log(self, stats, tag=None, step=None):
+        """
+        Log metrics/stats to PyTorch tensorboard.
+
+        :param stats: Dictoinary of values and their names to be recorded
+        :type stats: dict
+        :param tag:  Data identifier
+        :type tag: str, optional
+        :param step: step value associated with ``stats`` to record
+        :type step: int, optional
+        """
         if stats is None:
             return
         for key, values in stats.items():
