@@ -16,19 +16,22 @@ multilevel optimization code.
    :hidden:
 
    Installation<quickstart/installation.rst>
+   Tutorial<quickstart/tutorial.rst>
+   Architecture (Advanced)<quickstart/architecture.rst>
 
 .. toctree::
-   :caption: Docs
+   :caption: Library Docs
    :maxdepth: 2
    :hidden:
 
+   betty.engine<betty/betty.engine.rst>
    betty.problems<betty/betty.problems.rst>
    betty.hypergradient<betty/betty.hypergradient.rst>
    betty.optim<betty/betty.optim.rst>
    betty.logging<betty/betty.logging.rst>
 
 .. toctree::
-   :caption: Tutorial
+   :caption: Examples
    :hidden:
 
    Hyperparameter Optimization<tutorial/hyperparameter_optimization.rst>
