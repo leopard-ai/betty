@@ -4,7 +4,7 @@ from dataclasses import dataclass
 @dataclass
 class Config:
     type: str = 'darts'
-    step: int = 5
+    step: int = 1
     first_order: bool = True
     retain_graph: bool = False
     allow_unused: bool = True

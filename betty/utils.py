@@ -86,7 +86,7 @@ def log_from_loss_dict( loss_dict):
     outputs = []
     for key, values in loss_dict.items():
         if key == 'loss':
-            value = sum(values).item()
+            value = values.item()
             output = f'{key}: {value}'
             outputs.append(output)
         else:

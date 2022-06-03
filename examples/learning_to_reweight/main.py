@@ -149,9 +149,9 @@ outer_config = Config(type='darts',
                       fp16=args.fp16,
                       step=1,
                       log_step=100,
-                      retain_graph=True,
+                      retain_graph=False,
                       first_order=True)
-inner_config = Config(type='torch', fp16=args.fp16)
+inner_config = Config(type='darts', fp16=args.fp16)
 engine_config = EngineConfig(train_iters=10000, valid_step=100)
 outer = Outer(name='outer', config=outer_config, device=args.device)
 inner = Inner(name='inner', config=inner_config, device=args.device)

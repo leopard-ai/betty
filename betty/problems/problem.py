@@ -1,6 +1,8 @@
 import abc
 
-import betty.hypergradient as hypergradient
+import torch
+
+from betty.hypergradient import get_grads
 from betty.utils import convert_tensor, log_from_loss_dict
 from betty.optim import FP16_Optimizer
 
@@ -203,12 +205,11 @@ class Problem:
             self.cur_batch = self.get_batch() if batch is None else batch
 
             # calculate loss
-            losses_dict = self.get_losses()
-            losses = losses_dict['loss']
+            loss, loss_dict = self.get_loss()
 
             # logging
             if self.log_step > 0 and self._count % self.log_step == 0:
-                loss_log = log_from_loss_dict(losses_dict)
+                loss_log = log_from_loss_dict(loss_dict)
                 if global_step is None:
                     self.logger.info(
                         f'[Problem "{self._name}"] [Local Step {self._count}] '
@@ -223,16 +224,17 @@ class Problem:
                 cur_step = global_step
                 if global_step is None or self.log_local_step:
                     cur_step = self._count
-                self.log(losses_dict, cur_step)
+                self.log(loss_dict, cur_step)
 
             # calculate gradient (a.k.a backward)
-            self.backward(losses=losses,
-                          params=self.trainable_parameters(),
-                          paths=self._paths,
-                          config=self._config,
-                          create_graph=not self._first_order,
-                          retain_graph=self._retain_graph,
-                          allow_unused=self._allow_unused)
+            self.backward(
+                loss=loss,
+                params=self.trainable_parameters(),
+                paths=self._paths,
+                create_graph=not self._first_order,
+                retain_graph=self._retain_graph,
+                allow_unused=self._allow_unused
+            )
 
             # calculate parameter update
             if self._count % self.gas == 0:
@@ -259,13 +261,11 @@ class Problem:
                     if not param_update:
                         self.recover_states()
 
-                        losses_dict = self.get_losses()
-                        losses = losses_dict['loss']
+                        loss, _ = self.get_loss()
 
-                        self.backward(losses=losses,
+                        self.backward(loss=loss,
                                       params=self.trainable_parameters(),
                                       paths=self._paths,
-                                      config=self._config,
                                       create_graph=not self._first_order,
                                       retain_graph=self._retain_graph,
                                       allow_unused=self._allow_unused)
@@ -300,7 +300,7 @@ class Problem:
 
         return batch
 
-    def get_losses(self):
+    def get_loss(self):
         """
         Calculate loss and log metrics for the current batch based on the user-defined loss
         function.
@@ -308,29 +308,26 @@ class Problem:
         :return: loss and log metrics (e.g. classification accuracy)
         :rtype: dict
         """
-        maybe_losses_dict = self.training_step(self.cur_batch)
-        is_dict = isinstance(maybe_losses_dict, dict)
-        losses = maybe_losses_dict['loss'] if is_dict else maybe_losses_dict
-        if not (isinstance(losses, tuple) or isinstance(losses, list)):
-            losses = (losses,)
+        maybe_loss_dict = self.training_step(self.cur_batch)
+        is_dict = isinstance(maybe_loss_dict, dict)
+        loss = maybe_loss_dict['loss'] if is_dict else maybe_loss_dict
         # aggregate loss
         scale = self.loss_scale() if self._fp16 else 1
-        losses = tuple(loss * scale / (len(losses) * self.gas) for loss in losses)
+        loss = loss * scale / self.gas
 
         # construct loss dict
-        losses_dict = {'loss': losses}
+        loss_dict = {'loss': loss}
         if is_dict:
-            for key, value in maybe_losses_dict.items():
+            for key, value in maybe_loss_dict.items():
                 if key != 'loss':
-                    losses_dict[key] = value
+                    loss_dict[key] = value
 
-        return losses_dict
+        return loss, loss_dict
 
     def backward(self,
-                 losses,
+                 loss,
                  params,
                  paths,
-                 config,
                  create_graph=False,
                  retain_graph=True,
                  allow_unused=True):
@@ -344,8 +341,6 @@ class Problem:
         :type params: Sequence of Tensor
         :param paths: Paths on which the gradient will be calculated.
         :type paths: List of list of Problem
-        :param config: Hyperparameters for the best-response Jacobian approximation
-        :type config: Config
         :param create_graph:
             If ``True``, graph of the derivative will be constructed, allowing to compute higher order
             derivative products. Default: ``True``.
@@ -360,73 +355,21 @@ class Problem:
             their grad is always zero) is an error. Defaults to ``False``.
         :type allow_unused: bool, optional
         """
-        if self._default_grad:
-            grads = self.get_grads(loss=sum(losses),
-                                   params=params,
-                                   path=None,
-                                   config=config,
-                                   create_graph=create_graph,
-                                   retain_graph=retain_graph,
-                                   allow_unused=allow_unused)
-            self.set_grads(params, grads)
-        else:
-            assert len(paths) > 0
-            for idx, path in enumerate(paths):
-                loss = losses[0] if len(losses) == 1 else losses[idx]
-                grads = self.get_grads(loss=loss,
-                                       params=params,
-                                       path=path,
-                                       config=config,
-                                       create_graph=create_graph,
-                                       retain_graph=retain_graph,
-                                       allow_unused=allow_unused)
+        # direct grad
+        grads = torch.autograd.grad(
+            loss,
+            params,
+            create_graph=create_graph,
+            retain_graph=retain_graph,
+            allow_unused=allow_unused
+        )
+        self.set_grads(params, grads)
+
+        # indirect grad: best-response Jacobian
+        if self._config.first_order:
+            for path in paths:
+                grads = get_grads(loss, path)
                 self.set_grads(params, grads)
-
-    def get_grads(self,
-                  loss,
-                  params,
-                  path=None,
-                  config=None,
-                  create_graph=False,
-                  retain_graph=True,
-                  allow_unused=True):
-        """
-        Calculate the gradient of ``loss`` with respect to ``params`` based on a user-defined
-        ``config`` for the specific path.
-
-        :param loss: Outputs of the differentiated function.
-        :type loss: Tensor
-        :param params: Inputs with respect to which the gradient will be returned.
-        :type params: Sequence of Tensor
-        :param path: Path on which the gradient will be calculated.
-        :type path: List of list of Problem
-        :param config: Hyperparameters for the best-response Jacobian approximation
-        :type config: Config
-        :param create_graph:
-            If ``True``, graph of the derivative will be constructed, allowing to compute higher order
-            derivative products. Default: ``True``.
-        :type create_graph: bool, optional
-        :param retain_graph:
-            If ``False``, the graph used to compute the grad will be freed. Note that in nearly all
-            cases setting this option to ``True`` is not needed and often can be worked around in a much
-            more efficient way. Defaults to the value of ``create_graph``.
-        :type retain_graph: bool, optional
-        :param allow_unused:
-            If ``False``, specifying inputs that were not used when computing outputs (and therefore
-            their grad is always zero) is an error. Defaults to ``False``.
-        :type allow_unused: bool, optional
-        """
-        grad_fn_type = self.config.type
-        if self._default_grad or self.config.type in ['maml', 'torch']:
-            grad_fn_type = 'default'
-        grad_fn = hypergradient.get_grad_fn(grad_fn_type)
-
-        grads = grad_fn(loss, params, path, config,
-                        create_graph=create_graph,
-                        retain_graph=retain_graph,
-                        allow_unused=allow_unused)
-
-        return grads
 
     def set_grads(self, params, grads):
         """
@@ -438,10 +381,11 @@ class Problem:
         :type grads: Sequence of Tensor
         """
         for param, grad in zip(params, grads):
-            if hasattr(param, 'grad') and param.grad is not None:
-                param.grad = param.grad + grad
-            else:
-                param.grad = grad
+            if grad is not None:
+                if hasattr(param, 'grad') and param.grad is not None:
+                    param.grad = param.grad + grad
+                else:
+                    param.grad = grad
 
     @abc.abstractmethod
     def optimizer_step(self, *args, **kwargs):

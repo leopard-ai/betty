@@ -99,14 +99,10 @@ class Child(ImplicitProblem):
         self.module.w.data.zero_()
 
 fp16 = False
-dynamic_loss_scale = True
-parent_config = Config(type='darts',
-                       dynamic_loss_scale=dynamic_loss_scale,
-                       fp16=fp16,
-                       log_step=10,
-                       step=100,
-                       first_order=True)
-child_config = Config(type='torch', fp16=fp16, dynamic_loss_scale=dynamic_loss_scale)
+dynamic_loss_scale = False
+parent_config = Config(log_step=10, step=100,first_order=True)
+child_config = Config(type='cg', cg_iterations=3, cg_alpha=0.1)
+
 parent = Parent(name='outer', config=parent_config, device=device)
 child = Child(name='inner', config=child_config, device=device)
 
