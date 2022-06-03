@@ -10,7 +10,6 @@ their optimizer to ``IterativeProblem`` class through the constructor, ``initial
 ``IterativeProblem`` will automatically call ``patch_optimizer`` and ``patch_scheduler`` to patch
 user-proviced PyTorch native optimizer/scheduler along with stateful modules.
 
-
 .. automodule:: betty.optim
    :members:
    :undoc-members:
@@ -34,3 +33,6 @@ Below is the list of differentiable optimizers supported by Betty.
    :exclude-members: step
    :undoc-members:
 
+.. automodule:: betty.optim.fp16.fp16_optimizer
+   :members:
+   :undoc-members:

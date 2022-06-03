@@ -3,7 +3,7 @@ import math
 import torch
 from torch._utils import _flatten_dense_tensors, _unflatten_dense_tensors
 
-from betty.utils import get_grad_norm, get_weight_norm
+from betty.utils import get_grad_norm
 
 
 class FP16_Optimizer:
@@ -18,8 +18,7 @@ class FP16_Optimizer:
             raise SystemError("Cannot use fp16 without CUDA.")
         self.optimizer = init_optimizer
 
-
-        # praam flattened by groups
+        # param flattened by groups
         self.fp16_groups = []
         self.fp16_groups_flat = []
         self.fp32_groups_flat = []
@@ -65,7 +64,7 @@ class FP16_Optimizer:
         self.initialize_optimizer_states()
 
     def initialize_optimizer_states(self):
-        for i, group in enumerate(self.fp16_groups):
+        for i, _ in enumerate(self.fp16_groups):
             self.fp32_groups_flat[i].grad = torch.zeros(
                 self.fp32_groups_flat[i].size(),
                 device=self.fp32_groups_flat[i].device
@@ -73,7 +72,7 @@ class FP16_Optimizer:
 
         self.optimizer.step()
 
-        for i, group in enumerate(self.fp16_groups):
+        for i, _ in enumerate(self.fp16_groups):
             self.fp32_groups_flat[i].grad = None
 
         return
@@ -203,7 +202,9 @@ class FP16_Optimizer:
         Returns a dict containing the current state of this :class:`FP16_Optimizer` instance.
         This dict contains attributes of :class:`FP16_Optimizer`, as well as the state_dict
         of the contained Pytorch optimizer.
-        Example::
+
+        .. code:: python
+
             checkpoint = {}
             checkpoint['model'] = model.state_dict()
             checkpoint['optimizer'] = optimizer.state_dict()
@@ -230,7 +231,9 @@ class FP16_Optimizer:
         whose parameters in turn came from ``model``, it is expected that the user
         will call ``model.load_state_dict()`` before
         ``fp16_optimizer_instance.load_state_dict()`` is called.
-        Example::
+
+        .. code:: python
+
             model = torch.nn.Linear(D_in, D_out).cuda().half()
             optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
             optimizer = FP16_Optimizer(optimizer, static_loss_scale = 128.0)
@@ -239,7 +242,6 @@ class FP16_Optimizer:
             model.load_state_dict(checkpoint['model'])
             optimizer.load_state_dict(checkpoint['optimizer'])
         """
-        # I think it should actually be ok to reload the optimizer before the model.
         self.dynamic_loss_scale = state_dict['dynamic_loss_scale']
         self.cur_scale = state_dict['cur_scale']
         self.cur_iter = state_dict['cur_iter']

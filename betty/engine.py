@@ -1,4 +1,3 @@
-from cv2 import log
 from betty.configs import EngineConfig
 from betty.logging import logger
 from betty.utils import log_from_loss_dict
