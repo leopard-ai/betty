@@ -5,12 +5,6 @@ Unlike traditional automatic differentiation techniques that calculate analytic 
 operation, multilevel optimization requires *approximating* best-response Jacobian for each level
 optimization problem. Below is the list of approximation techniques that are supported by Betty.
 
-default
--------
-.. automodule:: betty.hypergradient.default
-   :members:
-   :undoc-members:
-
 finite difference
 -----------------
 .. automodule:: betty.hypergradient.darts

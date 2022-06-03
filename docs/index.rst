@@ -11,6 +11,13 @@ Betty provides a PyTorch-like programming interface for users to write general
 multilevel optimization code.
 
 .. toctree::
+   :caption: Quick Start
+   :maxdepth: 2
+   :hidden:
+
+   Installation<quickstart/installation.rst>
+
+.. toctree::
    :caption: Docs
    :maxdepth: 2
    :hidden:

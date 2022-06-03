@@ -6,6 +6,11 @@ from betty.utils import log_from_loss_dict
 
 
 class Engine:
+    """
+    ``Engine`` handles a dataflow graph based on the user-provided hierarchical problem
+    dependencies. It also provides a primitive for executing multilevel optimization.
+    """
+
     def __init__(self, config, problems, dependencies=None):
         # config
         self.config = config if config is not None else EngineConfig()

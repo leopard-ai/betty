@@ -3,6 +3,9 @@ from dataclasses import dataclass
 
 @dataclass
 class Config:
+    """
+    Training configuration for ``Problem``.
+    """
     type: str = "darts"
     step: int = 1
     first_order: bool = True
@@ -36,6 +39,9 @@ class Config:
 
 @dataclass
 class EngineConfig:
+    """
+    Configuration for ``Engine``.
+    """
     train_iters: int = 50000
     valid_step: int = 500
 
