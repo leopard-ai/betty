@@ -224,13 +224,14 @@ class LBIEngine(Engine):
         avgloss = loss / total
         if best_acc < acc:
             best_acc = acc
-        #print(f'[*] Validation Acc.: {acc} || Validation Loss: {avgloss}')
+
+        return {'loss': avgloss, 'acc': acc, 'best_acc': best_acc}
 
 
 # Define configs
 reweight_config = Config(type='darts', step=1, retain_graph=True, first_order=True)
-finetune_config = Config(type='torch', step=1, allow_unused=False)
-pretrain_config = Config(type='torch', step=1, allow_unused=False)
+finetune_config = Config(type='darts', step=1, allow_unused=False)
+pretrain_config = Config(type='darts', step=1, allow_unused=False)
 engine_config = EngineConfig(valid_step=20, train_iters=1000)
 
 reweight = Reweighting(name='reweight', config=reweight_config, device=device)

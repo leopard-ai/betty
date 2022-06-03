@@ -61,8 +61,6 @@ class Parent(IterativeProblem):
         outs = self.inner(inputs)
         loss = F.binary_cross_entropy_with_logits(outs, targets)
 
-        if self.count % 10 == 0:
-            print('count:', self.count, '|| val loss:', loss.item())
         return loss
 
     def configure_train_data_loader(self):
@@ -101,15 +99,15 @@ class Child(IterativeProblem):
     def on_inner_loop_start(self):
         self.params = (torch.nn.Parameter(torch.zeros(DATA_DIM)).to(device),)
 
-parent_config = Config(type='default', step=100, first_order=False)
-child_config = Config(type='default', step=1, first_order=True, retain_graph=True)
+parent_config = Config(type='darts', log_step=10, step=100, first_order=False)
+child_config = Config(type='darts', step=1, first_order=True, retain_graph=True)
 parent = Parent(name='outer', config=parent_config, device=device)
 child = Child(name='inner', config=child_config, device=device)
 
 problems = [parent, child]
-l2h = {child: [parent]}
-h2l = {parent: [child]}
-dependencies = {'l2h': l2h, 'h2l': h2l}
+l2u = {child: [parent]}
+u2l = {parent: [child]}
+dependencies = {'l2u': l2u, 'u2l': u2l}
 
 engine = Engine(config=None, problems=problems, dependencies=dependencies)
 engine.run()
