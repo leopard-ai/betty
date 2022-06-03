@@ -1,6 +1,6 @@
 import torch
 
-from betty.hypergradient.utils import to_vec, add_with_none
+from betty.utils import to_vec, add_with_none
 
 
 def darts(loss, params, path, config, create_graph=True, retain_graph=False, allow_unused=True):

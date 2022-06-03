@@ -1,6 +1,6 @@
 import torch
 
-from betty.hypergradient.utils import neg_with_none, to_vec, add_with_none
+from betty.utils import neg_with_none, to_vec, add_with_none
 
 
 def cg(loss, params, path, config, create_graph=True, retain_graph=False, allow_unused=True):

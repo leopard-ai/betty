@@ -1,6 +1,6 @@
 import torch
 
-from betty.hypergradient.utils import add_with_none, neg_with_none
+from betty.utils import add_with_none, neg_with_none
 
 
 def reinforce(loss, params, path, config, create_graph=True, retain_graph=False, allow_unused=True):

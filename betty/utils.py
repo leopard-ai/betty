@@ -40,6 +40,7 @@ def get_weight_norm(parameters):
 
     return total_norm
 
+
 def flatten_list(regular_list):
     """[summary]
     Flatten list of lists
@@ -48,12 +49,14 @@ def flatten_list(regular_list):
         return [item for sublist in regular_list for item in sublist]
     return regular_list
 
+
 def get_param_index(param, param_list):
     param_list = list(param_list)
     for idx, p in enumerate(param_list):
         if p is param:
             return idx
     print('no corresponding parameter found!')
+
 
 def get_multiplier(problem):
     if problem.leaf:
@@ -96,3 +99,25 @@ def log_from_loss_dict( loss_dict):
                 output = f'{key}: {values}'
                 outputs.append(output)
     return " || ".join(outputs)
+
+
+def to_vec(tensor_list, alpha=1.):
+    return torch.cat([alpha * t.reshape(-1) for t in tensor_list])
+
+
+def add_with_none(a, b):
+    if a is None and b is None:
+        return 0
+    if a is None:
+        return b
+    elif b is None:
+        return a
+    else:
+        return a + b
+
+
+def neg_with_none(a):
+    if a is None:
+        return None
+    else:
+        return -a
