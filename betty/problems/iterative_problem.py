@@ -12,6 +12,7 @@ class IterativeProblem(Problem):
     """
     ``IterativeProblem`` is sublassed from ``Problem``.
     """
+
     def __init__(self,
                  name,
                  config,

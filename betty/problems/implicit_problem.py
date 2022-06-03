@@ -6,6 +6,7 @@ class ImplicitProblem(Problem):
     """
     ``ImplicitProblem`` is sublassed from ``Problem``.
     """
+
     def __init__(self,
                  name,
                  config,

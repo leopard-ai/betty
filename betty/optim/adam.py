@@ -11,6 +11,7 @@ class DifferentiableAdam(DifferentiableOptimizerBase):
     `Adam <https://pytorch.org/docs/stable/generated/torch.optim.Adam.html#adam>`_ optimizer.
     All in-place operations are replaced.
     """
+
     def step(self, params):
         for param_group, param_mapping in zip(self.param_groups, self.param_mappings):
             amsgrad = param_group['amsgrad']
@@ -34,7 +35,7 @@ class DifferentiableAdam(DifferentiableOptimizerBase):
                     grad = grad + (weight_decay * p)
 
                 state['exp_avg'] = state['exp_avg'] * beta1 + (1 - beta1) * grad
-                state['exp_avg_sq'] =  state['exp_avg_sq'] * beta2 + (1 - beta2) * grad * grad
+                state['exp_avg_sq'] = state['exp_avg_sq'] * beta2 + (1 - beta2) * grad * grad
 
                 if amsgrad:
                     state['max_exp_avg_sq'] = torch.max(state['max_exp_avg_sq'], state['exp_avg_sq'])

@@ -15,6 +15,7 @@ class Problem:
     optimization configurations (e.g. best-response Jacobian calculation algorithm, number of
     unrolling steps, etc.).
     """
+
     def __init__(self,
                  name,
                  config,
@@ -139,12 +140,9 @@ class Problem:
         parents_str = [node.name for node in self._parents]
         self.logger.info('*** Problem Information ***')
         self.logger.info(f'Name: {self._name}')
-        self.logger.info(f'Parents: {parents_str}')
-        self.logger.info(f'Children: {children_str}')
-        self.logger.info(f'Paths: {path_str}')
-        if len(self._parents) > 0:
-            self.logger.info(f'Update parent problems every {self._parent_step} steps')
-        print()
+        self.logger.info(f'Uppers: {parents_str}')
+        self.logger.info(f'Lowers: {children_str}')
+        self.logger.info(f'Paths: {path_str}\n')
 
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)

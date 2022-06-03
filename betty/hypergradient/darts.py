@@ -23,7 +23,7 @@ def darts(vector, curr, prev):
 
     # negative
     for p, v in zip(curr.trainable_parameters(), vector):
-        p.data.add_(v.data, alpha=-2*eps)
+        p.data.add_(v.data, alpha=-2 * eps)
     loss_n = curr.training_step(curr.cur_batch)
     grad_n = torch.autograd.grad(loss_n, prev.trainable_parameters())
 

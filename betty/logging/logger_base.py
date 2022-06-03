@@ -5,6 +5,7 @@ import logging
 
 _logger = None
 
+
 def get_logger():
     """
     Get global logger.

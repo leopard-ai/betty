@@ -8,6 +8,7 @@ logger_mapping = {
     'wandb': WandBLogger
 }
 
+
 def type_check(logger_type):
     assert logger_type in logger_mapping
 
@@ -21,6 +22,7 @@ def type_check(logger_type):
 
             logger_type = 'tensorboard'
     return logger_type
+
 
 def logger(logger_type='tensorboard'):
     logger_type = type_check(logger_type)

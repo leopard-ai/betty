@@ -25,6 +25,7 @@ def get_grad_norm(parameters):
 
     return total_norm
 
+
 def get_weight_norm(parameters):
     if isinstance(parameters, torch.Tensor):
         parameters = [parameters]
@@ -82,7 +83,7 @@ def get_multiplier(problem):
     return s2[0]
 
 
-def log_from_loss_dict( loss_dict):
+def log_from_loss_dict(loss_dict):
     outputs = []
     for key, values in loss_dict.items():
         if key == 'loss':
@@ -103,17 +104,6 @@ def log_from_loss_dict( loss_dict):
 
 def to_vec(tensor_list, alpha=1.):
     return torch.cat([alpha * t.reshape(-1) for t in tensor_list])
-
-
-def add_with_none(a, b):
-    if a is None and b is None:
-        return 0
-    if a is None:
-        return b
-    elif b is None:
-        return a
-    else:
-        return a + b
 
 
 def neg_with_none(a):
