@@ -9,7 +9,7 @@ def cg(vector, curr, prev):
     (PyTorch's) default autograd method. Users may need to specify learning rate (``cg_alpha``) and
     conjugate gradient descent iterations (``cg_iterations``) in ``Config``.
     """
-    assert len(curr.paths) == 0, 'cg method is not supported for higher order MLO!'
+    assert len(curr.paths) == 0, "cg method is not supported for higher order MLO!"
     config = curr.config
     in_loss = curr.training_step(curr.cur_batch)
     in_grad = torch.autograd.grad(in_loss, curr.trainable_parameters(), create_graph=True)

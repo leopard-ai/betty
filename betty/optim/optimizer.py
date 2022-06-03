@@ -6,9 +6,7 @@ import betty.utils as utils
 
 
 class DifferentiableOptimizerBase(torch.optim.Optimizer):
-    def __init__(self,
-                 optimizer,
-                 module):
+    def __init__(self, optimizer, module):
 
         self.param_groups = []
         self.state = [None for _ in range(len(list(module.parameters())))]
@@ -18,11 +16,11 @@ class DifferentiableOptimizerBase(torch.optim.Optimizer):
         for init_param_group in optimizer.param_groups:
             param_group = {}
             for key, value in init_param_group.items():
-                if key != 'params':
+                if key != "params":
                     param_group[key] = value
 
             param_mapping = []
-            for param in init_param_group['params']:
+            for param in init_param_group["params"]:
                 param_idx = utils.get_param_index(param, module.parameters())
                 param_mapping.append(param_idx)
                 self.state[param_idx] = optimizer.state[param]

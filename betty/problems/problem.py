@@ -16,14 +16,16 @@ class Problem:
     unrolling steps, etc.).
     """
 
-    def __init__(self,
-                 name,
-                 config,
-                 module=None,
-                 optimizer=None,
-                 scheduler=None,
-                 train_data_loader=None,
-                 device=None):
+    def __init__(
+        self,
+        name,
+        config,
+        module=None,
+        optimizer=None,
+        scheduler=None,
+        train_data_loader=None,
+        device=None,
+    ):
         self._name = name
         self._config = config
         self.device = device
@@ -102,13 +104,13 @@ class Problem:
 
         # set up data loader
         train_data_loader = self.train_data_loader
-        if self.is_implemented('configure_train_data_loader'):
+        if self.is_implemented("configure_train_data_loader"):
             train_data_loader = self.configure_train_data_loader()
         assert train_data_loader is not None, "Train data loader must be specified!"
         self.train_data_iterator = iter(train_data_loader)
 
         # set up module for the current level
-        if self.is_implemented('configure_module'):
+        if self.is_implemented("configure_module"):
             if self.configure_module() is not None:
                 self.module = self.configure_module()
         assert self.module is not None, "Module must be specified!"
@@ -117,12 +119,12 @@ class Problem:
             self.module.half()
 
         # set up optimizer
-        if self.is_implemented('configure_optimizer'):
+        if self.is_implemented("configure_optimizer"):
             if self.configure_optimizer() is not None:
                 self.optimizer = self.configure_optimizer()
 
         # set up lr scheduler
-        if self.is_implemented('configure_scheduler'):
+        if self.is_implemented("configure_scheduler"):
             if self.configure_scheduler is not None:
                 self.scheduler = self.configure_scheduler()
         if self._fp16:
@@ -130,7 +132,7 @@ class Problem:
                 init_optimizer=self.optimizer,
                 dynamic_loss_scale=self.dynamic_loss_scale,
                 static_loss_scale=self.static_loss_scale,
-                initial_dynamic_scale=self.initial_dynamic_scale
+                initial_dynamic_scale=self.initial_dynamic_scale,
             )
 
         # Logging INFO
@@ -138,11 +140,11 @@ class Problem:
         path_str = [[node.name for node in path] for path in self._paths]
         children_str = [node.name for node in self._children]
         parents_str = [node.name for node in self._parents]
-        self.logger.info('*** Problem Information ***')
-        self.logger.info(f'Name: {self._name}')
-        self.logger.info(f'Uppers: {parents_str}')
-        self.logger.info(f'Lowers: {children_str}')
-        self.logger.info(f'Paths: {path_str}\n')
+        self.logger.info("*** Problem Information ***")
+        self.logger.info(f"Name: {self._name}")
+        self.logger.info(f"Uppers: {parents_str}")
+        self.logger.info(f"Lowers: {children_str}")
+        self.logger.info(f"Paths: {path_str}\n")
 
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
@@ -161,10 +163,7 @@ class Problem:
         """
         raise NotImplementedError
 
-    def step(self,
-             batch=None,
-             param_update=True,
-             global_step=None):
+    def step(self, batch=None, param_update=True, global_step=None):
         """
         ``step`` method abstracts a one-step gradient descent update with four sub-steps:
         1) data loading, 2) cost calculation, 3) gradient calculation, and 4) parameter update.
@@ -187,7 +186,7 @@ class Problem:
         if self.check_ready():
             # loop start
             if self._inner_loop_start:
-                if self.is_implemented('on_inner_loop_start'):
+                if self.is_implemented("on_inner_loop_start"):
                     self.on_inner_loop_start()
                 self._inner_loop_start = False
 
@@ -210,14 +209,13 @@ class Problem:
                 loss_log = log_from_loss_dict(loss_dict)
                 if global_step is None:
                     self.logger.info(
-                        f'[Problem "{self._name}"] [Local Step {self._count}] '
-                        f'{loss_log}'
+                        f'[Problem "{self._name}"] [Local Step {self._count}] ' f"{loss_log}"
                     )
                 else:
                     self.logger.info(
                         f'[Problem "{self._name}"] [Global Step {global_step}] '
-                        f'[Local Step {self._count}] '
-                        f'{loss_log}'
+                        f"[Local Step {self._count}] "
+                        f"{loss_log}"
                     )
                 cur_step = global_step
                 if global_step is None or self.log_local_step:
@@ -231,7 +229,7 @@ class Problem:
                 paths=self._paths,
                 create_graph=not self._first_order,
                 retain_graph=self._retain_graph,
-                allow_unused=self._allow_unused
+                allow_unused=self._allow_unused,
             )
 
             # calculate parameter update
@@ -240,7 +238,7 @@ class Problem:
                 if self.scheduler is not None and param_update:
                     self.scheduler.step()
 
-                if self.is_implemented('param_callback'):
+                if self.is_implemented("param_callback"):
                     self.param_callback(self.trainable_parameters())
 
                 # zero-out grad
@@ -261,18 +259,20 @@ class Problem:
 
                         loss, _ = self.get_loss()
 
-                        self.backward(loss=loss,
-                                      params=self.trainable_parameters(),
-                                      paths=self._paths,
-                                      create_graph=not self._first_order,
-                                      retain_graph=self._retain_graph,
-                                      allow_unused=self._allow_unused)
+                        self.backward(
+                            loss=loss,
+                            params=self.trainable_parameters(),
+                            paths=self._paths,
+                            create_graph=not self._first_order,
+                            retain_graph=self._retain_graph,
+                            allow_unused=self._allow_unused,
+                        )
 
                         self.optimizer_step()
                         if self.scheduler is not None and not param_update:
                             self.scheduler.step()
 
-                        if self.is_implemented('param_callback'):
+                        if self.is_implemented("param_callback"):
                             self.param_callback(self.trainable_parameters())
 
                     self.zero_grad()
@@ -290,7 +290,7 @@ class Problem:
             batch = next(self.train_data_iterator)
         except StopIteration:
             train_data_loader = self.train_data_loader
-            if self.is_implemented('configure_train_data_loader'):
+            if self.is_implemented("configure_train_data_loader"):
                 train_data_loader = self.configure_train_data_loader()
             self.train_data_iterator = iter(train_data_loader)
             batch = next(self.train_data_iterator)
@@ -308,27 +308,23 @@ class Problem:
         """
         maybe_loss_dict = self.training_step(self.cur_batch)
         is_dict = isinstance(maybe_loss_dict, dict)
-        loss = maybe_loss_dict['loss'] if is_dict else maybe_loss_dict
+        loss = maybe_loss_dict["loss"] if is_dict else maybe_loss_dict
         # aggregate loss
         scale = self.loss_scale() if self._fp16 else 1
         loss = loss * scale / self.gas
 
         # construct loss dict
-        loss_dict = {'loss': loss}
+        loss_dict = {"loss": loss}
         if is_dict:
             for key, value in maybe_loss_dict.items():
-                if key != 'loss':
+                if key != "loss":
                     loss_dict[key] = value
 
         return loss, loss_dict
 
-    def backward(self,
-                 loss,
-                 params,
-                 paths,
-                 create_graph=False,
-                 retain_graph=True,
-                 allow_unused=True):
+    def backward(
+        self, loss, params, paths, create_graph=False, retain_graph=True, allow_unused=True
+    ):
         """
         Calculate the gradient of ``loss`` with respect to ``params`` based on a user-defined
         ``config``.
@@ -359,7 +355,7 @@ class Problem:
             params,
             create_graph=create_graph,
             retain_graph=retain_graph,
-            allow_unused=allow_unused
+            allow_unused=allow_unused,
         )
         self.set_grads(params, grads)
 
@@ -380,7 +376,7 @@ class Problem:
         """
         for param, grad in zip(params, grads):
             if grad is not None:
-                if hasattr(param, 'grad') and param.grad is not None:
+                if hasattr(param, "grad") and param.grad is not None:
                     param.grad = param.grad + grad
                 else:
                     param.grad = grad
@@ -398,7 +394,7 @@ class Problem:
         Similar with PyTorch's ``optim.zero_grad()`` or ``module.zero_grad()``.
         """
         for param in list(self.trainable_parameters()):
-            if hasattr(param, 'grad'):
+            if hasattr(param, "grad"):
                 del param.grad
 
     def loss_scale(self):
@@ -467,21 +463,21 @@ class Problem:
         """
         name = problem.name
         if name not in self._problem_name_dict:
-            assert not hasattr(self, name), f'Problem already has an attribute named {name}!'
+            assert not hasattr(self, name), f"Problem already has an attribute named {name}!"
             self._problem_name_dict[name] = 0
             setattr(self, name, problem)
         elif self._problem_name_dict[name] == 0:
             # rename first problem
             first_problem = getattr(self, name)
             delattr(self, name)
-            setattr(self, name + '_0', first_problem)
+            setattr(self, name + "_0", first_problem)
 
             self._problem_name_dict[name] += 1
-            name = name + '_' + str(self._problem_name_dict[name])
+            name = name + "_" + str(self._problem_name_dict[name])
             setattr(self, name, problem)
         else:
             self._problem_name_dict[name] += 1
-            name = name + '_' + str(self._problem_name_dict[name])
+            name = name + "_" + str(self._problem_name_dict[name])
             setattr(self, name, problem)
 
         return name

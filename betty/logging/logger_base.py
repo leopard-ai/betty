@@ -13,11 +13,8 @@ def get_logger():
     global _logger
     if _logger:
         return _logger
-    logger = logging.getLogger('betty')
-    log_format = logging.Formatter(
-        "[%(asctime)s] [%(levelname)s] %(message)s",
-        "%Y-%m-%d %H:%M:%S"
-    )
+    logger = logging.getLogger("betty")
+    log_format = logging.Formatter("[%(asctime)s] [%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S")
 
     logger.propagate = False
     logger.setLevel(logging.INFO)

@@ -13,7 +13,7 @@ except ImportError:
 
 class WandBLogger(LoggerBase):
     def __init__(self):
-        wandb.init(project='betty', entity=socket.gethostname())
+        wandb.init(project="betty", entity=socket.gethostname())
 
     def log(self, stats, tag=None, step=None):
         """
@@ -29,7 +29,7 @@ class WandBLogger(LoggerBase):
         if stats is None:
             return
         for key, value in stats.items():
-            prefix = "" if tag is None else tag + '/'
+            prefix = "" if tag is None else tag + "/"
             full_key = prefix + key
             if torch.is_tensor(value):
                 value = value.item()

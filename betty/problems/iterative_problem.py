@@ -7,20 +7,22 @@ from betty.problems import Problem
 import betty.optim as optim
 
 
-#pylint: disable=W0223
+# pylint: disable=W0223
 class IterativeProblem(Problem):
     """
     ``IterativeProblem`` is sublassed from ``Problem``.
     """
 
-    def __init__(self,
-                 name,
-                 config,
-                 module=None,
-                 optimizer=None,
-                 scheduler=None,
-                 train_data_loader=None,
-                 device=None):
+    def __init__(
+        self,
+        name,
+        config,
+        module=None,
+        optimizer=None,
+        scheduler=None,
+        train_data_loader=None,
+        device=None,
+    ):
         super().__init__(name, config, module, optimizer, scheduler, train_data_loader, device)
         # functional modules
         self.fmodule = None
@@ -41,8 +43,8 @@ class IterativeProblem(Problem):
         self.patch_scheduler()
 
     def optimizer_step(self, *args, **kwargs):
-        assert not self._fp16, '[!] FP16 training is not supported for IterativeProblem.'
-        if self.is_implemented('custom_optimizer_step'):
+        assert not self._fp16, "[!] FP16 training is not supported for IterativeProblem."
+        if self.is_implemented("custom_optimizer_step"):
             params = self.custom_optimizer_step(*args, **kwargs)
         else:
             params = self.optimizer.step(self.params)
@@ -51,7 +53,7 @@ class IterativeProblem(Problem):
 
     def initialize_optimizer_state(self):
         for param_group in self.optimizer.param_groups:
-            for param in param_group['params']:
+            for param in param_group["params"]:
                 param.grad = torch.zeros_like(param.data)
         self.optimizer.step()
 

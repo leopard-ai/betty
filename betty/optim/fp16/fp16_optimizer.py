@@ -7,12 +7,14 @@ from betty.utils import get_grad_norm
 
 
 class FP16_Optimizer:
-    def __init__(self,
-                 init_optimizer,
-                 dynamic_loss_scale=False,
-                 static_loss_scale=1.0,
-                 initial_dynamic_scale=2**32,
-                 clip_grad=0.):
+    def __init__(
+        self,
+        init_optimizer,
+        dynamic_loss_scale=False,
+        static_loss_scale=1.0,
+        initial_dynamic_scale=2**32,
+        clip_grad=0.0,
+    ):
 
         if not torch.cuda.is_available():
             raise SystemError("Cannot use fp16 without CUDA.")
@@ -25,7 +27,7 @@ class FP16_Optimizer:
 
         for i, param_group in enumerate(self.optimizer.param_groups):
             # push this group to list before modify
-            self.fp16_groups.append(param_group['params'])
+            self.fp16_groups.append(param_group["params"])
             # init fp16 weight buffer, flattened
             self.fp16_groups_flat.append(
                 _flatten_dense_tensors([p.clone().detach() for p in self.fp16_groups[i]])
@@ -35,12 +37,10 @@ class FP16_Optimizer:
             for p, q in zip(self.fp16_groups[i], updated_params):
                 p.data = q.data
             # init master weight
-            self.fp32_groups_flat.append(
-                self.fp16_groups_flat[i].clone().float().detach()
-            )
+            self.fp32_groups_flat.append(self.fp16_groups_flat[i].clone().float().detach())
             # modify optimizer to have flat master weight
             self.fp32_groups_flat[i].requires_grad = True
-            param_group['params'] = [self.fp32_groups_flat[i]]
+            param_group["params"] = [self.fp32_groups_flat[i]]
 
         if dynamic_loss_scale:
             self.dynamic_loss_scale = True
@@ -66,8 +66,7 @@ class FP16_Optimizer:
     def initialize_optimizer_states(self):
         for i, _ in enumerate(self.fp16_groups):
             self.fp32_groups_flat[i].grad = torch.zeros(
-                self.fp32_groups_flat[i].size(),
-                device=self.fp32_groups_flat[i].device
+                self.fp32_groups_flat[i].size(), device=self.fp32_groups_flat[i].device
             )
 
         self.optimizer.step()
@@ -100,7 +99,9 @@ class FP16_Optimizer:
         self._update_scale(self.overflow)
 
         if self.overflow:
-            print(f"Overflow detected. Skipping step. Attempted loss scale: {prev_scale}, reducing to {self.cur_scale}")
+            print(
+                f"Overflow detected. Skipping step. Attempted loss scale: {prev_scale}, reducing to {self.cur_scale}"
+            )
             for i, fp16_group in enumerate(self.fp16_groups):
                 for p in fp16_group:
                     p.grad = None
@@ -111,12 +112,14 @@ class FP16_Optimizer:
             data_type = self.fp32_groups_flat[i].dtype
 
             grads_groups_flat.append(
-                _flatten_dense_tensors([
-                    torch.zeros(p.size(),
-                                dtype=data_type,
-                                device=p.device)
-                    if p.grad is None else p.grad.to(data_type) for p in group
-                ])
+                _flatten_dense_tensors(
+                    [
+                        torch.zeros(p.size(), dtype=data_type, device=p.device)
+                        if p.grad is None
+                        else p.grad.to(data_type)
+                        for p in group
+                    ]
+                )
             )
 
             for p in group:
@@ -133,8 +136,7 @@ class FP16_Optimizer:
             group.grad = None
 
         for i, fp16_group in enumerate(self.fp16_groups):
-            updated_params = _unflatten_dense_tensors(self.fp32_groups_flat[i],
-                                                      fp16_group)
+            updated_params = _unflatten_dense_tensors(self.fp32_groups_flat[i], fp16_group)
             for p, q in zip(fp16_group, updated_params):
                 p.data.copy_(q.data)
 
@@ -148,7 +150,7 @@ class FP16_Optimizer:
 
         # compute combined scale factor for this group
         combined_scale = self.cur_scale
-        if self.clip_grad > 0.:
+        if self.clip_grad > 0.0:
             # norm is in fact norm*scale
             clip = ((total_norm / self.cur_scale) + 1e-6) / self.clip_grad
             if clip > 1:
@@ -156,15 +158,14 @@ class FP16_Optimizer:
 
         if apply_scale:
             for grad in grad_groups_flat:
-                grad.data.mul_(1. / combined_scale)
+                grad.data.mul_(1.0 / combined_scale)
 
         return combined_scale
 
     def _update_scale(self, skip):
         if self.dynamic_loss_scale:
             if skip:
-                self.cur_scale = max(self.cur_scale / self.scale_factor,
-                                     self.min_loss_scale)
+                self.cur_scale = max(self.cur_scale / self.scale_factor, self.min_loss_scale)
                 self.last_overflow_iter = self.cur_iter
             else:
                 # Ensure self.scale_window updates since last overflow
@@ -193,7 +194,7 @@ class FP16_Optimizer:
                 raise
             return True
         else:
-            if cpu_sum == float('inf') or cpu_sum == -float('inf') or cpu_sum != cpu_sum:
+            if cpu_sum == float("inf") or cpu_sum == -float("inf") or cpu_sum != cpu_sum:
                 return True
             return False
 
@@ -211,16 +212,16 @@ class FP16_Optimizer:
             torch.save(checkpoint, "saved.pth")
         """
         state_dict = {}
-        state_dict['dynamic_loss_scale'] = self.dynamic_loss_scale
-        state_dict['cur_scale'] = self.cur_scale
-        state_dict['cur_iter'] = self.cur_iter
-        if state_dict['dynamic_loss_scale']:
-            state_dict['last_overflow_iter'] = self.last_overflow_iter
-            state_dict['scale_factor'] = self.scale_factor
-            state_dict['scale_window'] = self.scale_window
-        state_dict['optimizer_state_dict'] = self.optimizer.state_dict()
-        state_dict['fp32_groups_flat'] = self.fp32_groups_flat
-        state_dict['clip_grad'] = self.clip_grad
+        state_dict["dynamic_loss_scale"] = self.dynamic_loss_scale
+        state_dict["cur_scale"] = self.cur_scale
+        state_dict["cur_iter"] = self.cur_iter
+        if state_dict["dynamic_loss_scale"]:
+            state_dict["last_overflow_iter"] = self.last_overflow_iter
+            state_dict["scale_factor"] = self.scale_factor
+            state_dict["scale_window"] = self.scale_window
+        state_dict["optimizer_state_dict"] = self.optimizer.state_dict()
+        state_dict["fp32_groups_flat"] = self.fp32_groups_flat
+        state_dict["clip_grad"] = self.clip_grad
 
         return state_dict
 
@@ -242,16 +243,16 @@ class FP16_Optimizer:
             model.load_state_dict(checkpoint['model'])
             optimizer.load_state_dict(checkpoint['optimizer'])
         """
-        self.dynamic_loss_scale = state_dict['dynamic_loss_scale']
-        self.cur_scale = state_dict['cur_scale']
-        self.cur_iter = state_dict['cur_iter']
-        if state_dict['dynamic_loss_scale']:
-            self.last_overflow_iter = state_dict['last_overflow_iter']
-            self.scale_factor = state_dict['scale_factor']
-            self.scale_window = state_dict['scale_window']
+        self.dynamic_loss_scale = state_dict["dynamic_loss_scale"]
+        self.cur_scale = state_dict["cur_scale"]
+        self.cur_iter = state_dict["cur_iter"]
+        if state_dict["dynamic_loss_scale"]:
+            self.last_overflow_iter = state_dict["last_overflow_iter"]
+            self.scale_factor = state_dict["scale_factor"]
+            self.scale_window = state_dict["scale_window"]
         if load_optimizer_states:
-            self.optimizer.load_state_dict(state_dict['optimizer_state_dict'])
-        self.clip_grad = state_dict['clip_grad']
+            self.optimizer.load_state_dict(state_dict["optimizer_state_dict"])
+        self.clip_grad = state_dict["clip_grad"]
 
     def __repr__(self):
         return repr(self.optimizer)

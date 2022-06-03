@@ -14,13 +14,12 @@ def get_grad_norm(parameters):
         parameters = [parameters]
     parameters = list(filter(lambda p: p.grad is not None, parameters))
 
-    total_norm = 0.
+    total_norm = 0.0
     for p in parameters:
         param_norm = p.grad.data.float().norm()
-        total_norm += param_norm.item()**2
+        total_norm += param_norm.item() ** 2
 
-    if total_norm == float(
-            'inf') or total_norm == -float('inf') or total_norm != total_norm:
+    if total_norm == float("inf") or total_norm == -float("inf") or total_norm != total_norm:
         total_norm = -1
 
     return total_norm
@@ -30,13 +29,12 @@ def get_weight_norm(parameters):
     if isinstance(parameters, torch.Tensor):
         parameters = [parameters]
 
-    total_norm = 0.
+    total_norm = 0.0
     for p in parameters:
         param_norm = torch.norm(p, dtype=torch.float32)
-        total_norm += param_norm.item()**2
+        total_norm += param_norm.item() ** 2
 
-    if total_norm == float(
-            'inf') or total_norm == -float('inf') or total_norm != total_norm:
+    if total_norm == float("inf") or total_norm == -float("inf") or total_norm != total_norm:
         total_norm = -1
 
     return total_norm
@@ -56,7 +54,7 @@ def get_param_index(param, param_list):
     for idx, p in enumerate(param_list):
         if p is param:
             return idx
-    print('no corresponding parameter found!')
+    print("no corresponding parameter found!")
 
 
 def get_multiplier(problem):
@@ -86,23 +84,23 @@ def get_multiplier(problem):
 def log_from_loss_dict(loss_dict):
     outputs = []
     for key, values in loss_dict.items():
-        if key == 'loss':
+        if key == "loss":
             value = values.item()
-            output = f'{key}: {value}'
+            output = f"{key}: {value}"
             outputs.append(output)
         else:
             if isinstance(values, dict) or isinstance(values, list):
                 for value_idx, value in enumerate(values):
-                    full_key = key + '_' + str(value_idx)
-                    output = f'{full_key}: {value}'
+                    full_key = key + "_" + str(value_idx)
+                    output = f"{full_key}: {value}"
                     outputs.append(output)
             else:
-                output = f'{key}: {values}'
+                output = f"{key}: {values}"
                 outputs.append(output)
     return " || ".join(outputs)
 
 
-def to_vec(tensor_list, alpha=1.):
+def to_vec(tensor_list, alpha=1.0):
     return torch.cat([alpha * t.reshape(-1) for t in tensor_list])
 
 

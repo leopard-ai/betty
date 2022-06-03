@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class Config:
-    type: str = 'darts'
+    type: str = "darts"
     step: int = 1
     first_order: bool = True
     retain_graph: bool = False
@@ -16,7 +16,7 @@ class Config:
     fp16: bool = False
     dynamic_loss_scale: bool = False
     initial_dynamic_scale: int = 2**32
-    static_loss_scale: float = 1.
+    static_loss_scale: float = 1.0
 
     # logging
     log_step: int = -1
@@ -27,11 +27,11 @@ class Config:
 
     # neumann
     neumann_iterations: int = 1
-    neumann_alpha: float = 1.
+    neumann_alpha: float = 1.0
 
     # cg
     cg_iterations: int = 1
-    cg_alpha: float = 1.
+    cg_alpha: float = 1.0
 
 
 @dataclass
@@ -39,4 +39,4 @@ class EngineConfig:
     train_iters: int = 50000
     valid_step: int = 500
 
-    logger_type: str = 'tensorboard'
+    logger_type: str = "tensorboard"

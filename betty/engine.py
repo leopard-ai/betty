@@ -50,15 +50,14 @@ class Engine:
             self.train_step()
 
             if it % self.valid_step == 0:
-                if self.is_implemented('validation'):
+                if self.is_implemented("validation"):
                     self.eval()
                     validation_stats = self.validation() or {}
                     log_loss = log_from_loss_dict(validation_stats)
                     self.logger.info(
-                        f'[Validation] [Global Step {self.global_step}] '
-                        f'{log_loss}'
+                        f"[Validation] [Global Step {self.global_step}] " f"{log_loss}"
                     )
-                    self.logger.log(validation_stats, tag='validation', step=self.global_step)
+                    self.logger.log(validation_stats, tag="validation", step=self.global_step)
                     self.train()
 
     def initialize(self):
@@ -68,7 +67,7 @@ class Engine:
         # Parse config
         self.parse_config()
         self.logger = logger(logger_type=self.logger_type)
-        self.logger.info('Initializing Multilevel Optimization...\n')
+        self.logger.info("Initializing Multilevel Optimization...\n")
         start = time.time()
 
         # Parse dependency
@@ -80,7 +79,7 @@ class Engine:
             problem.initialize()
 
         end = time.time()
-        self.logger.info(f'Time spent on initialization: {end-start:.3f} (s)\n')
+        self.logger.info(f"Time spent on initialization: {end-start:.3f} (s)\n")
 
     def train(self):
         """
@@ -100,7 +99,7 @@ class Engine:
         """
         Check whether the given ``problem`` is a leaf problem or not.
         """
-        for _, value_list in self.dependencies['l2u'].items():
+        for _, value_list in self.dependencies["l2u"].items():
             if problem in set(value_list):
                 return False
 
@@ -110,7 +109,7 @@ class Engine:
         results = []
         path = [src]
         self.dfs(src, dst, path, results)
-        assert len(results) > 0, f'No path from {src.name} to {dst.name}!'
+        assert len(results) > 0, f"No path from {src.name} to {dst.name}!"
 
         for i, _ in enumerate(results):
             results[i].reverse()
@@ -124,7 +123,7 @@ class Engine:
             result = [node for node in path]
             results.append(result)
         else:
-            for adj in self.dependencies['l2u'][src]:
+            for adj in self.dependencies["l2u"][src]:
                 path.append(adj)
                 self.dfs(adj, dst, path, results)
                 path.pop()
@@ -136,7 +135,7 @@ class Engine:
         modified depth-first search algorithm is used.
         """
         # Parse upper-to-lower dependency
-        for key, value_list in self.dependencies['u2l'].items():
+        for key, value_list in self.dependencies["u2l"].items():
             for value in value_list:
                 # set the problelm attribute for key problem in value problem
                 if set_attr:
@@ -147,7 +146,7 @@ class Engine:
                 key.add_paths(paths)
 
         # Parse lower-to-upper dependency
-        for key, value_list in self.dependencies['l2u'].items():
+        for key, value_list in self.dependencies["l2u"].items():
             for value in value_list:
                 # set the problelm attribute for key problem in value problem
                 if set_attr:
@@ -182,21 +181,21 @@ class Engine:
         """
         name = problem.name
         if name not in self._problem_name_dict:
-            assert not hasattr(self, name), f'Problem already has an attribute named {name}!'
+            assert not hasattr(self, name), f"Problem already has an attribute named {name}!"
             self._problem_name_dict[name] = 0
             setattr(self, name, problem)
         elif self._problem_name_dict[name] == 0:
             # rename first problem
             first_problem = getattr(self, name)
             delattr(self, name)
-            setattr(self, name + '_0', first_problem)
+            setattr(self, name + "_0", first_problem)
 
             self._problem_name_dict[name] += 1
-            name = name + '_' + str(self._problem_name_dict[name])
+            name = name + "_" + str(self._problem_name_dict[name])
             setattr(self, name, problem)
         else:
             self._problem_name_dict[name] += 1
-            name = name + '_' + str(self._problem_name_dict[name])
+            name = name + "_" + str(self._problem_name_dict[name])
             setattr(self, name, problem)
 
         return name

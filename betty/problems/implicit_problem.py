@@ -1,26 +1,28 @@
 from betty.problems import Problem
 
 
-#pylint: disable=W0223
+# pylint: disable=W0223
 class ImplicitProblem(Problem):
     """
     ``ImplicitProblem`` is sublassed from ``Problem``.
     """
 
-    def __init__(self,
-                 name,
-                 config,
-                 module=None,
-                 optimizer=None,
-                 scheduler=None,
-                 train_data_loader=None,
-                 device=None):
+    def __init__(
+        self,
+        name,
+        config,
+        module=None,
+        optimizer=None,
+        scheduler=None,
+        train_data_loader=None,
+        device=None,
+    ):
         super().__init__(name, config, module, optimizer, scheduler, train_data_loader, device)
         self.module_state_dict_cache = None
         self.opitmizer_state_dict_cache = None
 
     def optimizer_step(self, *args, **kwargs):
-        if self.is_implemented('custom_optimizer_step'):
+        if self.is_implemented("custom_optimizer_step"):
             assert not self._fp16, "[!] FP16 training is not supported for custom optimizer step."
             self.custom_optimizer_step(*args, **kwargs)
         else:

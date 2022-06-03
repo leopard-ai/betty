@@ -13,20 +13,24 @@ def neumann(vector, curr, prev):
     ``Config``.
     """
     # ! Mabye replace with child.loss by adding self.loss attribute to save computation
-    assert len(curr.paths) == 0, 'neumann method is not supported for higher order MLO!'
+    assert len(curr.paths) == 0, "neumann method is not supported for higher order MLO!"
     config = curr.config
     in_loss = curr.training_step(curr.cur_batch)
     in_grad = torch.autograd.grad(in_loss, curr.trainable_parameters(), create_graph=True)
-    v2 = approx_inverse_hvp(vector, in_grad, curr.trainable_parameters(),
-                            iterations=config.neumann_iterations,
-                            alpha=config.neumann_alpha)
+    v2 = approx_inverse_hvp(
+        vector,
+        in_grad,
+        curr.trainable_parameters(),
+        iterations=config.neumann_iterations,
+        alpha=config.neumann_alpha,
+    )
     implicit_grad = torch.autograd.grad(in_grad, prev.trainable_parameters(), grad_outputs=v2)
     implicit_grad = [neg_with_none(ig) for ig in implicit_grad]
 
     return implicit_grad
 
 
-def approx_inverse_hvp(v, f, params, iterations=3, alpha=1.):
+def approx_inverse_hvp(v, f, params, iterations=3, alpha=1.0):
     p = v
     for _ in range(iterations):
         hvp = torch.autograd.grad(f, params, grad_outputs=v, retain_graph=True)
