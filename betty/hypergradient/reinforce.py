@@ -1,6 +1,6 @@
 import torch
 
-from betty.utils import add_with_none, neg_with_none
+from betty.utils import neg_with_none
 
 
 def reinforce(vector, curr, prev):
