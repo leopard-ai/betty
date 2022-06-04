@@ -9,5 +9,5 @@ Engine
 ------
 .. automodule:: betty.engine
    :members:
-   :exclude-members: training_step
+   :exclude-members: training_step, dfs
    :undoc-members:

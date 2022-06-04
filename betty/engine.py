@@ -47,6 +47,9 @@ class Engine:
         self.logger_type = self.config.logger_type
 
     def train_step(self):
+        """
+        Running one-step gradient descent for all leaf problems.
+        """
         for leaf in self.leaves:
             leaf.step(global_step=self.global_step)
 
@@ -93,14 +96,14 @@ class Engine:
 
     def train(self):
         """
-        Set invovled problems to train mode.
+        Set all problems in multilevel optimization to the train mode.
         """
         for problem in self.problems:
             problem.train()
 
     def eval(self):
         """
-        Set involved problems to eval mode.
+        Set all problems in multilevel optimization to the eval mode.
         """
         for problem in self.problems:
             problem.eval()
@@ -108,6 +111,11 @@ class Engine:
     def check_leaf(self, problem):
         """
         Check whether the given ``problem`` is a leaf problem or not.
+
+        :param problem: Problem in multilevel optimization
+        :type problem: Problem
+        :return: True or False
+        :rtype: bool
         """
         for _, value_list in self.dependencies["l2u"].items():
             if problem in set(value_list):
@@ -116,6 +124,15 @@ class Engine:
         return True
 
     def find_paths(self, src, dst):
+        """
+        Find all paths from ``src`` to ``dst`` with a modified depth-first search algorithm.
+
+        :param src: The end point of the upper-to-lower edge.
+        :type src: Problem
+        :param dst: The start point of the upper-to-lower edge.
+        :type dst: Problem
+        :return: List of all paths from ``src`` to ``dst``.
+        """
         results = []
         path = [src]
         self.dfs(src, dst, path, results)
@@ -188,6 +205,11 @@ class Engine:
     def set_problem_attr(self, problem):
         """
         Set class attribute for the given ``problem`` based on their names
+
+        :param problem: Problem in multilevel optimization
+        :type problem: Problem
+        :return: ``problem`` name
+        :rtype: str
         """
         name = problem.name
         if name not in self._problem_name_dict:
@@ -213,5 +235,9 @@ class Engine:
     def is_implemented(self, fn_name):
         """
         Check whether ``fn_name`` method is implemented in the class.
+
+        :param fn_name: class method name
+        :type fn_name: str
+        :rtype: bool
         """
         return callable(getattr(self, fn_name, None))

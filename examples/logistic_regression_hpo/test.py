@@ -112,4 +112,4 @@ dependencies = {'l2u': l2u, 'u2l': u2l}
 
 engine = Engine(config=engine_config, problems=problems, dependencies=dependencies)
 engine.run()
-print('*** Welcome to BettyWorld ***')
+print('*** Hello (Betty) World ***')

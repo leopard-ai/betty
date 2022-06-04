@@ -10,6 +10,17 @@ def darts(vector, curr, prev):
     in `DARTS: Differentiable Architecture Search <https://arxiv.org/pdf/1806.09055.pdf>`_ by
     re-interpreting it from the implicit differentiation perspective. Empirically, this method
     achieves better memory efficiency, training wall time, and test accuracy that other methods.
+
+    :param vector:
+        Vector with which matrix-vector multiplication with best-response Jacobian (matrix) would
+        be performed.
+    :type vector: Sequence of Tensor
+    :param curr: A current level problem
+    :type curr: Problem
+    :param prev: A directly lower-level problem to the current problem
+    :type prev: Problem
+    :return: (Intermediate) gradient
+    :rtype: Sequence of Tensor
     """
     config = curr.config
     R = config.darts_alpha

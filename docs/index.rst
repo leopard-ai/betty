@@ -34,7 +34,6 @@ multilevel optimization code.
    :caption: Examples
    :hidden:
 
-   Hyperparameter Optimization<tutorial/hyperparameter_optimization.rst>
    Neural Architecture Search<tutorial/neural_architecture_search.rst>
    Data Reweighting<tutorial/data_reweighting.rst>
 

@@ -8,6 +8,17 @@ def cg(vector, curr, prev):
     Approximate the matrix-vector multiplication with the best response Jacobian by the
     (PyTorch's) default autograd method. Users may need to specify learning rate (``cg_alpha``) and
     conjugate gradient descent iterations (``cg_iterations``) in ``Config``.
+
+    :param vector:
+        Vector with which matrix-vector multiplication with best-response Jacobian (matrix) would
+        be performed.
+    :type vector: Sequence of Tensor
+    :param curr: A current level problem
+    :type curr: Problem
+    :param prev: A directly lower-level problem to the current problem
+    :type prev: Problem
+    :return: (Intermediate) gradient
+    :rtype: Sequence of Tensor
     """
     assert len(curr.paths) == 0, "cg method is not supported for higher order MLO!"
     config = curr.config

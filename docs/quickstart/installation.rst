@@ -48,4 +48,4 @@ If the installation was successful, one should expect the output like:
   [YYYY-mm-dd HH:MM:SS] [INFO] [Problem "outer"] [Global Step 100] [Local Step 10] loss: 0.5861933827400208
   *** Welcome to BettyWorld ***
 
-Welcome to BettyWorld!
+Hello (Betty) World!

@@ -11,6 +11,17 @@ def neumann(vector, curr, prev):
     <https://arxiv.org/abs/1911.02590>`_ based on implicit function theorem (IFT). Users may
     specify learning rate (``neumann_alpha``) and unrolling steps (``neumann_iterations``) in
     ``Config``.
+
+    :param vector:
+        Vector with which matrix-vector multiplication with best-response Jacobian (matrix) would
+        be performed.
+    :type vector: Sequence of Tensor
+    :param curr: A current level problem
+    :type curr: Problem
+    :param prev: A directly lower-level problem to the current problem
+    :type prev: Problem
+    :return: (Intermediate) gradient
+    :rtype: Sequence of Tensor
     """
     # ! Mabye replace with child.loss by adding self.loss attribute to save computation
     assert len(curr.paths) == 0, "neumann method is not supported for higher order MLO!"
