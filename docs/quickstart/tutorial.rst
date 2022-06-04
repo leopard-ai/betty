@@ -1,8 +1,16 @@
 Tutorial
 ========
 
-In this tutorial, we go through two major concepts --- **Problem** and **Engine** --- with the toy
-example of hyperparameter optimization for logistic regression.
+In this tutorial, we go through two major concepts --- **Problem** and **Engine** --- with the
+example of hyperparameter optimization for MNIST image classification.
+Specifically, we aim to optimize weight decay (L2 regularization) values for *all parameters*
+rather than using one fixed value.
+This problem can easily be formulated as bi-level optimization problem:
+
+
+.. math::
+
+    a = b
 
 We first prepare train/validation data for logistic regression using ``numpy`` and ``torch``.
 
