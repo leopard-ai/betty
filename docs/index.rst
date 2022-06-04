@@ -16,11 +16,12 @@ multilevel optimization code.
    :hidden:
 
    Installation<quickstart/installation.rst>
+   Major Concepts<quickstart/concept.rst>
    Tutorial<quickstart/tutorial.rst>
    Architecture (Advanced)<quickstart/architecture.rst>
 
 .. toctree::
-   :caption: Library Docs
+   :caption: API Docs
    :maxdepth: 2
    :hidden:
 

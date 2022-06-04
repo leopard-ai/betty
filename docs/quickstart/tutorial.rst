@@ -100,7 +100,7 @@ lower-level problem is shown in the below code example:
     """ (5) training configurations """
     classifier_config = Config(type='darts', step=0, first_order=True)
 
-    """ Problem Initialization """
+    """ Problem Instantiation """
     classifier = Classifier(
         name='classifier',
         module=classifier_module,
@@ -171,7 +171,7 @@ We can repeat the same process with the lower-level problem for the upper-level 
     """ (5) training configurations """
     hpo_config = Config(type='darts', step=1, first_order=True, retain_graph=True)
 
-    """ Problem Initialization """
+    """ Problem Instantiation """
     hpo = HPO(
         name='hpo',
         module=hpo_module,
