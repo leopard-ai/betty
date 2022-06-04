@@ -20,14 +20,14 @@ h2 {
 h3 {
   font-family: 'Roboto', sans-serif;
   font-weight: 300;
-  font-size: 1em;
+  font-size: 1.1em;
   text-transform: uppercase;
 }
 
 
 h4 {
   font-family: 'Roboto', sans-serif;
-  font-size: 0.8em
+  font-size: 1.em
 }
 
 h5 {
@@ -42,6 +42,7 @@ h5 {
 
 body {
   font-size: 0.975em;
+  text-align: justify;
 }
 
 .theme-toggle-container {
