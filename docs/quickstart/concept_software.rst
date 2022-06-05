@@ -47,6 +47,7 @@ The example usage of the ``Problem`` class is shown below:
 To better understand the ``Problem`` class, we take a deeper dive into each component.
 
 (0) Problem type
+~~~~~~~~~~~~~~~~
 Automatic differentiation for multilevel optimization can be roughly categorized into two types:
 iterative differentiation (ITD) and implicit differentiation (AID). While AID allows users to use
 native PyTorch modules and optimizers, ITD requires patching both modules and optimizers to follow

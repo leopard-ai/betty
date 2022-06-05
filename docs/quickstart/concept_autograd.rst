@@ -108,3 +108,47 @@ number of gradient steps, which can significantly reduce the computational cost.
 potentially obtain a better approximation of :math:`w^*(\lambda)` by running gradient steps until
 convergence, this procedure alone can take a few days (or even weeks) when the underlying
 optimization problem is large-scale (e.g. ImageNet or BERT). 
+
+Once :math:`w^*(\lambda)` is approximated, matrix-vector multiplication between the best-response
+Jacobian :math:`\frac{dw^*(\lambda)}{d\lambda}` and a vector :math:`v` is popularly obtained by
+either iterative differentiation (ITD) or approximate implicit differentiation (AID). This problem
+has been extensively studied in bilevel optimization literature
+[`Grazzi et al. <https://arxiv.org/abs/2006.16218>`_,
+`Franceschi et al. <https://arxiv.org/abs/1703.01785>`_,
+`Liu et al. <https://arxiv.org/abs/1806.09055>`_,
+`Lorraine et al. <https://arxiv.org/abs/1911.02590>`_,
+`Maclaurin et al. <https://arxiv.org/abs/1502.03492>`_],
+and we direct interested readers to the original papers,
+
+Here, we provide several insights about each algorithm here. Roughly speaking, ITD differentiates
+through the optimization *path* of Equation (4), whereas AID only depends on the (approximated)
+solution :math:`w^*(\lambda)`. Due to this difference, AID is oftentimes considered to be more
+memory efficient than ITD. The same observation has also been made based on a theoretical
+analysis in `Ji et al. <https://arxiv.org/abs/2010.07962>`_. Moreover, a dependency to the
+optimization path requires ITD to track the intermediate states of the parameter during
+optimization, but existing frameworks like PyTorch override such intermediate states through the
+use of stateful modules and in-place operations in the optimizer. Hence, ITD requires patching
+modules and optimizers to support intermediate state tracking as well.
+
+Overall, AID provides two important benefits compared to ITD: it can allow better memory
+efficiency, and use native modules/optimizers of existing frameworks. Thus, in Betty we also
+primarily direct our focus on AID algorithms while also providing an implementation of ITD for
+completeness. Currently available best-response Jacobian calculation algorithms in Betty include
+(1) ITD with reverse-mode automatic differentiation [`Finn et al. <https://arxiv.org/abs/1703.03400>`_],
+(2) AID with Neumann series [`Lorraine et al. <https://arxiv.org/abs/1911.02590>`_],
+(3) AID with conjugate gradient [`Rajeswaran et al. <https://arxiv.org/abs/1909.04630>`_], and
+(4) AID with finite difference [`Liu et al. <https://arxiv.org/abs/1806.09055>`_].
+Users can choose whichever algorithm is most-appropriate for each problem in their MLO program,
+and the chosen algorithm is used to perform the matrix-vector multiplication with best-response
+Jacobians in Equation (2) for the corresponding problem based on the dataflow graph,
+accomplishing automatic differentiation for MLO. By default, Betty uses (4) AID with finite
+difference (i.e. ``darts``), as we empirically observe that ``darts`` achieves the best memory
+efficiency, training wall time, and final accuracy across a wide range of tasks.
+
+In general, the above automatic differentiation technique for multilevel optimization has a lot in
+common with reverse-mode automatic differentiation (i.e. backpropagation) in neural networks. In
+particular, both techniques achieve gradient calculation by iteratively multiplying Jacobian
+matrices while reverse-traversing dataflow graphs. However, the dataflow graph of MLO has two
+different types of edges, due to its unique constraint criteria, unlike that of neural networks
+with a single edge type. Furthermore, Jacobian matrices in MLO are generally approximated with ITD
+or AID while those in neural networks can be analytically calculated.
