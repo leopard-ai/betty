@@ -18,7 +18,6 @@ multilevel optimization code.
    Installation<quickstart/installation.rst>
    Major Concepts<quickstart/concept.rst>
    Tutorial<quickstart/tutorial.rst>
-   Architecture (Advanced)<quickstart/architecture.rst>
 
 .. toctree::
    :caption: API Docs
@@ -35,8 +34,8 @@ multilevel optimization code.
    :caption: Examples
    :hidden:
 
-   Neural Architecture Search<tutorial/neural_architecture_search.rst>
-   Data Reweighting<tutorial/data_reweighting.rst>
+   Neural Architecture Search<examples/neural_architecture_search.rst>
+   Data Reweighting<examples/data_reweighting.rst>
 
 
 
