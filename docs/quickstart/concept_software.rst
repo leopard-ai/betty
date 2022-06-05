@@ -24,7 +24,7 @@ The example usage of the ``Problem`` class is shown below:
     """ module, opitmizer, data loader setup """
     my_module, my_optimizer, my_data_loader = problem_setup()
 
-    class MyProblem(Problem):
+    class MyProblem(ImplicitProblem):
         def training_step(self, batch):
             """ Users define the loss function here """
             loss = loss_fn(batch, self.module, self.other_probs, ...)
@@ -46,8 +46,17 @@ The example usage of the ``Problem`` class is shown below:
 
 To better understand the ``Problem`` class, we take a deeper dive into each component.
 
+(0) Problem type
+Automatic differentiation for multilevel optimization can be roughly categorized into two types:
+iterative differentiation (ITD) and implicit differentiation (AID). While AID allows users to use
+native PyTorch modules and optimizers, ITD requires patching both modules and optimizers to follow
+a functional programming paradigm. Due to this difference, we provide separate classes
+``IterativeProblem`` and ``ImplicitProblem`` respecitvely for AID and ITD. Empirically, we observe
+that AID achieves better memory efficieny, training wall time, and final accuracy. Thus, we highly
+recommend using ``ImplicitProblem`` class as a default setting.
+
 (1) Module
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~
 Module defines parameters to be learned at the current level :math:`k`, and corresponds to
 :math:`\theta_k` in our mathematical formulation (:doc:`Chapter <concept_mlo>`). In practice,
 module is defined with PyTorch's ``torch.nn.Module`` as in traditional neural network
@@ -141,6 +150,7 @@ We here also take a deeper look into each component of ``Engine``.
 
 (1) Problems
 ~~~~~~~~~~~~
+Users should provide all the involved optimization problems through the problem argument.
 
 (2) Dependencies
 ~~~~~~~~~~~~~~~~
@@ -152,12 +162,17 @@ finds all paths required for automatic differentiation with a modified depth-fir
 Moreover, ``Engine`` sets constraining problem sets for each problem based on the dependency graphs,
 as mentioned above.
 
-
 (3) Validation
 ~~~~~~~~~~~~~~
+We currently allow users to define one validation stage for the *whole* multilevel optimization
+program. This can be achieved by implementing the ``validation`` method in ``Engine`` as shown
+above. As in the ``training_step`` method of the ``Problem`` class, users can return whichever
+metrics they want to log with the Python dictionary.
 
 (4) Engine Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~
+Users can specify several configurations for the whole multilevel optimization program, such as
+the total training iterations, the validation step, and the logger type.
 
 (5) Run
 ~~~~~~~
