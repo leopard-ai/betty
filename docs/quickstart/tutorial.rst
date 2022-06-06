@@ -12,10 +12,12 @@ Mathematically, the bilevel optimization formulation for the above problem can b
 
 .. math::
 
-    \text{Upper:}\quad\;\lambda^* = \underset{\lambda}{\arg\min}\;f(X; \theta^*) +
-    \frac{1}{2}\theta^{* \top} diag(\lambda)\theta^* \\
-    \text{Lower:}\quad\,\quad\;\theta^* = \underset{\theta}{\arg\min}\;f(X; \theta) +
-    \frac{1}{2}\theta^\top diag(\lambda)\theta
+    \begin{flalign}
+        &&\text{Upper:}\quad\;\lambda^* = \underset{\lambda}{\arg\min}\;f(X; \theta^*) +
+        \frac{1}{2}\theta^{* \top} diag(\lambda)\theta^*&&\text{(1)} \\
+        &&\text{Lower:}\quad\,\quad\;\theta^* = \underset{\theta}{\arg\min}\;f(X; \theta) +
+        \frac{1}{2}\theta^\top diag(\lambda)\theta&&\text{(2)}
+    \end{flalign}
 
 where :math:`\theta` is the image classification network parameter, :math:`\lambda` is the weight 
 decay value for each parameter, and :math:`X` is the training dataset. While many previous work use
@@ -41,14 +43,13 @@ step-by-step guide for implementing the ``Problem``
 
 Lower-level Problem (Classifier)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-In this example, the lower-level problem corresponds to the MNIST image classification task. Thus,
-(1) module, (2) optimizer, (3) data loader, (4) loss function, (5) training configuration can be
+In our MNIST + HPO example, the lower-level problem corresponds to the MNIST image classification
+task. Thus, module, optimizer, data loader, loss function, training configuration can be
 respectively defined as below.
 
-**(1) Module**
+**Module**
 
-We use the simple MLP with one hidden layer as our classification network (i.e. 784-200-100). This
-network can be implemented as:
+We use the simple MLP with one hidden layer as our classification network (i.e. 784-200-100).
 
 .. code:: python
 
@@ -67,7 +68,7 @@ network can be implemented as:
             return out
     classifier_module = Net()
 
-**(2) Optimizer**
+**Optimizer**
 
 We use the SGD optimizer with the learning rate of 0.01 and the momentum value of 0.9 as our
 optimizer.
@@ -80,7 +81,8 @@ optimizer.
         momentum=0.9
     )
 
-**(3) Data Loader**
+**Data Loader**
+
 MNIST dataset and data loader can be easily implemented with ``torchvision`` and
 ``torch.utils.DataLoader``.
 
@@ -99,11 +101,13 @@ MNIST dataset and data loader can be easily implemented with ``torchvision`` and
         pin_memory=True,
     )
 
-**(4) Loss Function**
+**Loss Function**
 Unlike other components, loss function should be directly implemented in the ``Problem`` class via
 the ``training_step`` method. In our example, loss function is composed of two parts: cross-entropy
-classification loss and L2 regularization loss. We also define the ``forward`` method to define the
-``__call__`` method of the class.
+classification loss and L2 regularization loss. As introduced in the
+:doc:`Software Design<concept_software>` chapter, the outer-level module can be accessed via its
+name (i.e. ``self.hpo``). We also define the ``forward`` method to define the ``__call__`` method
+of the class.
 
 .. code:: python
 
@@ -126,9 +130,9 @@ classification loss and L2 regularization loss. We also define the ``forward`` m
 
             return ce_loss + reg_loss
 
-**(5) Training Configuration**
+**Training Configuration**
 Since the classification problem is the lowest-level problem, it doesn't require any best-response
-Jacobian calculation from the lower-level problems. Rather, it would use the PyTorch's default
+Jacobian calculation from the lower-level problems. Rather, it would use PyTorch's default
 autograd to calculate the gradient. Therefore, we don't need to specify anything for the
 training configuration for this problem.
 
@@ -138,7 +142,7 @@ training configuration for this problem.
 
     classifier_config = Config()
 
-**(6) Problem Instatntiation**
+**Problem Instatntiation**
 Now that we have all the components to define the problem, we can instantiate the ``Problem`` class.
 We use 'classifier' as the ``name`` for this problem.
 
@@ -155,12 +159,16 @@ We use 'classifier' as the ``name`` for this problem.
 
 Upper-level Problem (HPO)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-We can repeat the same process with the lower-level problem for the upper-level problem
-(HPO).
+While the lower-level problem is a classification problem, the upper-level problem is a
+hyperparameter optimization problem. We here repeat the same process of defining the problem by
+going through each component step-by-step.
+
+**Module**
+In our example, hyperparameters are weight decay values for *all* classifier parameters. Thus,
+we create ``torch.nn.Module`` that has the same parameter shapes with the classifier.
 
 .. code:: python
 
-    """ (1) module """
     class WeightDecay(nn.Module):
         def __init__(self):
             super(WeightDecay, self).__init__()
@@ -171,10 +179,21 @@ We can repeat the same process with the lower-level problem for the upper-level 
             return self.fc1_wdecay, self.fc2_wdecay
     hpo_module = WeightDecay()
 
-    """ (2) optimizer """
+**Optimizer**
+We use Adam optimizer with the learning rate of 0.00001 to optimize hyperparameters.
+
+.. code:: python
+
     hpo_optimizer = optim.Adam(hpo_module.parameters(), lr=1e-5)
 
-    """ (3) data loader """
+**Data Loader**
+Following `How Important is the Train-Validation Split in Meta-Learning
+<https://proceedings.mlr.press/v139/bai21a/bai21a.pdf>`_, we use the same dataset as the lower-level
+problem. Essentially, this means that we are finding weight decay values that lead to fastest
+decrease in training loss.
+
+.. code:: python
+
     hpo_data_loader = torch.utils.data.DataLoader(
         trainset,
         batch_size=64,
@@ -183,7 +202,14 @@ We can repeat the same process with the lower-level problem for the upper-level 
         pin_memory=True,
     )
 
-    """ (4) loss function """
+**Loss Function**
+In Equations (1) & (2), both levels adopt the same loss function. Therefore, the ``training_step``
+method for the upper-level problem can be similarly implemented with the lower-level problem.
+
+.. code:: python
+
+    from betty.problems import ImplicitProblem
+
     class HPO(ImplicitProblem):
         def forward(self):
             return self.module()
@@ -200,17 +226,46 @@ We can repeat the same process with the lower-level problem for the upper-level 
             acc = (out.argmax(dim=1) == target.long()).float().mean().item() * 100
             loss = loss + reg_loss
 
-            return loss
+            return {'loss': loss, 'acc': acc}
+
+**Optional Components**
+Weight decay values should always be positive, as the loss function with the negative weight decay
+value can easily diverge to :math:`-\infty` by increasing the corresponding weight. Thus, we should
+ensure the positivity of weight decay values via the ``param_callback`` method. Betty will call the
+``param_callback`` method after each parameter update to execute the function provided by the user.
+This is an optional component that may not be present in other problems.
+
+.. code:: python
+    class HPO(ImplicitProblem):
+        def training_step(self, batch):
+            ...
 
         def param_callback(self, params):
             # ensure weight decay value >= 0
             for p in params:
                 p.data.clamp_(min=1e-8)
 
-    """ (5) training configurations """
-    hpo_config = Config(type='darts', step=1, first_order=True, retain_graph=True)
 
-    """ Problem Instantiation """
+**Training Configuration**
+Since the HPO problem's loss function is dependent on the optimal parameter of the lower-level
+classification problem (see Equation (1)), it requires the approximation of
+best-response Jacobian of the lower-level problem for calculating its gradient. We use AID with
+finite difference (a.k.a ``darts``) with the unrolling step of 1. Depending on the computation
+graph of your multilevel optimization, you may need to set ``retain_graph=True`` in ``Config`` as
+below.
+
+.. code:: python
+
+    from betty.configs import Config
+
+    hpo_config = Config(type='darts', step=1, retain_graph=True)
+
+**Problem Instantiation**
+We can now instantiate the HPO Problem class with the above-defined components. We use 'hpo' as the
+name for this problem.
+
+.. code:: python
+
     hpo = HPO(
         name='hpo',
         module=hpo_module,
@@ -219,9 +274,6 @@ We can repeat the same process with the lower-level problem for the upper-level 
         config=hpo_config,
         device="cuda"
     )
-
-For the ``HPO`` class, we additionally define ``param_callback`` method to ensure that the weight
-decay value is always positive by clamping its value.
 
 
 Engine
