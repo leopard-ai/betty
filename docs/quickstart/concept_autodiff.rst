@@ -1,4 +1,4 @@
-Autograd for Multilevel Optimization
+Autodiff for Multilevel Optimization
 ====================================
 
 In this paper, we focus in particular on *gradient-based* multilevel optimization, rather than
