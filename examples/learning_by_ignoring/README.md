@@ -13,6 +13,8 @@ The similar idea was also proposed in
 [Meta-Learning to Improve Pre-TrainingMeta-learning](https://arxiv.org/abs/2111.01754)
 (NeurIPS 2021).
 
+## Dataset
+OfficeHome dataset can be downloaded from [here](http://155.33.198.138/lbi_data.zip)
 ## Environment
 Our code is developed/tested on:
 
