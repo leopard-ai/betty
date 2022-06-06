@@ -95,9 +95,10 @@ Jacobian and a vector serves as a base operation of efficient automatic differen
 Mathematically, this problem can be simply written as follows:
 
 .. math::
+
     \begin{flalign}
-        &&\text{Calculate}\,:\quad&\frac{\partial w^*(\lambda)}{\partial \lambda}\times v&&\text{(3)}\\
-        &&\text{Given}\,:\quad&w^*(\lambda) = \underset{w}{\mathrm{argmin}}\;\mathcal{C}(w, \lambda)&&\text{(4)}
+        &&\text{Calculate}\,:\quad&\frac{\partial w^*(\lambda)}{\partial \lambda}\times v &&\quad\quad\quad\text{(3)}\\
+        &&\text{Given}\,:\quad&w^*(\lambda) = \underset{w}{\mathrm{argmin}}\;\mathcal{C}(w, \lambda) &&\quad\quad\quad\text{(4)}
     \end{flalign}
 
 Two major challenges in the above problems are: (1) approximating the solution of the optimization

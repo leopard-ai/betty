@@ -14,9 +14,9 @@ Mathematically, the bilevel optimization formulation for the above problem can b
 
     \begin{flalign}
         &&\text{Upper:}\quad\;\lambda^* = \underset{\lambda}{\arg\min}\;f(X; \theta^*) +
-        \frac{1}{2}\theta^{* \top} diag(\lambda)\theta^*&&\text{(1)} \\
+        \frac{1}{2}\theta^{* \top} diag(\lambda)\theta^*&&\quad\quad\quad\text{(1)} \\
         &&\text{Lower:}\quad\,\quad\;\theta^* = \underset{\theta}{\arg\min}\;f(X; \theta) +
-        \frac{1}{2}\theta^\top diag(\lambda)\theta&&\text{(2)}
+        \frac{1}{2}\theta^\top diag(\lambda)\theta&&\quad\quad\quad\text{(2)}
     \end{flalign}
 
 where :math:`\theta` is the image classification network parameter, :math:`\lambda` is the weight 
@@ -204,7 +204,8 @@ decrease in training loss.
 
 **Loss Function**
 In Equations (1) & (2), both levels adopt the same loss function. Therefore, the ``training_step``
-method for the upper-level problem can be similarly implemented with the lower-level problem.
+method for the upper-level problem can be similarly implemented with the lower-level problem. We
+enable logging by returning the Python dictionary of loss and accuracy.
 
 .. code:: python
 
@@ -253,13 +254,14 @@ classification problem (see Equation (1)), it requires the approximation of
 best-response Jacobian of the lower-level problem for calculating its gradient. We use AID with
 finite difference (a.k.a ``darts``) with the unrolling step of 1. Depending on the computation
 graph of your multilevel optimization, you may need to set ``retain_graph=True`` in ``Config`` as
-below.
+below. Finally, we also specify the ``log_step`` for the metrics returned in the ``training_step``
+method.
 
 .. code:: python
 
     from betty.configs import Config
 
-    hpo_config = Config(type='darts', step=1, retain_graph=True)
+    hpo_config = Config(type='darts', step=1, log_step=10, retain_graph=True)
 
 **Problem Instantiation**
 We can now instantiate the HPO Problem class with the above-defined components. We use 'hpo' as the
@@ -279,11 +281,27 @@ name for this problem.
 
 Engine
 ------
-Now that we defined both level optimization problems with ``Problem``, we inject the dependency
-between these problems and optionally the validation stage via the ``Engine`` class. Specifically,
-the dependency between problems are split into two categories of upper-to-lower (``u2l``) and
-lower-to-upper(``l2u``), and both are defined with the Python dictionary. Finally, the whole
-multilevel optimization procedure can be excuted by the ``run`` method of ``Engine``.
+Recalling the :doc:`Software Design <concept_software>` chapter, the ``Engine`` class handles
+problem dependencies, validation, and execution of multilevel optimization. Let's again take a
+step-by-step dive into each component.
+
+**Problem Dependencies**
+The dependency between problems are split into two categories of upper-to-lower (``u2l``) and
+lower-to-upper(``l2u``), both of which are defined with the Python dictionary. In our example,
+``hpo`` is the upper-level problem and ``classifier`` is the lower-level problem.
+
+.. code:: python
+
+    u2l = {hpo: [classifier]}
+    l2u = {classifier: [hpo]}
+    dependencies = {'l2u': l2u, 'u2l': u2l}
+
+**Validation**
+Validation for HPO + MNIST can be implemented with the ``validation`` method in the ``Engine``
+class. As in the ``training_step`` method of the ``Problem`` class, each problem can be accessed
+via their name (e.g. ``self.classifier``), and multiple metrics can be returned with the Python
+dictionary for the logging purpose. Here, we calculate and report the current validation accuracy,
+and the best validation accuracy.
 
 .. code:: python
 
@@ -305,14 +323,26 @@ multilevel optimization procedure can be excuted by the ``run`` method of ``Engi
                 best_acc = acc
             return {'acc': acc, 'best_acc': best_acc}
 
-    problems = [classifier, hpo]
-    
-    u2l = {hpo: [classifier]}
-    l2u = {classifier: [hpo]}
-    dependencies = {'l2u': l2u, 'u2l': u2l}
+**Engine Instantiation**
+To instantiate the ``Engine`` class, we also need to provide all involved problems and the
+Engine configuration. Since we already defined all problems, we can simply combine them with
+Python list. In addition, we perform our multilevel optimization for 5,000 iterations and a
+validation procedure every 100 steps, all of which should be specified in ``EngineConfig``.
 
+.. code:: python
+    
+    problems = [hpo, classifier]
     engine_config = EngineConfig(train_iters=5000, valid_step=100)
     engine = HPOEngine(config=engine_config, problems=problems, dependencies=dependencies)
+
+**Execution of Multilevel Optimization**
+Finally, multilevel optimization can be excuted by running ``engine.run()``, which calls the
+``step`` method of the lowermost problem (``Classifier``), which corresponds to the one-step
+gradient descent. After unrolling gradient descent for the lower-most problem for the
+pre-determined steps (``step`` attribute in ``hpo_config``), the ``step`` method of ``Classifier``
+will automatically call the ``step`` method of ``HPO`` according to the provided dependencies.
+
+.. code:: python
     engine.run()
 
 
