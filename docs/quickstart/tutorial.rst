@@ -236,6 +236,7 @@ ensure the positivity of weight decay values via the ``param_callback`` method. 
 This is an optional component that may not be present in other problems.
 
 .. code:: python
+
     class HPO(ImplicitProblem):
         def training_step(self, batch):
             ...
