@@ -102,6 +102,7 @@ MNIST dataset and data loader can be easily implemented with ``torchvision`` and
     )
 
 **Loss Function**
+
 Unlike other components, loss function should be directly implemented in the ``Problem`` class via
 the ``training_step`` method. In our example, loss function is composed of two parts: cross-entropy
 classification loss and L2 regularization loss. As introduced in the
@@ -131,6 +132,7 @@ of the class.
             return ce_loss + reg_loss
 
 **Training Configuration**
+
 Since the classification problem is the lowest-level problem, it doesn't require any best-response
 Jacobian calculation from the lower-level problems. Rather, it would use PyTorch's default
 autograd to calculate the gradient. Therefore, we don't need to specify anything for the
@@ -143,6 +145,7 @@ training configuration for this problem.
     classifier_config = Config()
 
 **Problem Instatntiation**
+
 Now that we have all the components to define the problem, we can instantiate the ``Problem`` class.
 We use 'classifier' as the ``name`` for this problem.
 
@@ -164,6 +167,7 @@ hyperparameter optimization problem. We here repeat the same process of defining
 going through each component step-by-step.
 
 **Module**
+
 In our example, hyperparameters are weight decay values for *all* classifier parameters. Thus,
 we create ``torch.nn.Module`` that has the same parameter shapes with the classifier.
 
@@ -180,6 +184,7 @@ we create ``torch.nn.Module`` that has the same parameter shapes with the classi
     hpo_module = WeightDecay()
 
 **Optimizer**
+
 We use Adam optimizer with the learning rate of 0.00001 to optimize hyperparameters.
 
 .. code:: python
@@ -187,6 +192,7 @@ We use Adam optimizer with the learning rate of 0.00001 to optimize hyperparamet
     hpo_optimizer = optim.Adam(hpo_module.parameters(), lr=1e-5)
 
 **Data Loader**
+
 Following `How Important is the Train-Validation Split in Meta-Learning
 <https://proceedings.mlr.press/v139/bai21a/bai21a.pdf>`_, we use the same dataset as the lower-level
 problem. Essentially, this means that we are finding weight decay values that lead to fastest
@@ -203,6 +209,7 @@ decrease in training loss.
     )
 
 **Loss Function**
+
 In Equations (1) & (2), both levels adopt the same loss function. Therefore, the ``training_step``
 method for the upper-level problem can be similarly implemented with the lower-level problem. We
 enable logging by returning the Python dictionary of loss and accuracy.
@@ -230,6 +237,7 @@ enable logging by returning the Python dictionary of loss and accuracy.
             return {'loss': loss, 'acc': acc}
 
 **Optional Components**
+
 Weight decay values should always be positive, as the loss function with the negative weight decay
 value can easily diverge to :math:`-\infty` by increasing the corresponding weight. Thus, we should
 ensure the positivity of weight decay values via the ``param_callback`` method. Betty will call the
@@ -249,6 +257,7 @@ This is an optional component that may not be present in other problems.
 
 
 **Training Configuration**
+
 Since the HPO problem's loss function is dependent on the optimal parameter of the lower-level
 classification problem (see Equation (1)), it requires the approximation of
 best-response Jacobian of the lower-level problem for calculating its gradient. We use AID with
@@ -264,6 +273,7 @@ method.
     hpo_config = Config(type='darts', step=1, log_step=10, retain_graph=True)
 
 **Problem Instantiation**
+
 We can now instantiate the HPO Problem class with the above-defined components. We use 'hpo' as the
 name for this problem.
 
@@ -286,8 +296,9 @@ problem dependencies, validation, and execution of multilevel optimization. Let'
 step-by-step dive into each component.
 
 **Problem Dependencies**
-The dependency between problems are split into two categories of upper-to-lower (``u2l``) and
-lower-to-upper(``l2u``), both of which are defined with the Python dictionary. In our example,
+
+The dependency between problems are split into two categories --- upper-to-lower (``u2l``) and
+lower-to-upper(``l2u``) ---, both of which are defined with the Python dictionary. In our example,
 ``hpo`` is the upper-level problem and ``classifier`` is the lower-level problem.
 
 .. code:: python
@@ -297,6 +308,7 @@ lower-to-upper(``l2u``), both of which are defined with the Python dictionary. I
     dependencies = {'l2u': l2u, 'u2l': u2l}
 
 **Validation**
+
 Validation for HPO + MNIST can be implemented with the ``validation`` method in the ``Engine``
 class. As in the ``training_step`` method of the ``Problem`` class, each problem can be accessed
 via their name (e.g. ``self.classifier``), and multiple metrics can be returned with the Python
@@ -324,6 +336,7 @@ and the best validation accuracy.
             return {'acc': acc, 'best_acc': best_acc}
 
 **Engine Instantiation**
+
 To instantiate the ``Engine`` class, we also need to provide all involved problems and the
 Engine configuration. Since we already defined all problems, we can simply combine them with
 Python list. In addition, we perform our multilevel optimization for 5,000 iterations and a
@@ -336,6 +349,7 @@ validation procedure every 100 steps, all of which should be specified in ``Engi
     engine = HPOEngine(config=engine_config, problems=problems, dependencies=dependencies)
 
 **Execution of Multilevel Optimization**
+
 Finally, multilevel optimization can be excuted by running ``engine.run()``, which calls the
 ``step`` method of the lowermost problem (``Classifier``), which corresponds to the one-step
 gradient descent. After unrolling gradient descent for the lower-most problem for the
@@ -343,8 +357,8 @@ pre-determined steps (``step`` attribute in ``hpo_config``), the ``step`` method
 will automatically call the ``step`` method of ``HPO`` according to the provided dependencies.
 
 .. code:: python
-    engine.run()
 
+    engine.run()
 
 Results
 -------
