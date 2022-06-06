@@ -1,18 +1,20 @@
 Multilevel Optimization
 =======================
 
-To introduce MLO, we first define an important concept known as a *constrained problem*.
+To introduce multilevel optimization, we first define an important concept known as a
+*constrained problem*.
 
 **Definition 1.** An optimization problem :math:`P` is said to be **constrained** by
-:math:`\lambda` when its cost function :math:`\mathcal{C}` has :math:`\lambda` as an argument in
-addition to the optimization parameter :math:`\theta` 
-(i.e. :math:`P:\arg\min_{\theta}\mathcal{C}(\theta, \lambda,\cdots)`). 
+:math:`\lambda` when its cost function :math:`\mathcal{C}` has :math:`\lambda` as an
+argument in addition to the optimization parameter :math:`\theta` — i.e.
+:math:`P:\arg\min_{\theta}\mathcal{C}(\theta, \lambda,\cdots)`.
 
-Multilevel optimization refers to a field of study that aims to solve a nested set of optimization
-problems defined on a sequence of so-called *levels*, which satisfy two main criteria: **(A1)**
-upper-level problems are constrained by the *optimal* parameters of lower-level problems while
-**(A2)** lower-level problems are constrained by the *nonoptimal* parameters of upper-level
-problems. Formally, an n-level MLO program can be written as:
+Multilevel optimization (MLO) refers to a field of study that aims to solve a nested set
+of optimization problems defined on a sequence of so-called *levels*, which satisfy two
+main criteria: **(A1)** upper-level problems are constrained by the *optimal* parameters
+of lower-level problems while **(A2)** lower-level problems are constrained by the
+*nonoptimal* parameters of upper-level problems. Formally, an n-level MLO program can be
+written as:
 
 .. math::
 
@@ -24,18 +26,21 @@ problems. Formally, an n-level MLO program can be written as:
         P_1:\quad&& &\hspace{24mm}\text{s.t.}\hspace{2mm}\theta_1^* = \underset{\theta_1}{\mathrm{argmin}}\; \mathcal{C}_1(\theta_1, \mathcal{U}_1, \mathcal{L}_1; \mathcal{D}_k)&&\quad\quad\;\text{ $\rhd$ Level $1$}
     \end{flalign*}
 
-where, :math:`P_k` stands for the level k problem, :math:`\theta_k\,/\,\theta_k^*` for
-corresponding nonoptimal / optimal parameters, and :math:`\mathcal{U}_k\,/\,\mathcal{L}_k` for the
-sets of constraining parameters from upper / lower level problems. Here, :math:`\mathcal{D}_k` is
-the training dataset, and :math:`\mathcal{C}_k` indicates the cost function. Due to criteria
-**A1** & **A2**, constraining parameters from upper-level problems should be nonoptimal (i.e.
-:math:`\mathcal{U}_k \subseteq \{\theta_{k+1}, \cdots, \theta_n\}`) while constraining parameters
-from lower-level problems should be optimal (i.e.
-:math:`\mathcal{L}_k \subseteq \{\theta_{1}^*, \cdots, \theta_{k-1}^*\}`). Although we denote only
-one optimization problem per level in the above formulation, each level could in fact have multiple
-problems. Therefore, we henceforth discard the concept of level, and rather assume that problems
-:math:`\{P_1, P_2, \cdots, P_n\}` of a general MLO program are topologically sorted in a
-*reverse* order (i.e. :math:`P_n` / :math:`P_1` denote uppermost / lowermost problems).
+where :math:`P_k` stands for the level k problem, :math:`\theta_k\,/\,\theta_k^*` for
+corresponding nonoptimal / optimal parameters, and
+:math:`\mathcal{U}_k\,/\,\mathcal{L}_k` for the sets of constraining parameters from
+upper / lower level problems. Here, :math:`\mathcal{D}_k` is the training dataset, and
+:math:`\mathcal{C}_k` indicates the cost function. Due to criteria **(A1)** & **(A2)**,
+the constraining parameters from upper-level problems should be nonoptimal (i.e.
+:math:`\mathcal{U}_k \subseteq \{\theta_{k+1}, \cdots, \theta_n\}`) while the
+constraining parameters from lower-level problems should be optimal (i.e.
+:math:`\mathcal{L}_k \subseteq \{\theta_{1}^*, \cdots, \theta_{k-1}^*\}`).
+
+Although we denote only one optimization problem per level in the above formulation,
+each level could in fact have multiple problems. Therefore, we henceforth discard the
+concept of level, and rather assume that problems :math:`\{P_1, P_2, \cdots, P_n\}` of a
+general MLO program are topologically sorted in a *reverse* order (i.e. :math:`P_n` /
+:math:`P_1` denote uppermost / lowermost problems).
 
 Application Examples
 --------------------
@@ -46,10 +51,10 @@ hyperparameter optimization (HPO) [`Franceschi et al. <https://arxiv.org/pdf/170
 [`Liu et al. (DARTS) <https://arxiv.org/abs/1806.09055>`_], and reinforcement learning (RL)
 [`Konda et al. (Actor-Critic)
 <https://proceedings.neurips.cc/paper/1999/file/6449f44a102fde848669bdd9eb6b76fa-Paper.pdf>`_].
-Expecially, all above problems can be formulated as bilevel optimization, the simplest case of
-multilevel optimization with two-level hierarchy. To better understand the concept of multilevel
-optimization, we illustrate how each of these problems can be formulated under the above
-mathematical notation and framework.
+In particular, each of these problems can be formulated as bilevel optimization, the
+simplest case of multilevel optimization with a two-level hierarchy. To better
+understand the concept of multilevel optimization, we illustrate how each of these
+problems can be formulated under the above mathematical notation and framework.
 
 +---------------+---------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------+
 |               |                                          Level 2 (Upper)                                          |                                         Level 1 (Lower)                                        |
