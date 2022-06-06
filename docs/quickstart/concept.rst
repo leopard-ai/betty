@@ -1,7 +1,7 @@
 Major Concepts
 ==============
-In this chapter, we will introduce the basic concept of multilevel optimization (MLO), and the core
-concept of Betty's software design. Our design allows an easy-to-use, modular, and maintainable
+In this chapter, we will introduce the basic concept of multilevel optimization (MLO), and
+Betty's software design. Our design allows an easy-to-use, modular, and maintainable
 programming interface for general MLO programs with complex dependencies without requiring expertise
 in programming and mathematics. Particularly, this chapter is composed of 4 sub-chapters:
 

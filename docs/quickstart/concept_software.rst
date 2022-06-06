@@ -14,9 +14,8 @@ Problem
 -------
 
 Under our abstraction, each optimization problem :math:`P` in MLO is defined by the (1)
-module :math:`\theta_k`, (2) the optimizer, (3) the data loader :math:`D_k`,
-(4) the loss function :math:`\mathcal{C}_k`, (5) the problem (or optimization) configuration,
-and the sets of the upper and lower constraining problems :math:`\mathcal{U}_k\;\&\;\mathcal{L}_k`.
+module, (2) the optimizer, (3) the data loader, (4) the loss function, (5) the problem
+(or optimization) configuration, and the sets of the upper and lower constraining problems.
 The example usage of the ``Problem`` class is shown below:
 
 .. code:: python
@@ -52,21 +51,22 @@ Automatic differentiation for multilevel optimization can be roughly categorized
 iterative differentiation (ITD) and implicit differentiation (AID). While AID allows users to use
 native PyTorch modules and optimizers, ITD requires patching both modules and optimizers to follow
 a functional programming paradigm. Due to this difference, we provide separate classes
-``IterativeProblem`` and ``ImplicitProblem`` respecitvely for AID and ITD. Empirically, we observe
+``IterativeProblem`` and ``ImplicitProblem`` respecitvely for ITD and AID. Empirically, we observe
 that AID achieves better memory efficieny, training wall time, and final accuracy. Thus, we highly
 recommend using ``ImplicitProblem`` class as a default setting.
 
 (1) Module
 ~~~~~~~~~~
-Module defines parameters to be learned at the current level :math:`k`, and corresponds to
+Module defines parameters to be learned in the current optimization problem, and corresponds to
 :math:`\theta_k` in our mathematical formulation (:doc:`Chapter <concept_mlo>`). In practice,
-module is defined with PyTorch's ``torch.nn.Module`` as in traditional neural network
-implementations, and is passed to the class through the constructor.
+the module is usually defined with PyTorch's ``torch.nn.Module``, and is passed to the
+``Problem`` class through the constructor.
 
 (2) Optimizer
 ~~~~~~~~~~~~~
 Optimizer updates parameters for the above module. In practice, module is most commonly defined
-with PyTorch's ``torch.optim.Optimizer``, and is also passed to the class through the constructor.
+with PyTorch's ``torch.optim.Optimizer``, and is also passed to the ``Problem`` class through
+the constructor.
 
 (3) Data loader
 ~~~~~~~~~~~~~~~

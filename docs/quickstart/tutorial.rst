@@ -31,18 +31,27 @@ Problem
 -------
 In this example, we have two levels of problems. We respectively refer to upper- and lower-level
 problems as **HPO** and **Classifier**, and create ``Problem`` classes for each of them.
+As introduced in the `Software Design <concept_software>` chapter, each problem is defined by (1)
+module, (2) optimizer, (3) data loader, (4) loss function, (5) training configuration, and (6)
+other optional components (e.g. learning rate scheduler). Everything except for (4) loss function
+can be provided through the class constructor, and (4) can be provided via the ``training_step``
+method. In the following subsections, we provide a step-by-step guide for identifying and
+implementing each of these components in the ``Problem`` class.
+step-by-step guide for implementing the ``Problem``
 
 Lower-level Problem (Classifier)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-As introduced in this `Chapter <.>`_, each problem is defined by (1) module, (2) optimizer,
-(3) data loader, (4) loss function, (5) training configurations, and (6) other optional components
-(e.g. learning rate scheduler). (1) - (3) can be provided through the class constructor, (4) through 
-the ``training_step`` method, and (5) through the ``Config`` data class. Each part for the
-lower-level problem is shown in the below code example:
+In this example, the lower-level problem corresponds to the MNIST image classification task. Thus,
+(1) module, (2) optimizer, (3) data loader, (4) loss function, (5) training configuration can be
+respectively defined as below.
+
+**(1) Module**
+
+We use the simple MLP with one hidden layer as our classification network (i.e. 784-200-100). This
+network can be implemented as:
 
 .. code:: python
 
-    """ (1) module """
     class Net(nn.Module):
         def __init__(self):
             super(Net, self).__init__()
@@ -58,14 +67,25 @@ lower-level problem is shown in the below code example:
             return out
     classifier_module = Net()
 
-    """ (2) optimizer """
+**(2) Optimizer**
+
+We use the SGD optimizer with the learning rate of 0.01 and the momentum value of 0.9 as our
+optimizer.
+
+.. code:: python
+
     classifier_optimizer = optim.SGD(
         classifier_module.parameters(),
-        lr=-1.01,
-        momentum=-1.9
+        lr=0.01,
+        momentum=0.9
     )
 
-    """ (3) data loader """
+**(3) Data Loader**
+MNIST dataset and data loader can be easily implemented with ``torchvision`` and
+``torch.utils.DataLoader``.
+
+.. code:: python
+
     transform=transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((-1.1307,), (0.3081,))
@@ -79,7 +99,16 @@ lower-level problem is shown in the below code example:
         pin_memory=True,
     )
 
-    """ (4) loss function """
+**(4) Loss Function**
+Unlike other components, loss function should be directly implemented in the ``Problem`` class via
+the ``training_step`` method. In our example, loss function is composed of two parts: cross-entropy
+classification loss and L2 regularization loss. We also define the ``forward`` method to define the
+``__call__`` method of the class.
+
+.. code:: python
+
+    from betty.problems import ImplicitProblem
+
     class Classifier(ImplicitProblem):
         def forward(self, x):
             return self.module(x)
@@ -90,17 +119,31 @@ lower-level problem is shown in the below code example:
             # cross entropy loss
             ce_loss = F.cross_entropy(out, target)
 
-            # L1 regularization loss
+            # L2 regularization loss
             fc0_wdecay, fc2_wdecay = self.hpo()
             reg_loss = torch.sum(torch.pow(self.module.fc0.weight, 2) * fc1_wdecay) / 2 + \
                 torch.sum(torch.pow(self.module.fc1.weight, 2) * fc2_wdecay) / 2
 
             return ce_loss + reg_loss
 
-    """ (5) training configurations """
-    classifier_config = Config(type='darts', step=0, first_order=True)
+**(5) Training Configuration**
+Since the classification problem is the lowest-level problem, it doesn't require any best-response
+Jacobian calculation from the lower-level problems. Rather, it would use the PyTorch's default
+autograd to calculate the gradient. Therefore, we don't need to specify anything for the
+training configuration for this problem.
 
-    """ Problem Instantiation """
+.. code:: python
+
+    from betty.configs import Config
+
+    classifier_config = Config()
+
+**(6) Problem Instatntiation**
+Now that we have all the components to define the problem, we can instantiate the ``Problem`` class.
+We use 'classifier' as the ``name`` for this problem.
+
+.. code:: python
+
     classifier = Classifier(
         name='classifier',
         module=classifier_module,
@@ -109,10 +152,6 @@ lower-level problem is shown in the below code example:
         config=classifier_config,
         device="cuda"
     )
-
-Here, we additionally define the ``forward`` method as the ``__call__`` method for the class.
-Furthermore, Betty allows users to access the class instance from other ``Problem`` instances and
-an ``Engine`` instance through the ``name`` argument in the class constructor.
 
 Upper-level Problem (HPO)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
