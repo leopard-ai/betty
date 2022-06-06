@@ -1,12 +1,11 @@
 Installation
 ============
 
-Betty can be installed via `pip <https://pypi.org/project/pip/>`_. Betty's dependency includes:
+Betty can be installed via `pip <https://pypi.org/project/pip/>`_. Betty's dependencies include:
 
-- PyTorch 1.5 - 1.10
+- Ubuntu 16.04 (or later) or MacOS
 - Python 3.7 - 3.10
-- Ubuntu 16.04 or later
-- MacOS
+- PyTorch 1.5 - 1.10
 
 Install with pip
 ~~~~~~~~~~~~~~~~
@@ -25,7 +24,7 @@ You can verify the installation by running
 
   python test.py
 
-If the installation was successful, one should expect the output like:
+If the installation was successful, you should see the following output:
 
 .. code::
 
@@ -46,6 +45,6 @@ If the installation was successful, one should expect the output like:
   [YYYY-mm-dd HH:MM:SS] [INFO] Time spent on initialization: 0.001 (s)
 
   [YYYY-mm-dd HH:MM:SS] [INFO] [Problem "outer"] [Global Step 100] [Local Step 10] loss: 0.5861933827400208
-  *** Welcome to BettyWorld ***
+  *** Hello (Betty) World ***
 
 Hello (Betty) World!

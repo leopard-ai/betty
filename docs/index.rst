@@ -1,12 +1,7 @@
-.. betty documentation master file, created by
-   sphinx-quickstart on Wed Jun  1 12:29:13 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Betty Documentation
-=================================
+===================
 
-Betty is an automatic differentiation library for multilevel optimization.
+**Betty** is an automatic differentiation library for multilevel optimization.
 Betty provides a PyTorch-like programming interface for users to write general
 multilevel optimization code.
 
