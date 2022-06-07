@@ -1,44 +1,24 @@
-<h2 align="center">
+<h3 align="center">
   Betty
-</h2>
+</h3>
 <p align="center">
   An automatic differentiation library for multielvel optimization or generalized meta-learning. 
 </p>
 
 ## Installation
-<table>
-<tr>
-<th align="center">
-<img width="441" height="1">
-<p> 
-PyPI (pip)
-</p>
-</th>
-<th align="center">
-<img width="441" height="1">
-<p> 
-From Source
-</p>
-</th>
-</tr>
-<tr>
-<td>
+**pip** (general use)
 
 ```bash
 pip install betty
-``` 
+```
 
-</td>
-<td>  
+**From source** (developers)
 
 ```bash
 pip install -e .
-```  
+```
 
-</td>
-</tr>
-</table>
-
+## What is Betty?
 It can be used as a unified programming interface for a wide range of multilevel optimization
 applications, including meta-learning, hyperparameter optimization, neural architecture search,
 reinforcement learning, etc.
@@ -60,7 +40,7 @@ Users interested in detailed internal mechanisms and software architectures are 
 read our [paper](.) and [documentation](.).
 
 
-## Installation
+### Installation
 The stable version of `betty` can be easily installed with [PyPI](https://pypi.org/) (or pip).
 ```bash
 pip install betty
@@ -81,7 +61,7 @@ The dependency of `betty` includes:
 - tensorboard
 - functorch
 
-## Examples
+### Examples
 #### Problem
 ```python
 import betty
@@ -92,7 +72,7 @@ import betty
 import betty
 ```
 
-## Features
+### Features
 #### Gradient Approximation Methods
 - Implicit Differentiation
   - Finite Difference ([DARTS: Differentiable Architecture Search](https://arxiv.org/abs/1806.09055))
@@ -111,7 +91,7 @@ import betty
 - tensorboard
 - wandb
 
-## Citation
+### Citation
 If you use `betty` in your research, please cite our arxiv paper with the following Bibtex entry.
 ```
 @article{choe2022betty,
@@ -122,5 +102,5 @@ If you use `betty` in your research, please cite our arxiv paper with the follow
 }
 ```
 
-## License
+### License
 `betty` is licensed under the [MIT License](LICENSE).
