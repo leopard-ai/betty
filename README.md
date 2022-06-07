@@ -52,8 +52,8 @@ from betty import Engine
 - Distributed data-parallel training (TODO)
 
 #### Logging
-- tensorboard
-- wandb
+- [(PyTorch) TensorBoard](https://pytorch.org/docs/stable/tensorboard.html)
+- [wandb](https://github.com/wandb/client)
 
 ## Citation
 If you use Betty in your research, please cite our arxiv paper with the following Bibtex entry.
