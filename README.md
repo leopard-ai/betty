@@ -10,10 +10,6 @@ pip install betty
 Betty is an automatic differentiation library for *multilevel optimization (MLO)* and/or
 *generalized meta-learning*.
 
-It provides an easy-to-use, modular and unified programming interface for various MLO
-applications including meta-learning, hyperparameter optimization, neural architecture search,
-reinforcement learning, etc.
-
 ## Why Betty?
 An implementation of gradient-based multilevel optimization or meta-learning is notoriously
 complicated. It requires (1) approximating gradient for upper-level problems using
@@ -25,10 +21,11 @@ the implementation intricacies internally. Instead, users only need to do two th
 multilevel optimization programs:
 1. Define each optimization problem with the `Problem` class. The programming interface of the
 `Problem` class is very similar with that of PyTorch Lightning's `LightningModel`.
-1. Define the hierarchical problem dependency with the `Engine` class.
+2. Define the hierarchical problem dependency with the `Engine` class.
 
-Users interested in detailed internal mechanisms and software architectures are encouraged to
-read our [paper](.) and [documentation](.).
+As a result, Betty allows an easy-to-use, modular and unified programming interface for various
+MLO applications including meta-learning, hyperparameter optimization, neural architecture search,
+reinforcement learning, etc.
 
 ## Examples
 #### Problem
