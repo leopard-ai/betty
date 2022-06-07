@@ -1,31 +1,30 @@
 <h3 align="center">
   Betty
 </h3>
+<p align="center">
+  An automatic differentiation library for multilevel optimization
+</p>
 
 ```bash
 pip install betty
 ```
 
 ## What is Betty?
-Betty is an automatic differentiation library for *multilevel optimization (MLO)* and/or
-*generalized meta-learning*.
+Betty is a [PyTorch](https://pytorch.org) library for multilevel optimization (MLO) that provides
+a unified programming interface for various MLO applications including meta-learning,
+hyperparameter optimization, neural architecture search, reinforcement learning, etc.
 
 ## Why Betty?
-An implementation of gradient-based multilevel optimization or meta-learning is notoriously
-complicated. For example, it requires approximating gradient for upper-level problems using
-iterative/implicit differentiation, and writing nested for-loops to handle the hierarchical
-dependency between multiple levels.
+An implementation of gradient-based multilevel optimization (MLO) or meta-learning is notoriously
+complicated. For example, it requires approximating gradient using iterative/implicit
+differentiation, and writing nested for-loops to handle the hierarchical dependency between
+multiple levels.
 
-Good news is that Betty hides most of such implementation intricacies behind the API while allowing
-users to write only high-level code. Now, users simply need to do two things to implement
-multilevel optimization programs:
-1. Define each optimization problem with the `Problem` class. The programming interface of the
-`Problem` class is very similar with that of PyTorch Lightning's `LightningModel`.
+Good news is that Betty abstracts away such low-level implementation details behind the API while
+allowing users to write only high-level code. Now, users simply need to do two things to implement
+any multilevel optimization programs:
+1. Define each level optimization problem with the `Problem` class. 
 2. Define the hierarchical problem dependency with the `Engine` class.
-
-As a result, Betty allows an easy-to-use, modular and unified programming interface for various
-MLO applications including meta-learning, hyperparameter optimization, neural architecture search,
-reinforcement learning, etc.
 
 ## Examples
 #### Problem
