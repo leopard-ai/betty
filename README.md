@@ -86,8 +86,10 @@ class Classifier(ImplicitProblem):
         loss = F.cross_entropy(outputs, labels)
         acc = (outputs.argmax(dim=1) == labels.long()).float().mean().item() * 100
         
-        # accessing weight decay hyperparameter from another problem HPO can be achieved by its
-        # name 'hpo'
+        """
+        accessing weight decay hyperparameter from another problem HPO can be achieved
+        by its name 'hpo'
+        """
         weight_decay = self.hpo()
         reg_loss = weight_decay * sum([p.norm().pow(2) for p in self.module.parameters()])
         
@@ -95,10 +97,61 @@ class Classifier(ImplicitProblem):
 
 cls_prob = Classifier(name='classifier', module=...)
 ```
-#### Engine
+### Engine
+#### Basics
+`Engine` class handles the hierarchical dependency between problems. In MLO, there are two types of
+dependencies: upper-to-lower (`u2l`) and lower-to-upper (`l2u`). Both types of dependencies can
+be defind with Python dictionary, where the key is the starting node and the value is the list of
+destination nodes. 
+
 ```python
 from betty import Engine
+from betty.configs import EngineConfig
+
+# set up all involved problems
+problems = [cls_prob, hpo_prob]
+
+# set up upper-to-lower and lower-to-upper dependencies
+u2l = {hpo_prob: [cls_prob]}
+l2u = {cls_prob: [hpo_prob]}
+dependencies = {'u2l': u2l, 'l2u': l2u}
+
+# set up Engine configuration
+engine_config = EngineConfig(train_iters=10000, valid_step=100)
+
+# instantiate Engine class
+engine = Engine(problems=problems, dependencies=dependencies, config=engine_config)
+
+# execute multilevel optimization
+engine.run()
 ```
+
+Since `Engine` manages the whole MLO program, you can also perform a global validation stage within
+it. All involved problems of the MLO program can again be accessed with their names.
+```python
+class HPOEngine(Engine):
+    # set up global validation
+    @torch.no_grad()
+    def validation(self):
+        loss = 0
+        for inputs, labels in test_loader:
+            outputs = self.classifer(inputs)
+            loss += F.cross_entropy(outputs, targets)
+            
+        return {'loss': loss}
+...
+engine = HPOEngine(problems=problems, dependencies=dependencies, config=engine_config)
+engine.run()
+```
+
+Once we define all optimization problems and the hierarchical dependency between them
+respectively with the `Problem` class and the `Engine` class, all complicated internal mechanism of
+MLO such as gradient calculation, optimization execution order will be handled by Betty.
+For more details and advanced features, users can check out our
+[Tutorial](https://www.google.com) and
+[Documentation](https://www.google.com).
+
+Happy multilevel optimization programming!
 
 ## Features
 ### Gradient Approximation Methods
