@@ -15,10 +15,9 @@ a unified programming interface for various MLO applications including meta-lear
 hyperparameter optimization, neural architecture search, reinforcement learning, etc.
 
 ## Why Betty?
-An implementation of gradient-based multilevel optimization (MLO) or meta-learning is notoriously
-complicated. For example, it requires approximating gradient using iterative/implicit
-differentiation, and writing nested for-loops to handle the hierarchical dependency between
-multiple levels.
+An implementation of multilevel optimization is notoriously complicated. For example, it
+requires approximating gradient using iterative/implicit differentiation, and writing nested
+for-loops to handle the hierarchical dependency between multiple levels.
 
 Good news is that Betty abstracts away such low-level implementation details behind the API while
 allowing users to write only high-level code. Now, users simply need to do two things to implement
