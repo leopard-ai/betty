@@ -22,10 +22,10 @@ for-loops to handle the hierarchical dependency between multiple levels.
 Good news is that Betty abstracts away such low-level implementation details behind the API while
 allowing users to write only high-level code. Now, users simply need to do two things to implement
 any multilevel optimization programs:
-1. Define each level optimization problem with the `Problem` class. 
-2. Define the hierarchical problem dependency with the `Engine` class.
+1. Define each level optimization problem with the [Problem](#problem) class. 
+2. Define the hierarchical problem dependency with the [Engine](#engine) class.
 
-## Examples
+## How to use Betty?
 #### Problem
 ```python
 from betty.problems import ImplicitProblem
