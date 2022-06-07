@@ -1,6 +1,7 @@
 <h3 align="center">
   Betty
 </h3>
+
 ```bash
 pip install betty
 ```
@@ -9,7 +10,7 @@ pip install betty
 Betty is an automatic differentiation library for *multilevel optimization (MLO)* and/or
 *generalized meta-learning*.
 
-It provides an easy-to-use, modular and maintainable programming interface for various MLO
+It provides an easy-to-use, modular and unified programming interface for various MLO
 applications including meta-learning, hyperparameter optimization, neural architecture search,
 reinforcement learning, etc.
 
@@ -32,12 +33,12 @@ read our [paper](.) and [documentation](.).
 ## Examples
 #### Problem
 ```python
-import betty
+from betty.problems import ImplicitProblem
 ```
 
 #### Engine
 ```python
-import betty
+from betty import Engine
 ```
 
 ## Features
