@@ -184,7 +184,8 @@ If you use Betty in your research, please cite our arxiv paper with the followin
 ```
 
 ## Contributing
-To be updated.
+We welcome contributions from the community! Please see
+our [contributing guidelines](CONTRIBUTING.md) for details on how to contributed to Betty.
 
 ## License
 Betty is licensed under the [MIT License](LICENSE).
