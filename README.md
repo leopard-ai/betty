@@ -18,12 +18,12 @@ pip install betty
 pip install -e .
 ```
 
-### What is Betty?
+## What is Betty?
 It can be used as a unified programming interface for a wide range of multilevel optimization
 applications, including meta-learning, hyperparameter optimization, neural architecture search,
 reinforcement learning, etc.
 
-### Why Betty?
+## Why Betty?
 An implementation of gradient-based multilevel optimization or meta-learning is notoriously
 complicated. It requires (1) approximating gradient for upper-level problems using
 iterative/implicit differentiation, and (2) writing nested for-loops to handle the hierarchical
@@ -40,7 +40,7 @@ Users interested in detailed internal mechanisms and software architectures are 
 read our [paper](.) and [documentation](.).
 
 
-### Installation
+## Installation
 The stable version of `betty` can be easily installed with [PyPI](https://pypi.org/) (or pip).
 ```bash
 pip install betty
@@ -61,7 +61,7 @@ The dependency of `betty` includes:
 - tensorboard
 - functorch
 
-### Examples
+## Examples
 #### Problem
 ```python
 import betty
@@ -72,7 +72,7 @@ import betty
 import betty
 ```
 
-### Features
+## Features
 #### Gradient Approximation Methods
 - Implicit Differentiation
   - Finite Difference ([DARTS: Differentiable Architecture Search](https://arxiv.org/abs/1806.09055))
@@ -91,7 +91,7 @@ import betty
 - tensorboard
 - wandb
 
-### Citation
+## Citation
 If you use `betty` in your research, please cite our arxiv paper with the following Bibtex entry.
 ```
 @article{choe2022betty,
@@ -102,5 +102,5 @@ If you use `betty` in your research, please cite our arxiv paper with the follow
 }
 ```
 
-### License
+## License
 `betty` is licensed under the [MIT License](LICENSE).
