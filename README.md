@@ -1,29 +1,63 @@
-# Betty
+<h2 align="center">
+  Betty
+</h2>
+<p align="center">
+  An automatic differentiation library for multielvel optimization or generalized meta-learning. 
+</p>
 
-`betty` is a PyTorch-based automatic differentiation library for *multielvel optimization*,
-a generalization of meta-learning or bilevel optimization.
+## Installation
+<table>
+<tr>
+<th align="center">
+<img width="441" height="1">
+<p> 
+PyPI (pip)
+</p>
+</th>
+<th align="center">
+<img width="441" height="1">
+<p> 
+From Source
+</p>
+</th>
+</tr>
+<tr>
+<td>
+
+```bash
+pip install betty
+``` 
+
+</td>
+<td>  
+
+```bash
+pip install -e .
+```  
+
+</td>
+</tr>
+</table>
 
 It can be used as a unified programming interface for a wide range of multilevel optimization
 applications, including meta-learning, hyperparameter optimization, neural architecture search,
 reinforcement learning, etc.
 
 ## Why Betty?
-An implementation of gradient-based multilevel optimization is notoriously complicated.
-It requires (1) approximating gradient for upper-level problems using iterative/implicit
-differentiation, and (2) writing nested for loops to handle the hierarchical dependency between
-multiple problems. Thus, implementing multilevel optimization applications oftentimes requires
-expertise in both programming and mathematics, raising a major barrier to research in this field.
+An implementation of gradient-based multilevel optimization or meta-learning is notoriously
+complicated. It requires (1) approximating gradient for upper-level problems using
+iterative/implicit differentiation, and (2) writing nested for-loops to handle the hierarchical
+dependency between multiple levels.
 
-`betty` abstracts away the above implementation difficulties by re-interpreting multilevel
-optimization from the dataflow graph perspective. More specifically, the dataflow graph
-interpretation enables
-- **automatic differentiation** that hides low-level implementation details of gradient
-calculation/approximation in multilevel optimization behind the API as autodiff libraries for neural
-networks do (e.g. PyTorch, Tensorflow).
-- **easy-to-use programming interface** that allows users to focus on implementing each level
-optimization problem independently without having to worry about hierarchical interactions between
-them. Particularly, our interface for implementing each level problem is very similar with
-PyTorch's interface for implementing `torch.nn.Module`.
+With `betty`, users do not need to care about any of the above issues, as the API will handle all
+the implementation intricacies internally. Instead, users only need to do two things to implement
+multilevel optimization programs:
+1. Define each optimization problem with the `Problem` class. The programming interface of the
+`Problem` class is very similar with that of PyTorch Lightning's `LightningModel`.
+1. Define the hierarchical problem dependency with the `Engine` class.
+
+Users interested in detailed internal mechanisms and software architectures are encouraged to
+read our [paper](.) and [documentation](.).
 
 
 ## Installation
@@ -49,19 +83,23 @@ The dependency of `betty` includes:
 
 ## Examples
 #### Problem
-
+```python
+import betty
+```
 
 #### Engine
-
+```python
+import betty
+```
 
 ## Features
 #### Gradient Approximation Methods
 - Implicit Differentiation
   - Finite Difference ([DARTS: Differentiable Architecture Search](https://arxiv.org/abs/1806.09055))
   - Neumann Series ([Optimizing Millions of Hyperparameters by Implicit Differentiation](http://proceedings.mlr.press/v108/lorraine20a/lorraine20a.pdf))
-  - Conjugate Gradient (ref: [Meta-Learning with Implicit Gradients](https://proceedings.neurips.cc/paper/2019/file/072b030ba126b2f4b2374f342be9ed44-Paper.pdf))
+  - Conjugate Gradient ([Meta-Learning with Implicit Gradients](https://proceedings.neurips.cc/paper/2019/file/072b030ba126b2f4b2374f342be9ed44-Paper.pdf))
 - Iterative Differentiation
-  - Reverse-mode Automatic Differentiation ([Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks](https://arxiv.org/abs/1703.03400))
+  - Reverse-mode Automatic Differentiation ([Model-Agnostic Meta-Learning (MAML)](https://arxiv.org/abs/1703.03400))
 
 
 #### Training
