@@ -2,7 +2,11 @@
   Betty
 </h3>
 <p align="center">
-  An automatic differentiation library for multilevel optimization
+  An automatic differentiation library for multilevel optimization<br>
+  <a href="https://www.google.com/">Tutorial</a> |
+  <a href="https://www.google.com/">Docs</a> |
+  <a href="https://www.google.com/">Examples</a> |
+  <a href="https://www.google.com/">CASL Project</a>
 </p>
 
 ```bash
@@ -26,18 +30,75 @@ any MLO programs:
 2. Define the hierarchical problem dependency with the [Engine](#engine) class.
 
 ## How to use Betty?
-#### Problem
+### Problem
+#### Basics
+Each level problem can be defined with x components: (1) module, (2) optimizer, (3) data loader,
+(4) loss function, (5) problem configuration, (6) name. For example, 
 ```python
 from betty.problems import ImplicitProblem
+from betty.configs import Config
+
+# set up module, optimizer, data loader (i.e. (1)-(3))
+cls_module, cls_optimizer, cls_data_loader = setup_classification()
+
+class Classifier(ImplicitProblem):
+    # set up loss function
+    def training_step(self, batch):
+        inputs, labels = batch
+        outputs = self.module(inputs)
+        loss = F.cross_entropy(outputs, labels)
+        acc = (outputs.argmax(dim=1) == labels.long()).float().mean().item() * 100
+
+        # Returned dictionary will be automatically logged with the logging tool (e.g. tensorboard)
+        return {'loss': loss, 'acc': acc}
+
+# set up problem configuration
+cls_config = Config(type='darts', step=1, log_step=10, fp16=False, retain_graph=True)
+
+# Classifier problem class instantiation
+cls_prob = Classifier(name='classifier',
+                      module=cls_module,
+                      optimizer=cls_optimizer,
+                      train_data_loader=cls_data_loader,
+                      config=cls_config)
 ```
 
+#### Interaction with other problems
+In MLO, each problem often needs to access modules from other problems to define its loss function.
+This can be achieved by using the `name` attributed
+
+```python
+class HPO(ImplicitProblem):
+    def training_step(self, batch):
+        # set up hyperparameter optimization loss
+        ...
+
+# HPO problem class instantiation
+hpo_prob = HPO(name='hpo', module=...)
+
+class Classifier(ImplicitProblem):
+    def training_step(self, batch):
+        inputs, labels = batch
+        outputs = self.module(inputs)
+        loss = F.cross_entropy(outputs, labels)
+        acc = (outputs.argmax(dim=1) == labels.long()).float().mean().item() * 100
+        
+        # accessing weight decay hyperparameter from another problem HPO can be achieved by its
+        # name 'hpo'
+        weight_decay = self.hpo()
+        reg_loss = weight_decay * sum([p.norm().pow(2) for p in self.module.parameters()])
+        
+        return {'loss': loss + reg_loss, 'acc': acc}
+
+cls_prob = Classifier(name='classifier', module=...)
+```
 #### Engine
 ```python
 from betty import Engine
 ```
 
 ## Features
-#### Gradient Approximation Methods
+### Gradient Approximation Methods
 - Implicit Differentiation
   - Finite Difference ([DARTS: Differentiable Architecture Search](https://arxiv.org/abs/1806.09055))
   - Neumann Series ([Optimizing Millions of Hyperparameters by Implicit Differentiation](http://proceedings.mlr.press/v108/lorraine20a/lorraine20a.pdf))
@@ -46,12 +107,12 @@ from betty import Engine
   - Reverse-mode Automatic Differentiation ([Model-Agnostic Meta-Learning (MAML)](https://arxiv.org/abs/1703.03400))
 
 
-#### Training
+### Training
 - Gradient accumulation
 - FP16 training (unstable)
 - Distributed data-parallel training (TODO)
 
-#### Logging
+### Logging
 - [(PyTorch) TensorBoard](https://pytorch.org/docs/stable/tensorboard.html)
 - [wandb](https://github.com/wandb/client)
 
