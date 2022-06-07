@@ -1,13 +1,17 @@
 <h3 align="center">
   Betty
 </h3>
+```bash
+pip install betty
+```
 
 ## What is Betty?
-Betty is an automatic differentiation library for multilevel optimization (MLO) or generalized
-meta-learning.
+Betty is an automatic differentiation library for *multilevel optimization (MLO)* and/or
+*generalized meta-learning*.
 
-It provides a unified programming interface for various MLO applications including meta-learning,
-hyperparameter optimization, neural architecture search, reinforcement learning, etc.
+It provides an easy-to-use, modular and maintainable programming interface for various MLO
+applications including meta-learning, hyperparameter optimization, neural architecture search,
+reinforcement learning, etc.
 
 ## Why Betty?
 An implementation of gradient-based multilevel optimization or meta-learning is notoriously
@@ -24,27 +28,6 @@ multilevel optimization programs:
 
 Users interested in detailed internal mechanisms and software architectures are encouraged to
 read our [paper](.) and [documentation](.).
-
-
-## Installation
-The stable version can be easily installed with [PyPI](https://pypi.org/) (or pip).
-```bash
-pip install betty
-```
-
-#### From Source
-For users interested in the latest (but unstable) version, or contributing to the development of
-Betty, we provide an option to install the library from source.
-```bash
-pip install -r requirements.txt
-pip install -e .
-```
-
-#### Requirments
-- Python >= 3.6
-- PyTorch >= 1.10
-- tensorboard
-- functorch
 
 ## Examples
 #### Problem
