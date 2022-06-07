@@ -12,12 +12,12 @@ Betty is an automatic differentiation library for *multilevel optimization (MLO)
 
 ## Why Betty?
 An implementation of gradient-based multilevel optimization or meta-learning is notoriously
-complicated. It requires (1) approximating gradient for upper-level problems using
-iterative/implicit differentiation, and (2) writing nested for-loops to handle the hierarchical
+complicated. For example, it requires approximating gradient for upper-level problems using
+iterative/implicit differentiation, and writing nested for-loops to handle the hierarchical
 dependency between multiple levels.
 
-With Betty, users do not need to care about any of the above issues, as the API will handle all
-the implementation intricacies internally. Instead, users only need to do two things to implement
+Good news is that Betty hides most of such implementation intricacies behind the API while allowing
+users to write only high-level code. Now, users simply need to do two things to implement
 multilevel optimization programs:
 1. Define each optimization problem with the `Problem` class. The programming interface of the
 `Problem` class is very similar with that of PyTorch Lightning's `LightningModel`.
