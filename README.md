@@ -5,7 +5,7 @@
   An automatic differentiation library for multielvel optimization or generalized meta-learning. 
 </p>
 
-## Installation
+### Installation
 **pip** (general use)
 
 ```bash
@@ -18,12 +18,12 @@ pip install betty
 pip install -e .
 ```
 
-## What is Betty?
+### What is Betty?
 It can be used as a unified programming interface for a wide range of multilevel optimization
 applications, including meta-learning, hyperparameter optimization, neural architecture search,
 reinforcement learning, etc.
 
-## Why Betty?
+### Why Betty?
 An implementation of gradient-based multilevel optimization or meta-learning is notoriously
 complicated. It requires (1) approximating gradient for upper-level problems using
 iterative/implicit differentiation, and (2) writing nested for-loops to handle the hierarchical
