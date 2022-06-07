@@ -11,8 +11,8 @@ pip install betty
 
 ## What is Betty?
 Betty is a [PyTorch](https://pytorch.org) library for multilevel optimization (MLO) that provides
-a unified programming interface for various applications including meta-learning,
-hyperparameter optimization, neural architecture search, reinforcement learning, etc.
+a unified programming interface for various applications including meta-learning, hyperparameter
+optimization, neural architecture search, data reweighting, reinforcement learning, etc.
 
 ## Why Betty?
 An implementation of multilevel optimization is notoriously complicated. For example, it
