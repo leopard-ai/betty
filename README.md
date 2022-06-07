@@ -32,8 +32,11 @@ any MLO programs:
 ## How to use Betty?
 ### Problem
 #### Basics
-Each level problem can be defined with x components: (1) module, (2) optimizer, (3) data loader,
-(4) loss function, (5) problem configuration, (6) name. For example, 
+Each level problem can be defined with 7 components: (1) module, (2) optimizer, (3) data loader,
+(4) loss function, (5) problem configuration, (6) name, and (7) other optional components (e.g.
+learning rate scheduler). (4) loss function can be defined with the `training_step` method, while
+all other components can be provided through the class constructor. For example, image
+classification problem can be defined as follows:
 ```python
 from betty.problems import ImplicitProblem
 from betty.configs import Config
@@ -49,7 +52,7 @@ class Classifier(ImplicitProblem):
         loss = F.cross_entropy(outputs, labels)
         acc = (outputs.argmax(dim=1) == labels.long()).float().mean().item() * 100
 
-        # Returned dictionary will be automatically logged with the logging tool (e.g. tensorboard)
+        # Returned dict will be automatically logged with the logging tool (e.g. TensorBoard)
         return {'loss': loss, 'acc': acc}
 
 # set up problem configuration
