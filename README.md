@@ -66,5 +66,8 @@ If you use Betty in your research, please cite our arxiv paper with the followin
 }
 ```
 
+## Contributing
+To be updated.
+
 ## License
 Betty is licensed under the [MIT License](LICENSE).
