@@ -9,18 +9,22 @@ def transform(train=True):
     resize = 256
     randomResizedCrop = 224
     if train:
-        data_transforms = transforms.Compose([
-            transforms.Resize(resize),
-            transforms.RandomResizedCrop(randomResizedCrop),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize(OFFICE_MEAN, OFFICE_STD)
-        ])
+        data_transforms = transforms.Compose(
+            [
+                transforms.Resize(resize),
+                transforms.RandomResizedCrop(randomResizedCrop),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(OFFICE_MEAN, OFFICE_STD),
+            ]
+        )
     else:
-        data_transforms = transforms.Compose([
-            transforms.Resize(resize),
-            transforms.CenterCrop(randomResizedCrop),
-            transforms.ToTensor(),
-            transforms.Normalize(OFFICE_MEAN, OFFICE_STD)
-        ])
+        data_transforms = transforms.Compose(
+            [
+                transforms.Resize(resize),
+                transforms.CenterCrop(randomResizedCrop),
+                transforms.ToTensor(),
+                transforms.Normalize(OFFICE_MEAN, OFFICE_STD),
+            ]
+        )
     return data_transforms

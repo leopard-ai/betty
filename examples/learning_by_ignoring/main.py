@@ -1,4 +1,5 @@
 import sys
+
 sys.path.insert(0, "./../..")
 import argparse
 import os
@@ -17,28 +18,29 @@ from dalib.vision.datasets import Office31, OfficeHome
 from model.resnet import build_model, build_optimizer, MLP
 
 
-domainIdxDict = {'Ar': 0, 'Cl': 1, 'Pr': 2, 'Rw': 3, 'A': 0, 'D': 1, 'W': 2}
+domainIdxDict = {"Ar": 0, "Cl": 1, "Pr": 2, "Rw": 3, "A": 0, "D": 1, "W": 2}
 
 
 def argument_parser():
-    parser = argparse.ArgumentParser(description='regularize the target by the source')
-    parser.add_argument('--gpu', type=int, default=0)
-    parser.add_argument('--source_domain', type=str, default="Cl")
-    parser.add_argument('--target_domain', type=str, default="Ar")
-    parser.add_argument('--features_lr', type=float, default=1e-4)
-    parser.add_argument('--classifier_lr', type=float, default=1e-3)
-    parser.add_argument('--batch_size', type=int, default=64)
-    parser.add_argument('--weight_decay', type=float, default=5e-4)
-    parser.add_argument('--random_seed', type=int, default=0)
-    parser.add_argument('--dataset', type=str, default='officehome')
-    parser.add_argument('--data_dir', type=str, metavar='PATH', default='./data')
-    parser.add_argument('--lam', type=float, help='lambda', default=7e-3)
-    parser.add_argument('--gamma', type=float, default=0.1)
-    parser.add_argument('--step_size', type=int, default=400)
-    parser.add_argument('--train_portion', type=float, default=0.9)
-    parser.add_argument('--baseline', action='store_true', default=False)
+    parser = argparse.ArgumentParser(description="regularize the target by the source")
+    parser.add_argument("--gpu", type=int, default=0)
+    parser.add_argument("--source_domain", type=str, default="Cl")
+    parser.add_argument("--target_domain", type=str, default="Ar")
+    parser.add_argument("--features_lr", type=float, default=1e-4)
+    parser.add_argument("--classifier_lr", type=float, default=1e-3)
+    parser.add_argument("--batch_size", type=int, default=64)
+    parser.add_argument("--weight_decay", type=float, default=5e-4)
+    parser.add_argument("--random_seed", type=int, default=0)
+    parser.add_argument("--dataset", type=str, default="officehome")
+    parser.add_argument("--data_dir", type=str, metavar="PATH", default="./data")
+    parser.add_argument("--lam", type=float, help="lambda", default=7e-3)
+    parser.add_argument("--gamma", type=float, default=0.1)
+    parser.add_argument("--step_size", type=int, default=400)
+    parser.add_argument("--train_portion", type=float, default=0.9)
+    parser.add_argument("--baseline", action="store_true", default=False)
 
     return parser
+
 
 parser = argument_parser()
 args = parser.parse_args()
@@ -50,57 +52,61 @@ device = torch.device(f"cuda:{args.gpu}" if torch.cuda.is_available() else "cpu"
 train_transform = transform(train=True)
 test_transform = transform(train=False)
 data_root = os.path.join(args.data_dir, args.dataset)
-if args.dataset == 'office31':
+if args.dataset == "office31":
     getDataset = Office31
-elif args.dataset == 'officehome':
+elif args.dataset == "officehome":
     getDataset = OfficeHome
 
-print(f'train source_task: {args.source_domain}')
-train_source_dataset = getDataset(root=data_root,
-                                  task=args.source_domain + '_train',
-                                  download=True,
-                                  transform=train_transform)
+print(f"train source_task: {args.source_domain}")
+train_source_dataset = getDataset(
+    root=data_root, task=args.source_domain + "_train", download=True, transform=train_transform
+)
 
-print(f'train target_task: {args.target_domain}')
-train_target_dataset = getDataset(root=data_root,
-                                   task=args.target_domain + '_train',
-                                   download=True,
-                                   transform=train_transform)
-valid_target_dataset = getDataset(root=data_root,
-                                  task=args.target_domain + '_train',
-                                  download=True,
-                                  transform=test_transform)
+print(f"train target_task: {args.target_domain}")
+train_target_dataset = getDataset(
+    root=data_root, task=args.target_domain + "_train", download=True, transform=train_transform
+)
+valid_target_dataset = getDataset(
+    root=data_root, task=args.target_domain + "_train", download=True, transform=test_transform
+)
 
-test_target_dataset = getDataset(root=data_root,
-                                 task=args.target_domain + '_test',
-                                 download=True,
-                                 transform=test_transform)
+test_target_dataset = getDataset(
+    root=data_root, task=args.target_domain + "_test", download=True, transform=test_transform
+)
 
-train_loader = torch.utils.data.DataLoader(train_target_dataset,
-                                           batch_size=args.batch_size,
-                                           num_workers=6,
-                                           shuffle=True,
-                                           pin_memory=True,
-                                           drop_last=False)
-valid_loader = torch.utils.data.DataLoader(valid_target_dataset,
-                                           batch_size=args.batch_size,
-                                           num_workers=6,
-                                           shuffle=True,
-                                           pin_memory=True,
-                                           drop_last=False)
-test_loader = torch.utils.data.DataLoader(test_target_dataset,
-                                          batch_size=args.batch_size,
-                                          num_workers=6,
-                                          shuffle=False,
-                                          pin_memory=True,
-                                          drop_last=False)
+train_loader = torch.utils.data.DataLoader(
+    train_target_dataset,
+    batch_size=args.batch_size,
+    num_workers=6,
+    shuffle=True,
+    pin_memory=True,
+    drop_last=False,
+)
+valid_loader = torch.utils.data.DataLoader(
+    valid_target_dataset,
+    batch_size=args.batch_size,
+    num_workers=6,
+    shuffle=True,
+    pin_memory=True,
+    drop_last=False,
+)
+test_loader = torch.utils.data.DataLoader(
+    test_target_dataset,
+    batch_size=args.batch_size,
+    num_workers=6,
+    shuffle=False,
+    pin_memory=True,
+    drop_last=False,
+)
 
-train_source_loader = torch.utils.data.DataLoader(train_source_dataset,
-                                                  batch_size=args.batch_size,
-                                                  num_workers=6,
-                                                  shuffle=True,
-                                                  pin_memory=True,
-                                                  drop_last=True)
+train_source_loader = torch.utils.data.DataLoader(
+    train_source_dataset,
+    batch_size=args.batch_size,
+    num_workers=6,
+    shuffle=True,
+    pin_memory=True,
+    drop_last=True,
+)
 
 
 class ReweightingModule(torch.nn.Module):
@@ -120,7 +126,7 @@ class Pretraining(ImplicitProblem):
         inputs = batch[0].to(device)
         targets = batch[1].to(device)
         outs = self.module(inputs)
-        loss_raw = F.cross_entropy(outs, targets, reduction='none')
+        loss_raw = F.cross_entropy(outs, targets, reduction="none")
 
         # reweighting
         if args.baseline:
@@ -128,7 +134,7 @@ class Pretraining(ImplicitProblem):
         else:
             logit = self.reweight(inputs)
             weight = torch.sigmoid(logit)
-            loss = torch.mean(loss_raw * weight)#/ weight.detach().mean().item()
+            loss = torch.mean(loss_raw * weight)  # / weight.detach().mean().item()
 
         return loss
 
@@ -153,7 +159,7 @@ class Finetuning(ImplicitProblem):
         inputs = batch[0].to(device)
         targets = batch[1].to(device)
         outs = self(inputs)
-        ce_loss = F.cross_entropy(outs, targets, reduction='none')
+        ce_loss = F.cross_entropy(outs, targets, reduction="none")
         ce_loss = torch.mean(ce_loss)
         reg_loss = self.reg_loss()
 
@@ -161,8 +167,10 @@ class Finetuning(ImplicitProblem):
 
     def reg_loss(self):
         loss = 0
-        for (n1, p1), (n2, p2) in zip(self.module.named_parameters(), self.pretrain.module.named_parameters()):
-            lam = 0 if 'fc' in n1 else args.lam
+        for (n1, p1), (n2, p2) in zip(
+            self.module.named_parameters(), self.pretrain.module.named_parameters()
+        ):
+            lam = 0 if "fc" in n1 else args.lam
             loss = loss + lam * (p1 - p2).pow(2).sum()
         return loss
 
@@ -206,6 +214,8 @@ class Reweighting(ImplicitProblem):
 
 
 best_acc = -1
+
+
 class LBIEngine(Engine):
     @torch.no_grad()
     def validation(self):
@@ -217,7 +227,7 @@ class LBIEngine(Engine):
             inputs = batch[0].to(device)
             targets = batch[1].to(device)
             outputs = self.finetune(inputs)
-            loss += F.cross_entropy(outputs, targets, reduction='sum')
+            loss += F.cross_entropy(outputs, targets, reduction="sum")
             correct += (outputs.argmax(dim=1) == targets).float().sum().item()
             total += inputs.size(0)
         acc = correct / total
@@ -225,18 +235,18 @@ class LBIEngine(Engine):
         if best_acc < acc:
             best_acc = acc
 
-        return {'loss': avgloss, 'acc': acc, 'best_acc': best_acc}
+        return {"loss": avgloss, "acc": acc, "best_acc": best_acc}
 
 
 # Define configs
-reweight_config = Config(type='darts', step=1, retain_graph=True, first_order=True)
-finetune_config = Config(type='darts', step=1, allow_unused=False)
-pretrain_config = Config(type='darts', step=1, allow_unused=False)
+reweight_config = Config(type="darts", retain_graph=True, first_order=True)
+finetune_config = Config(type="darts", allow_unused=False)
+pretrain_config = Config(type="darts", allow_unused=False)
 engine_config = EngineConfig(valid_step=20, train_iters=1000)
 
-reweight = Reweighting(name='reweight', config=reweight_config, device=device)
-finetune = Finetuning(name='finetune', config=finetune_config, device=device)
-pretrain = Pretraining(name='pretrain', config=pretrain_config, device=device)
+reweight = Reweighting(name="reweight", config=reweight_config, device=device)
+finetune = Finetuning(name="finetune", config=finetune_config, device=device)
+pretrain = Pretraining(name="pretrain", config=pretrain_config, device=device)
 if args.baseline:
     problems = [finetune, pretrain]
 else:
@@ -248,10 +258,10 @@ if args.baseline:
 else:
     u2l = {reweight: [pretrain]}
     l2u = {pretrain: [finetune], finetune: [reweight]}
-dependencies = {'u2l': u2l, 'l2u': l2u}
+dependencies = {"u2l": u2l, "l2u": l2u}
 
 engine = LBIEngine(config=engine_config, problems=problems, dependencies=dependencies)
 engine.run()
-print('='*30)
-print(f'{args.source_domain} --> {args.target_domain} || best_acc: {best_acc}')
-print('='*30)
+print("=" * 30)
+print(f"{args.source_domain} --> {args.target_domain} || best_acc: {best_acc}")
+print("=" * 30)
