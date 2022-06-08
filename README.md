@@ -14,29 +14,38 @@ pip install betty
 ```
 
 ## What is Betty?
-Betty is a [PyTorch](https://pytorch.org) library for multilevel optimization (MLO) that provides
-a unified programming interface for various applications including meta-learning, hyperparameter
-optimization, neural architecture search, data reweighting, reinforcement learning, etc.
+Betty is a [PyTorch](https://pytorch.org) library for multilevel optimization (MLO) that
+provides a unified programming interface for a number of MLO applications including
+meta-learning, hyperparameter optimization, neural architecture search, data
+reweighting, and reinforcement learning.
 
 ## Why Betty?
-An implementation of multilevel optimization is notoriously complicated. For example, it
-requires approximating gradient using iterative/implicit differentiation, and writing nested
-for-loops to handle the hierarchical dependency between multiple levels.
+Implementing multilevel optimization is notoriously complicated. For example, it
+requires approximating gradients using iterative/implicit differentiation, and writing
+nested for-loops to handle hierarchical dependencies between multiple levels.
 
-Good news is that Betty abstracts away such low-level implementation details behind the API, while
-allowing users to write only high-level code. Now, users simply need to do two things to implement
-any MLO programs:
-1. Define each level optimization problem with the [Problem](#problem) class. 
-2. Define the hierarchical problem dependency with the [Engine](#engine) class.
+Betty aims to abstract away low-level implementation details behind its API, while
+allowing users to write only high-level declarative code. Now, users simply need to do
+two things to implement any MLO program:
+
+1. Define each level's optimization problem using the [Problem](#problem) class.
+2. Define the hierarchical problem structure using the [Engine](#engine) class.
+
+**[TODO]** From here, Betty performs automatic differentiation for the MLO program,
+choosing from a set of provided gradient approximation methods, in order to carry out
+robust, high-performance MLO. A number of [template examples](examples/) show how Betty
+can be used for differentiable HPO, NAS, data-reweighting, pretraining/finetuning, and
+more.
 
 ## How to use Betty?
 ### Problem
 #### Basics
-Each level problem can be defined with 7 components: (1) module, (2) optimizer, (3) data loader,
-(4) loss function, (5) problem configuration, (6) name, and (7) other optional components (e.g.
-learning rate scheduler). (4) loss function can be defined with the `training_step` method, while
-all other components can be provided through the class constructor. For example, image
-classification problem can be defined as follows:
+Each level problem can be defined with seven components: (1) module, (2) optimizer, (3)
+data loader, (4) loss function, (5) problem configuration, (6) name, and (7) other
+optional components (e.g.  learning rate scheduler). The loss function (4) can be
+defined via the `training_step` method, while all other components can be provided
+through the class constructor. For example, an image classification problem can be
+defined as follows:
 ```python
 from betty.problems import ImplicitProblem
 from betty.configs import Config
@@ -67,8 +76,8 @@ cls_prob = Classifier(name='classifier',
 ```
 
 #### Interaction with other problems
-In MLO, each problem often needs to access modules from other problems to define its loss function.
-This can be achieved by using the `name` attributed
+In MLO, each problem will often need to access modules from other problems to define its
+loss function. This can be achieved by using the `name` attribute as follows:
 
 ```python
 class HPO(ImplicitProblem):
@@ -99,10 +108,10 @@ cls_prob = Classifier(name='classifier', module=...)
 ```
 ### Engine
 #### Basics
-`Engine` class handles the hierarchical dependency between problems. In MLO, there are two types of
-dependencies: upper-to-lower (`u2l`) and lower-to-upper (`l2u`). Both types of dependencies can
-be defind with Python dictionary, where the key is the starting node and the value is the list of
-destination nodes. 
+The `Engine` class handles the hierarchical dependencies between problems. In MLO, there
+are two types of dependencies: upper-to-lower (`u2l`) and lower-to-upper (`l2u`). Both
+types of dependencies can be defind with Python dictionary, where the key is the
+starting node and the value is the list of destination nodes.
 
 ```python
 from betty import Engine
@@ -144,12 +153,11 @@ engine = HPOEngine(problems=problems, dependencies=dependencies, config=engine_c
 engine.run()
 ```
 
-Once we define all optimization problems and the hierarchical dependency between them
-respectively with the `Problem` class and the `Engine` class, all complicated internal mechanism of
-MLO such as gradient calculation, optimization execution order will be handled by Betty.
-For more details and advanced features, users can check out our
-[Tutorial](https://www.google.com) and
-[Documentation](https://www.google.com).
+Once we define all optimization problems and the hierarchical dependencies between them
+respectively with the `Problem` class and the `Engine` class, all complicated internal
+mechanism of MLO such as gradient calculation, optimization execution order will be
+handled by Betty.  For more details and advanced features, users can check out our
+[Tutorial](https://www.google.com) and [Documentation](https://www.google.com).
 
 Happy multilevel optimization programming!
 
