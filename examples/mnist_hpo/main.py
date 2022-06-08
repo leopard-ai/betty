@@ -55,9 +55,6 @@ train_loader = torch.utils.data.DataLoader(
 )
 
 class Classifier(ImplicitProblem):
-    def forward(self, x):
-        return self.module(x)
-
     def training_step(self, batch):
         x, target = batch
         out = self.module(x)
@@ -102,9 +99,6 @@ valid_loader = torch.utils.data.DataLoader(
 )
 
 class HPO(ImplicitProblem):
-    def forward(self):
-        return self.module()
-
     def training_step(self, batch):
         x, target = batch
         out = self.classifier(x)

@@ -12,7 +12,6 @@ class Config:
     Training configuration for ``Problem``.
     """
     type: str = "darts"
-    step: int = 1
     first_order: bool = True
     retain_graph: bool = False
     allow_unused: bool = True

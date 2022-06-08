@@ -1,5 +1,6 @@
 import argparse
 import sys
+
 sys.path.insert(0, "./../..")
 
 import numpy as np
@@ -16,13 +17,13 @@ from support.mini_imagenet import MiniImagenet
 
 
 argparser = argparse.ArgumentParser()
-argparser.add_argument('--n_way', type=int, help='n way', default=5)
-argparser.add_argument('--k_spt', type=int, help='k shot for support set', default=1)
-argparser.add_argument('--k_qry', type=int, help='k shot for query set', default=15)
-argparser.add_argument('--inner_steps', type=int, help='number of inner steps', default=5)
-argparser.add_argument('--device', type=str, help='device', default='cuda')
-argparser.add_argument('--task_num',type=int, help='meta batch size, namely task num', default=4)
-argparser.add_argument('--seed', type=int, help='random seed', default=1)
+argparser.add_argument("--n_way", type=int, help="n way", default=5)
+argparser.add_argument("--k_spt", type=int, help="k shot for support set", default=1)
+argparser.add_argument("--k_qry", type=int, help="k shot for query set", default=15)
+argparser.add_argument("--inner_steps", type=int, help="number of inner steps", default=5)
+argparser.add_argument("--device", type=str, help="device", default="cuda")
+argparser.add_argument("--task_num", type=int, help="meta batch size, namely task num", default=4)
+argparser.add_argument("--seed", type=int, help="random seed", default=1)
 arg = argparser.parse_args()
 
 torch.manual_seed(arg.seed)
@@ -31,31 +32,26 @@ if torch.cuda.is_available():
 np.random.seed(arg.seed)
 
 mini = MiniImagenet(
-        '/home/ubuntu/workspace/datasets/mini-imagenet',
-        batchsz=100,
-        n_way=arg.n_way,
-        k_shot=arg.k_spt,
-        k_query=arg.k_qry,
-        resize=84,
-        mode='train'
-    )
-db = torch.utils.data.DataLoader(
-    mini,
-    arg.task_num,
-    shuffle=True,
-    pin_memory=True,
-    num_workers=1
+    "/home/ubuntu/workspace/datasets/mini-imagenet",
+    batchsz=100,
+    n_way=arg.n_way,
+    k_shot=arg.k_spt,
+    k_query=arg.k_qry,
+    resize=84,
+    mode="train",
 )
+db = torch.utils.data.DataLoader(mini, arg.task_num, shuffle=True, pin_memory=True, num_workers=1)
 
 mini_test = MiniImagenet(
-        '/home/ubuntu/workspace/datasets/mini-imagenet',
-        batchsz=arg.task_num,
-        n_way=arg.n_way,
-        k_shot=arg.k_spt,
-        k_query=arg.k_qry,
-        resize=84,
-        mode='test'
-    )
+    "/home/ubuntu/workspace/datasets/mini-imagenet",
+    batchsz=arg.task_num,
+    n_way=arg.n_way,
+    k_shot=arg.k_spt,
+    k_query=arg.k_qry,
+    resize=84,
+    mode="test",
+)
+
 
 class Flatten(nn.Module):
     def forward(self, x):
@@ -65,24 +61,26 @@ class Flatten(nn.Module):
 class Net(nn.Module):
     def __init__(self, n_way, device, hidden_dim=32):
         super(Net, self).__init__()
-        self.net = nn.Sequential(nn.Conv2d(3, hidden_dim, 3),
-                                 nn.BatchNorm2d(hidden_dim, momentum=1, affine=True),
-                                 nn.ReLU(inplace=True),
-                                 nn.MaxPool2d(2, 2),
-                                 nn.Conv2d(hidden_dim, hidden_dim, 3),
-                                 nn.BatchNorm2d(hidden_dim, momentum=1, affine=True),
-                                 nn.ReLU(inplace=True),
-                                 nn.MaxPool2d(2, 2),
-                                 nn.Conv2d(hidden_dim, hidden_dim, 3),
-                                 nn.BatchNorm2d(hidden_dim, momentum=1, affine=True),
-                                 nn.ReLU(inplace=True),
-                                 nn.MaxPool2d(2, 2),
-                                 nn.Conv2d(hidden_dim, hidden_dim, 3),
-                                 nn.BatchNorm2d(hidden_dim, momentum=1, affine=True),
-                                 nn.ReLU(inplace=True),
-                                 nn.MaxPool2d(2, 1),
-                                 Flatten(),
-                                 nn.Linear(hidden_dim*5*5, n_way)).to(device)
+        self.net = nn.Sequential(
+            nn.Conv2d(3, hidden_dim, 3),
+            nn.BatchNorm2d(hidden_dim, momentum=1, affine=True),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(2, 2),
+            nn.Conv2d(hidden_dim, hidden_dim, 3),
+            nn.BatchNorm2d(hidden_dim, momentum=1, affine=True),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(2, 2),
+            nn.Conv2d(hidden_dim, hidden_dim, 3),
+            nn.BatchNorm2d(hidden_dim, momentum=1, affine=True),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(2, 2),
+            nn.Conv2d(hidden_dim, hidden_dim, 3),
+            nn.BatchNorm2d(hidden_dim, momentum=1, affine=True),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(2, 1),
+            Flatten(),
+            nn.Linear(hidden_dim * 5 * 5, n_way),
+        ).to(device)
 
     def forward(self, x):
         return self.net.forward(x)
@@ -98,7 +96,7 @@ class Parent(IterativeProblem):
         losses = []
         accs = []
         for idx in range(len(self._children)):
-            net = getattr(self, f'inner_{idx}')
+            net = getattr(self, f"inner_{idx}")
             out = net(self.parent_batch[0][idx])
             loss = F.cross_entropy(out, self.parent_batch[1][idx])
             losses.append(loss)
@@ -107,8 +105,15 @@ class Parent(IterativeProblem):
         self.child_batch = (x_spt, y_spt)
         self.scheduler.step()
         if self.count % 10 == 0:
-            acc = 100. * torch.cat(accs).float().mean().item()
-            print('step:', self.count, '|| loss:', sum(losses).clone().detach().item(), ' || acc:', acc)
+            acc = 100.0 * torch.cat(accs).float().mean().item()
+            print(
+                "step:",
+                self.count,
+                "|| loss:",
+                sum(losses).clone().detach().item(),
+                " || acc:",
+                acc,
+            )
 
         return losses
 
@@ -158,16 +163,16 @@ class Child(IterativeProblem):
     def configure_optimizer(self):
         return optim.SGD(self.module.parameters(), lr=0.01)
 
-parent_config = Config(type='maml',
-                       step=arg.inner_steps,
-                       first_order=False)
-child_config = Config(type='maml',
-                      step=1,
-                      first_order=False,
-                      retain_graph=True)
 
-parent = Parent(name='outer', config=parent_config, device=arg.device)
-children = [Child(name='inner', config=child_config, device=arg.device) for _ in range(arg.task_num)]
+parent_config = Config(type="maml", first_order=False)
+child_config = Config(
+    type="maml", unroll_steps=arg.inner_steps, first_order=False, retain_graph=True
+)
+
+parent = Parent(name="outer", config=parent_config, device=arg.device)
+children = [
+    Child(name="inner", config=child_config, device=arg.device) for _ in range(arg.task_num)
+]
 problems = children + [parent]
 dependencies = {parent: children}
 engine = Engine(config=None, problems=problems, dependencies=dependencies)
