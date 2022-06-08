@@ -51,4 +51,5 @@ class EngineConfig:
     train_iters: int = 50000
     valid_step: int = 500
 
+    # logger
     logger_type: str = "tensorboard"

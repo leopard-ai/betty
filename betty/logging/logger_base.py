@@ -28,7 +28,6 @@ def get_logger():
 
 
 class LoggerBase:
-    @abc.abstractmethod
     def log(self, stats, tag=None, step=None):
         """
         Log metrics/stats to a visualization logger (e.g. tensorboard, wandb)
@@ -40,7 +39,7 @@ class LoggerBase:
         :param step: step value associated with ``stats`` to record
         :type step: int, optional
         """
-        raise NotImplementedError
+        return
 
     @staticmethod
     def debug(msg, *args, **kwargs):

@@ -1,9 +1,10 @@
+from logging import Logger
 from .logger_tensorboard import TensorBoardLogger
 from .logger_wandb import WandBLogger
-from .logger_base import get_logger
+from .logger_base import get_logger, LoggerBase
 
 
-logger_mapping = {"tensorboard": TensorBoardLogger, "wandb": WandBLogger}
+logger_mapping = {"tensorboard": TensorBoardLogger, "wandb": WandBLogger, "none": LoggerBase}
 
 
 def type_check(logger_type):
@@ -19,6 +20,6 @@ def type_check(logger_type):
     return logger_type
 
 
-def logger(logger_type="tensorboard"):
+def logger(logger_type="none"):
     logger_type = type_check(logger_type)
     return logger_mapping[logger_type]()
