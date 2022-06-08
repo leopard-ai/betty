@@ -13,6 +13,7 @@ class MixedLayer(nn.Module):
     we use weights to aggregate these outputs while training.
     and softmax to select the strongest edges while inference.
     """
+
     def __init__(self, c, stride):
         """
         :param c: 16
@@ -37,7 +38,7 @@ class MixedLayer(nn.Module):
             # create corresponding layer
             layer = OPS[primitive](c, stride, False)
             # append batchnorm after pool layer
-            if 'pool' in primitive:
+            if "pool" in primitive:
                 # disable affine w/b for batchnorm
                 layer = nn.Sequential(layer, nn.BatchNorm2d(c, affine=False))
 
@@ -56,7 +57,6 @@ class MixedLayer(nn.Module):
 
 
 class Cell(nn.Module):
-
     def __init__(self, steps, multiplier, cpp, cp, c, reduction, reduction_prev):
         """
         :param steps: 4, number of layers inside a cell
@@ -113,20 +113,21 @@ class Cell(nn.Module):
         states = [s0, s1]
         offset = 0
         # for each node, receive input from all previous intermediate nodes and s0, s1
-        for _ in range(self.steps): # 4
+        for _ in range(self.steps):  # 4
             s = sum(self.layers[offset + j](h, weights[offset + j]) for j, h in enumerate(states))
             offset += len(states)
             # append one state since s is the elem-wise addition of all output
             states.append(s)
 
         # concat along dim=channel
-        return torch.cat(states[-self.multiplier:], dim=1)
+        return torch.cat(states[-self.multiplier :], dim=1)
 
 
 class Network(nn.Module):
     """
     stack number:layer of cells and then flatten to fed a linear layer
     """
+
     def __init__(self, c, num_classes, layers, criterion, steps=4, multiplier=4, stem_multiplier=3):
         """
         :param c: 16
@@ -151,8 +152,7 @@ class Network(nn.Module):
         c_curr = stem_multiplier * c
         # stem network, convert 3 channel to c_curr
         self.stem = nn.Sequential(
-            nn.Conv2d(3, c_curr, 3, padding=1, bias=False),
-            nn.BatchNorm2d(c_curr)
+            nn.Conv2d(3, c_curr, 3, padding=1, bias=False), nn.BatchNorm2d(c_curr)
         )
 
         # c_curr means a factor of the output channels of current cell
@@ -209,7 +209,7 @@ class Network(nn.Module):
         for _, cell in enumerate(self.cells):
             # weights are shared across all reduction cell or normal cell
             # according to current cell's type, it choose which architecture parameters to use
-            if cell.reduction: # if current cell is reduction cell
+            if cell.reduction:  # if current cell is reduction cell
                 weights = F.softmax(alpha_reduce, dim=-1)
             else:
                 weights = F.softmax(alpha_normal, dim=-1)
@@ -239,6 +239,7 @@ class Network(nn.Module):
         :return:
         """
         alpha_reduce, alpha_normal = alphas
+
         def _parse(weights):
             """
             :param weights: [14, 8]
@@ -247,21 +248,26 @@ class Network(nn.Module):
             gene = []
             n = 2
             start = 0
-            for i in range(self.steps): # for each node
+            for i in range(self.steps):  # for each node
                 end = start + n
-                W = weights[start:end].copy() # [2, 8], [3, 8], ...
-                edges = sorted(range(i + 2), # i+2 is the number of connection for node i
-                            key=lambda x: -max(W[x][k] # by descending order
-                                               for k in range(len(W[x])) # get strongest ops
-                                               if k != PRIMITIVES.index('none'))
-                               )[:2] # only has two inputs
-                for j in edges: # for every input nodes j of current node i
+                W = weights[start:end].copy()  # [2, 8], [3, 8], ...
+                edges = sorted(
+                    range(i + 2),  # i+2 is the number of connection for node i
+                    key=lambda x: -max(
+                        W[x][k]  # by descending order
+                        for k in range(len(W[x]))  # get strongest ops
+                        if k != PRIMITIVES.index("none")
+                    ),
+                )[
+                    :2
+                ]  # only has two inputs
+                for j in edges:  # for every input nodes j of current node i
                     k_best = None
-                    for k in range(len(W[j])): # get strongest ops for current input j->i
-                        if k != PRIMITIVES.index('none'):
+                    for k in range(len(W[j])):  # get strongest ops for current input j->i
+                        if k != PRIMITIVES.index("none"):
                             if k_best is None or W[j][k] > W[j][k_best]:
                                 k_best = k
-                    gene.append((PRIMITIVES[k_best], j)) # save ops and input node
+                    gene.append((PRIMITIVES[k_best], j))  # save ops and input node
                 start = end
                 n += 1
             return gene
@@ -271,8 +277,7 @@ class Network(nn.Module):
 
         concat = range(2 + self.steps - self.multiplier, self.steps + 2)
         genotype = Genotype(
-            normal=gene_normal, normal_concat=concat,
-            reduce=gene_reduce, reduce_concat=concat
+            normal=gene_normal, normal_concat=concat, reduce=gene_reduce, reduce_concat=concat
         )
 
         return genotype

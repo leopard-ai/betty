@@ -41,11 +41,12 @@ class Cutout:
         x1 = np.clip(x - self.length // 2, 0, w)
         x2 = np.clip(x + self.length // 2, 0, w)
 
-        mask[y1: y2, x1: x2] = 0.
+        mask[y1:y2, x1:x2] = 0.0
         mask = torch.from_numpy(mask)
         mask = mask.expand_as(img)
         img *= mask
         return img
+
 
 def data_transforms_cifar10(args):
     """
@@ -55,28 +56,36 @@ def data_transforms_cifar10(args):
     CIFAR_MEAN = [0.49139968, 0.48215827, 0.44653124]
     CIFAR_STD = [0.24703233, 0.24348505, 0.26158768]
 
-    train_transform = transforms.Compose([
-        transforms.RandomCrop(32, padding=4),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(CIFAR_MEAN, CIFAR_STD),
-    ])
+    train_transform = transforms.Compose(
+        [
+            transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize(CIFAR_MEAN, CIFAR_STD),
+        ]
+    )
     if args.cutout:
         train_transform.transforms.append(Cutout(args.cutout_length))
 
-    valid_transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize(CIFAR_MEAN, CIFAR_STD),
-    ])
+    valid_transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize(CIFAR_MEAN, CIFAR_STD),
+        ]
+    )
     return train_transform, valid_transform
 
+
 def drop_path(x, drop_prob):
-    if drop_prob > 0.:
-        keep_prob = 1. - drop_prob
+    if drop_prob > 0.0:
+        keep_prob = 1.0 - drop_prob
         mask = torch.cuda.FloatTensor(x.size(0), 1, 1, 1).bernoulli_(keep_prob)
         x.div_(keep_prob)
         x.mul_(mask)
     return x
 
+
 def count_parameters_in_MB(model):
-    return np.sum(v.numel() for name, v in model.named_parameters() if "auxiliary" not in name)/1e6
+    return (
+        np.sum(v.numel() for name, v in model.named_parameters() if "auxiliary" not in name) / 1e6
+    )

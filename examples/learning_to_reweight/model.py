@@ -21,25 +21,32 @@ class LambdaLayer(nn.Module):
 class BasicBlock(nn.Module):
     expansion = 1
 
-    def __init__(self, in_planes, planes, stride=1, option='A'):
+    def __init__(self, in_planes, planes, stride=1, option="A"):
         super(BasicBlock, self).__init__()
-        self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
+        self.conv1 = nn.Conv2d(
+            in_planes, planes, kernel_size=3, stride=stride, padding=1, bias=False
+        )
         self.bn1 = nn.BatchNorm2d(planes)
         self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn2 = nn.BatchNorm2d(planes)
 
         self.shortcut = nn.Sequential()
         if stride != 1 or in_planes != planes:
-            if option == 'A':
+            if option == "A":
                 """
                 For CIFAR10 ResNet paper uses option A.
                 """
-                self.shortcut = LambdaLayer(lambda x:
-                                            functional.pad(x[:, :, ::2, ::2], (0, 0, 0, 0, planes//4, planes//4), "constant", 0))
-            elif option == 'B':
+                self.shortcut = LambdaLayer(
+                    lambda x: functional.pad(
+                        x[:, :, ::2, ::2], (0, 0, 0, 0, planes // 4, planes // 4), "constant", 0
+                    )
+                )
+            elif option == "B":
                 self.shortcut = nn.Sequential(
-                    nn.Conv2d(in_planes, self.expansion * planes, kernel_size=1, stride=stride, bias=False),
-                    nn.BatchNorm2d(self.expansion * planes)
+                    nn.Conv2d(
+                        in_planes, self.expansion * planes, kernel_size=1, stride=stride, bias=False
+                    ),
+                    nn.BatchNorm2d(self.expansion * planes),
                 )
 
     def forward(self, x):
@@ -65,7 +72,7 @@ class ResNet32(nn.Module):
         self.apply(_weights_init)
 
     def _make_layer(self, block, planes, num_blocks, stride):
-        strides = [stride] + [1]*(num_blocks-1)
+        strides = [stride] + [1] * (num_blocks - 1)
         layers = []
         for stride in strides:
             layers.append(block(self.in_planes, planes, stride))
@@ -98,7 +105,9 @@ class MLP(nn.Module):
     def __init__(self, hidden_size=100, num_layers=1):
         super(MLP, self).__init__()
         self.first_hidden_layer = HiddenLayer(1, hidden_size)
-        self.rest_hidden_layers = nn.Sequential(*[HiddenLayer(hidden_size, hidden_size) for _ in range(num_layers - 1)])
+        self.rest_hidden_layers = nn.Sequential(
+            *[HiddenLayer(hidden_size, hidden_size) for _ in range(num_layers - 1)]
+        )
         self.output_layer = nn.Linear(hidden_size, 1)
 
     def forward(self, x):

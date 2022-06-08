@@ -73,7 +73,7 @@ class Cell(nn.Module):
             h1 = op1(h1)
             h2 = op2(h2)
 
-            if self.training and drop_prob > 0.:
+            if self.training and drop_prob > 0.0:
                 if not isinstance(op1, Identity):
                     h1 = drop_path(h1, drop_prob)
                 if not isinstance(op2, Identity):
@@ -85,7 +85,6 @@ class Cell(nn.Module):
 
 
 class AuxiliaryHeadCIFAR(nn.Module):
-
     def __init__(self, C, num_classes):
         """assuming input size 8x8"""
         super(AuxiliaryHeadCIFAR, self).__init__()
@@ -98,7 +97,7 @@ class AuxiliaryHeadCIFAR(nn.Module):
             nn.ReLU(inplace=True),
             nn.Conv2d(128, 768, 2, bias=False),
             nn.BatchNorm2d(768),
-            nn.ReLU(inplace=True)
+            nn.ReLU(inplace=True),
         )
         self.classifier = nn.Linear(768, num_classes)
 
@@ -122,7 +121,7 @@ class AuxiliaryHeadImageNet(nn.Module):
             # NOTE: This batchnorm was omitted in my earlier implementation due to a typo.
             # Commenting it out for consistency with the experiments in the paper.
             # nn.BatchNorm2d(768),
-            nn.ReLU(inplace=True)
+            nn.ReLU(inplace=True),
         )
         self.classifier = nn.Linear(768, num_classes)
 
@@ -135,15 +134,14 @@ class AuxiliaryHeadImageNet(nn.Module):
 class NetworkCIFAR(nn.Module):
     def __init__(self, C, num_classes, layers, auxiliary, genotype):
         super(NetworkCIFAR, self).__init__()
-        
+
         self._layers = layers
         self._auxiliary = auxiliary
 
         stem_multiplier = 3
         C_curr = stem_multiplier * C
         self.stem = nn.Sequential(
-            nn.Conv2d(3, C_curr, 3, padding=1, bias=False),
-            nn.BatchNorm2d(C_curr)
+            nn.Conv2d(3, C_curr, 3, padding=1, bias=False), nn.BatchNorm2d(C_curr)
         )
 
         C_prev_prev, C_prev, C_curr = C_curr, C_curr, C

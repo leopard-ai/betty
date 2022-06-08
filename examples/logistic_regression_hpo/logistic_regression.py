@@ -1,4 +1,5 @@
 import sys
+
 sys.path.insert(0, "./../..")
 
 import numpy as np
@@ -11,7 +12,7 @@ from betty.engine import Engine
 from betty.configs import Config
 from betty.problems import IterativeProblem
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # hyperparameters
 DATA_NUM = 1000
@@ -24,8 +25,15 @@ y = x @ w_gt + 0.1 * np.random.randn(DATA_NUM)
 y = (y > 0).astype(float)
 
 x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.5)
-x_train, y_train = torch.from_numpy(x_train).to(device).float(), torch.from_numpy(y_train).to(device).float()
-x_val, y_val = torch.from_numpy(x_val).to(device).float(), torch.from_numpy(y_val).to(device).float()
+x_train, y_train = (
+    torch.from_numpy(x_train).to(device).float(),
+    torch.from_numpy(y_train).to(device).float(),
+)
+x_val, y_val = (
+    torch.from_numpy(x_val).to(device).float(),
+    torch.from_numpy(y_val).to(device).float(),
+)
+
 
 def make_data_loader(xs, ys):
     datasets = [(xs, ys)]
@@ -43,6 +51,7 @@ class ChildNet(torch.nn.Module):
         outs = inputs @ self.w
         return outs
 
+
 class ParentNet(torch.nn.Module):
     def __init__(self) -> None:
         super().__init__()
@@ -52,11 +61,12 @@ class ParentNet(torch.nn.Module):
     def forward(self):
         return None
 
+
 class Parent(IterativeProblem):
-    def forward(self, *args, **kwargs):
+    def forward(self):
         return self.params[0]
 
-    def training_step(self, batch, *args, **kwargs):
+    def training_step(self, batch):
         inputs, targets = batch
         outs = self.inner(inputs)
         loss = F.binary_cross_entropy_with_logits(outs, targets)
@@ -76,15 +86,21 @@ class Parent(IterativeProblem):
         for p in params:
             p.data.clamp_(min=1e-8)
 
+
 class Child(IterativeProblem):
     def forward(self, inputs):
         return self.fmodule(self.params, self.buffers, inputs)
 
-    def training_step(self, batch, *args, **kwargs):
+    def training_step(self, batch):
         inputs, targets = batch
         outs = self.forward(inputs)
-        loss = F.binary_cross_entropy_with_logits(outs, targets) +\
-            0.5 * (self.params[0].unsqueeze(0) @ torch.diag(self.outer()) @ self.params[0].unsqueeze(1)).sum()
+        loss = (
+            F.binary_cross_entropy_with_logits(outs, targets)
+            + 0.5
+            * (
+                self.params[0].unsqueeze(0) @ torch.diag(self.outer()) @ self.params[0].unsqueeze(1)
+            ).sum()
+        )
         return loss
 
     def configure_train_data_loader(self):
@@ -99,15 +115,16 @@ class Child(IterativeProblem):
     def on_inner_loop_start(self):
         self.params = (torch.nn.Parameter(torch.zeros(DATA_DIM)).to(device),)
 
-parent_config = Config(type='darts', log_step=10, first_order=False)
-child_config = Config(type='darts', unroll_steps=100, first_order=True, retain_graph=True)
-parent = Parent(name='outer', config=parent_config, device=device)
-child = Child(name='inner', config=child_config, device=device)
+
+parent_config = Config(type="darts", log_step=10, first_order=False)
+child_config = Config(type="darts", unroll_steps=100, retain_graph=True)
+parent = Parent(name="outer", config=parent_config, device=device)
+child = Child(name="inner", config=child_config, device=device)
 
 problems = [parent, child]
 l2u = {child: [parent]}
 u2l = {parent: [child]}
-dependencies = {'l2u': l2u, 'u2l': u2l}
+dependencies = {"l2u": l2u, "u2l": u2l}
 
 engine = Engine(config=None, problems=problems, dependencies=dependencies)
 engine.run()
