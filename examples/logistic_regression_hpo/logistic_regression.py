@@ -59,7 +59,7 @@ class ParentNet(torch.nn.Module):
         self.w = torch.nn.Parameter(torch.ones(DATA_DIM))
 
     def forward(self):
-        return None
+        return self.w
 
 
 class Parent(IterativeProblem):
@@ -94,12 +94,8 @@ class Child(IterativeProblem):
     def training_step(self, batch):
         inputs, targets = batch
         outs = self.forward(inputs)
-        loss = (
-            F.binary_cross_entropy_with_logits(outs, targets)
-            + 0.5
-            * (
-                self.params[0].unsqueeze(0) @ torch.diag(self.outer()) @ self.params[0].unsqueeze(1)
-            ).sum()
+        loss = F.binary_cross_entropy_with_logits(outs, targets) + 0.5 * sum(
+            self.params[0].pow(2) * self.outer()
         )
         return loss
 
@@ -116,7 +112,7 @@ class Child(IterativeProblem):
         self.params = (torch.nn.Parameter(torch.zeros(DATA_DIM)).to(device),)
 
 
-parent_config = Config(type="darts", log_step=10, first_order=False)
+parent_config = Config(type="darts", log_step=10, first_order=False, retain_graph=False)
 child_config = Config(type="darts", unroll_steps=100, retain_graph=True)
 parent = Parent(name="outer", config=parent_config, device=device)
 child = Child(name="inner", config=child_config, device=device)

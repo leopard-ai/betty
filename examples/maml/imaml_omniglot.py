@@ -88,28 +88,18 @@ class Parent(ImplicitProblem):
 
     def training_step(self, batch, *args, **kwargs):
         x_spt, y_spt, x_qry, y_qry = batch
-        losses = []
         accs = []
+        loss = 0
         for idx in range(len(self._children)):
             net = getattr(self, f"inner_{idx}")
             out = net(self.parent_batch[0][idx])
-            loss = F.cross_entropy(out, self.parent_batch[1][idx])
-            losses.append(loss)
+            loss += F.cross_entropy(out, self.parent_batch[1][idx])
             accs.append((out.argmax(dim=1) == self.parent_batch[1][idx]).detach())
+        acc = 100.0 * torch.cat(accs).float().mean().item()
         self.parent_batch = (x_qry, y_qry)
         self.child_batch = (x_spt, y_spt)
-        if self.count % 10 == 0:
-            acc = 100.0 * torch.cat(accs).float().mean().item()
-            print(
-                "step:",
-                self.count,
-                "|| loss:",
-                sum(losses).clone().detach().item(),
-                " || acc:",
-                acc,
-            )
 
-        return losses
+        return {'loss': loss, 'acc': acc}
 
     def configure_train_data_loader(self):
         data_loader = db
@@ -153,7 +143,7 @@ class Child(ImplicitProblem):
         self.module.load_state_dict(self.outer.module.state_dict())
 
     def configure_train_data_loader(self):
-        return [None]
+        return db_test
 
     def configure_module(self):
         return Net(arg.n_way, self.device)
@@ -162,8 +152,8 @@ class Child(ImplicitProblem):
         return optim.SGD(self.module.parameters(), lr=0.1)
 
 
-parent_config = Config(type="cg", cg_alpha=0.00001, cg_iterations=2, first_order=True)
-child_config = Config(type="torch", unroll_steps=5)
+parent_config = Config(type="cg", cg_alpha=0.00001, cg_iterations=2, log_step=10)
+child_config = Config(type="darts", unroll_steps=5)
 
 parent = Parent(name="outer", config=parent_config, device=arg.device)
 children = [

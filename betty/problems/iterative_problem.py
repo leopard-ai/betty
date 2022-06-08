@@ -50,11 +50,9 @@ class IterativeProblem(Problem):
     def optimizer_step(self, *args, **kwargs):
         assert not self._fp16, "[!] FP16 training is not supported for IterativeProblem."
         if self.is_implemented("custom_optimizer_step"):
-            params = self.custom_optimizer_step(*args, **kwargs)
+            self.params = self.custom_optimizer_step(*args, **kwargs)
         else:
-            params = self.optimizer.step(self.params)
-
-        self.params = params
+            self.params = self.optimizer.step(self.params)
 
     def initialize_optimizer_state(self):
         for param_group in self.optimizer.param_groups:

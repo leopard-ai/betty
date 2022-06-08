@@ -256,7 +256,7 @@ class Problem:
                         problem.ready[idx] = True
                         problem.step(global_step=global_step)
 
-                        self._inner_loop_start = True
+                    self._inner_loop_start = True
 
                     if self._roll_back:
                         self.recover_states()
@@ -279,7 +279,7 @@ class Problem:
                         if self.is_implemented("param_callback"):
                             self.param_callback(self.trainable_parameters())
 
-                    self.zero_grad()
+                        self.zero_grad()
 
             self.ready = [False for _ in range(len(self._children))]
 
