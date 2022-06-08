@@ -12,10 +12,10 @@ class Config:
     Training configuration for ``Problem``.
     """
     type: str = "darts"
+    unroll_steps: int = 1
     first_order: bool = True
     retain_graph: bool = False
     allow_unused: bool = True
-    unroll_steps: int = 1
     roll_back: bool = False
 
     # gradient accumulation

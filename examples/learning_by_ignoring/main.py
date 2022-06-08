@@ -239,9 +239,9 @@ class LBIEngine(Engine):
 
 
 # Define configs
-reweight_config = Config(type="darts", retain_graph=True, first_order=True)
-finetune_config = Config(type="darts", allow_unused=False)
-pretrain_config = Config(type="darts", allow_unused=False)
+reweight_config = Config(type="darts", retain_graph=True)
+finetune_config = Config(type="darts", unroll_steps=1, allow_unused=False)
+pretrain_config = Config(type="darts", unroll_steps=1, allow_unused=False)
 engine_config = EngineConfig(valid_step=20, train_iters=1000)
 
 reweight = Reweighting(name="reweight", config=reweight_config, device=device)
