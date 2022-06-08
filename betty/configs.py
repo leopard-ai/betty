@@ -52,4 +52,4 @@ class EngineConfig:
     valid_step: int = 500
 
     # logger
-    logger_type: str = "tensorboard"
+    logger_type: str = "none"
