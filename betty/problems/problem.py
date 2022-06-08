@@ -7,6 +7,7 @@ import abc
 
 import torch
 
+from betty.configs import Config
 from betty.hypergradient import get_grads
 from betty.utils import convert_tensor, log_from_loss_dict
 from betty.optim import FP16_Optimizer
@@ -32,7 +33,7 @@ class Problem:
         device=None,
     ):
         self._name = name
-        self._config = config
+        self._config = config if config is not None else Config()
         self.device = device
 
         # computation graph depedency
@@ -75,14 +76,15 @@ class Problem:
         self._first_order = False
         self._retain_graph = config.retain_graph
         self._allow_unused = config.allow_unused
+        self._unroll_steps = config.unroll_steps
+        self._roll_back = config.roll_back
         self._inner_loop_start = True
         self._training = True
         self.ready = None
         self._count = 0
-        self._parent_step = 1
 
     def initialize(self):
-        """[summary]
+        """
         ``initialize`` patches/sets up module, optimizer, data loader, etc. after compiling a
         user-provided configuration (e.g., fp16 training, iterative differentiation)
         """
@@ -95,15 +97,18 @@ class Problem:
 
         # compile parents configurations
         first_order = []
-        parent_steps = []
         for problem in self._parents:
             parent_config = problem.config
             first_order.append(parent_config.first_order)
-            parent_steps.append(parent_config.step)
         self._first_order = all(first_order)
-        if len(parent_steps) > 0:
-            assert all(s == parent_steps[0] for s in parent_steps)
-            self._parent_step = parent_steps[0]
+
+        # compile children configurations
+        children_unroll_steps = []
+        for problem in self._children:
+            child_config = problem.config
+            children_unroll_steps.append(child_config.unroll_steps)
+        if len(children_unroll_steps) > 0:
+            assert all(s == children_unroll_steps[0] for s in children_unroll_steps)
 
         self._inner_loop_start = True
 
@@ -154,12 +159,11 @@ class Problem:
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
 
-    @abc.abstractmethod
     def forward(self, *args, **kwargs):
         """
         Users define how forward (or call) function is defined for the problem here.
         """
-        raise NotImplementedError
+        return self.module(*args, **kwargs)
 
     @abc.abstractmethod
     def training_step(self, batch):
@@ -168,7 +172,7 @@ class Problem:
         """
         raise NotImplementedError
 
-    def step(self, batch=None, param_update=True, global_step=None):
+    def step(self, batch=None, global_step=None):
         """
         ``step`` method abstracts a one-step gradient descent update with four sub-steps:
         1) data loading, 2) cost calculation, 3) gradient calculation, and 4) parameter update.
@@ -180,11 +184,6 @@ class Problem:
             automatically load batch from the internal user-provided data loader.
             Defaults to None.
         :type batch: Any, optional
-        :param param_update:
-            If ``False``, it will recover the parameter/optimizer states once
-            the unrolling process is done, and perform a one-step gradient descent
-            with recovered states. Defaults to True.
-        :type param_update: bool, optional
         :param global_step: global step of the whole multilevel optimization. Defaults to None.
         :type global_step: int, optional
         """
@@ -196,7 +195,7 @@ class Problem:
                 self._inner_loop_start = False
 
                 # copy current parameters, buffers, optimizer states
-                if not param_update:
+                if self._roll_back:
                     self.cache_states()
 
             # increase count
@@ -240,7 +239,7 @@ class Problem:
             # calculate parameter update
             if self._count % self.gas == 0:
                 self.optimizer_step()
-                if self.scheduler is not None and param_update:
+                if self.scheduler is not None and not self._roll_back:
                     self.scheduler.step()
 
                 if self.is_implemented("param_callback"):
@@ -251,7 +250,7 @@ class Problem:
 
             # call parent step function
             if self._training:
-                if self._count % (self._parent_step * self.gas) == 0:
+                if self._count % (self._unroll_steps * self.gas) == 0:
                     for problem in self._parents:
                         idx = problem.children.index(self)
                         problem.ready[idx] = True
@@ -259,7 +258,7 @@ class Problem:
 
                         self._inner_loop_start = True
 
-                    if not param_update:
+                    if self._roll_back:
                         self.recover_states()
 
                         loss, _ = self.get_loss()
@@ -274,7 +273,7 @@ class Problem:
                         )
 
                         self.optimizer_step()
-                        if self.scheduler is not None and not param_update:
+                        if self.scheduler is not None and self._roll_back:
                             self.scheduler.step()
 
                         if self.is_implemented("param_callback"):
@@ -415,7 +414,7 @@ class Problem:
     @abc.abstractmethod
     def cache_states(self):
         """
-        Cache params, buffers, optimizer states when ``param_update`` is set to ``False`` in
+        Cache params, buffers, optimizer states when ``config.roll_back`` is set to ``True`` in
         ``step``.
         """
         raise NotImplementedError
@@ -423,7 +422,7 @@ class Problem:
     @abc.abstractmethod
     def recover_states(self):
         """
-        Recover params, buffers, optimizer states when ``param_update`` is set to ``False`` in
+        Recover params, buffers, optimizer states when ``config.roll_back`` is set to ``True`` in
         ``step``.
         """
         raise NotImplementedError

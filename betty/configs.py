@@ -16,6 +16,8 @@ class Config:
     first_order: bool = True
     retain_graph: bool = False
     allow_unused: bool = True
+    unroll_steps: int = 1
+    roll_back: bool = False
 
     # gradient accumulation
     gradient_accumulation: int = 1
