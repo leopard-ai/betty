@@ -46,3 +46,9 @@ class TensorBoardLogger(LoggerBase):
                     if torch.is_tensor(value):
                         value = value.item()
                     self.writer.add_scalar(full_key, value, step)
+            else:
+                value = values
+                full_key = key_extended
+                if torch.is_tensor(value):
+                    value = value.item()
+                self.writer.add_scalar(full_key, value, step)
