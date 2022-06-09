@@ -31,7 +31,11 @@ class ImplicitProblem(Problem):
             assert not self._fp16, "[!] FP16 training is not supported for custom optimizer step."
             self.custom_optimizer_step(*args, **kwargs)
         else:
-            self.optimizer.step()
+            if self._fp16:
+                self.scaler.step(self.optimizer)
+                self.scaler.update()
+            else:
+                self.optimizer.step()
 
     def cache_states(self):
         self.module_state_dict_cache = self.module.state_dict()

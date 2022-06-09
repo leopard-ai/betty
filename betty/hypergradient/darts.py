@@ -29,13 +29,13 @@ def darts(vector, curr, prev):
     # positive
     for p, v in zip(curr.trainable_parameters(), vector):
         p.data.add_(v.data, alpha=eps)
-    loss_p = curr.training_step(curr.cur_batch)
+    loss_p = curr.training_step_exec(curr.cur_batch)
     grad_p = torch.autograd.grad(loss_p, prev.trainable_parameters())
 
     # negative
     for p, v in zip(curr.trainable_parameters(), vector):
         p.data.add_(v.data, alpha=-2 * eps)
-    loss_n = curr.training_step(curr.cur_batch)
+    loss_n = curr.training_step_exec(curr.cur_batch)
     grad_n = torch.autograd.grad(loss_n, prev.trainable_parameters())
 
     # reverse weight change

@@ -10,7 +10,6 @@ import torch
 from betty.configs import Config
 from betty.hypergradient import get_grads
 from betty.utils import convert_tensor, log_from_loss_dict
-from betty.optim import FP16_Optimizer
 
 
 class Problem:
@@ -125,8 +124,6 @@ class Problem:
                 self.module = self.configure_module()
         assert self.module is not None, "Module must be specified!"
         self.module.to(self.device)
-        if self._fp16:
-            self.module.half()
 
         # set up optimizer
         if self.is_implemented("configure_optimizer"):
@@ -137,13 +134,9 @@ class Problem:
         if self.is_implemented("configure_scheduler"):
             if self.configure_scheduler is not None:
                 self.scheduler = self.configure_scheduler()
+
         if self._fp16:
-            self.optimizer = FP16_Optimizer(
-                init_optimizer=self.optimizer,
-                dynamic_loss_scale=self.dynamic_loss_scale,
-                static_loss_scale=self.static_loss_scale,
-                initial_dynamic_scale=self.initial_dynamic_scale,
-            )
+            self.scaler = torch.cuda.amp.GradScaler(init_scale=1024.)
 
         # Logging INFO
         # TODO: Replace print with logging
@@ -171,6 +164,13 @@ class Problem:
         Users define the loss function of the problem here.
         """
         raise NotImplementedError
+
+    def training_step_exec(self, batch):
+        if self._fp16:
+            with torch.cuda.amp.autocast():
+                return self.training_step(batch)
+        else:
+            return self.training_step(batch)
 
     def step(self, batch=None, global_step=None):
         """
@@ -310,15 +310,16 @@ class Problem:
         :return: loss and log metrics (e.g. classification accuracy)
         :rtype: dict
         """
-        maybe_loss_dict = self.training_step(self.cur_batch)
+        maybe_loss_dict = self.training_step_exec(self.cur_batch)
         is_dict = isinstance(maybe_loss_dict, dict)
         loss = maybe_loss_dict["loss"] if is_dict else maybe_loss_dict
-        # aggregate loss
-        scale = self.loss_scale() if self._fp16 else 1
-        loss = loss * scale / self.gas
+        loss_no_scale = loss.item()
+        if self._fp16:
+            loss = self.scaler.scale(loss)
+        loss = loss / self.gas
 
         # construct loss dict
-        loss_dict = {"loss": loss}
+        loss_dict = {"loss": loss_no_scale}
         if is_dict:
             for key, value in maybe_loss_dict.items():
                 if key != "loss":
@@ -400,16 +401,6 @@ class Problem:
         for param in list(self.trainable_parameters()):
             if hasattr(param, "grad"):
                 del param.grad
-
-    def loss_scale(self):
-        """
-        Return (dynamic) loss scale for fp16 training
-
-        :return: fp16 training loss scale
-        :rtype: float
-        """
-        assert self._fp16
-        return self.optimizer.cur_scale
 
     @abc.abstractmethod
     def cache_states(self):
