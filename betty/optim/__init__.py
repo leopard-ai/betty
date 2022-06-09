@@ -5,7 +5,6 @@ import torch
 from .sgd import DifferentiableSGD
 from .adam import DifferentiableAdam
 from .adamw import DifferentiableAdamW
-from .fp16.fp16_optimizer import FP16_Optimizer
 
 optimizer_mapping = {
     torch.optim.SGD: DifferentiableSGD,

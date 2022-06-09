@@ -106,10 +106,10 @@ class Child(ImplicitProblem):
         self.module.w.data.zero_()
 
 
-fp16 = False
+fp16 = True
 dynamic_loss_scale = False
-parent_config = Config(log_step=10, first_order=True)
-child_config = Config(type="cg", cg_iterations=3, cg_alpha=0.1, unroll_steps=100)
+parent_config = Config(log_step=10, first_order=True, fp16=fp16)
+child_config = Config(type="cg", cg_iterations=3, cg_alpha=0.1, unroll_steps=100, fp16=fp16)
 
 parent = Parent(name="outer", config=parent_config, device=device)
 child = Child(name="inner", config=child_config, device=device)

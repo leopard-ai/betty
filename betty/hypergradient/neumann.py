@@ -26,7 +26,7 @@ def neumann(vector, curr, prev):
     # ! Mabye replace with child.loss by adding self.loss attribute to save computation
     assert len(curr.paths) == 0, "neumann method is not supported for higher order MLO!"
     config = curr.config
-    in_loss = curr.training_step(curr.cur_batch)
+    in_loss = curr.training_step_exec(curr.cur_batch)
     in_grad = torch.autograd.grad(in_loss, curr.trainable_parameters(), create_graph=True)
     v2 = approx_inverse_hvp(
         vector,

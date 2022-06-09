@@ -136,8 +136,6 @@ class ReweightingEngine(Engine):
         global best_acc
         for x, target in test_dataloader:
             x, target = x.to(args.device), target.to(args.device)
-            if args.fp16:
-                x, target = x.half(), target.half()
             with torch.no_grad():
                 out = self.inner(x)
             correct += (out.argmax(dim=1) == target).sum().item()

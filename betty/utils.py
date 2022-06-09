@@ -4,8 +4,6 @@ import torch
 def convert_tensor(item, device=None, fp16=False):
     if not isinstance(item, torch.Tensor):
         return item
-    if fp16:
-        return item.to(device).half()
     return item.to(device)
 
 
@@ -84,19 +82,14 @@ def get_multiplier(problem):
 def log_from_loss_dict(loss_dict):
     outputs = []
     for key, values in loss_dict.items():
-        if key == "loss":
-            value = values.item()
-            output = f"{key}: {value}"
-            outputs.append(output)
-        else:
-            if isinstance(values, dict) or isinstance(values, list):
-                for value_idx, value in enumerate(values):
-                    full_key = key + "_" + str(value_idx)
-                    output = f"{full_key}: {value}"
-                    outputs.append(output)
-            else:
-                output = f"{key}: {values}"
+        if isinstance(values, dict) or isinstance(values, list):
+            for value_idx, value in enumerate(values):
+                full_key = key + "_" + str(value_idx)
+                output = f"{full_key}: {value}"
                 outputs.append(output)
+        else:
+            output = f"{key}: {values}"
+            outputs.append(output)
     return " || ".join(outputs)
 
 
