@@ -136,6 +136,7 @@ class Problem:
                 self.scheduler = self.configure_scheduler()
 
         if self._fp16:
+            assert torch.cuda.is_available()
             self.scaler = torch.cuda.amp.GradScaler(init_scale=1024.)
 
         # Logging INFO

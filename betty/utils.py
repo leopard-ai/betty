@@ -85,9 +85,13 @@ def log_from_loss_dict(loss_dict):
         if isinstance(values, dict) or isinstance(values, list):
             for value_idx, value in enumerate(values):
                 full_key = key + "_" + str(value_idx)
+                if torch.is_tensor(value):
+                    value = value.item()
                 output = f"{full_key}: {value}"
                 outputs.append(output)
         else:
+            if torch.is_tensor(values):
+                values = values.item()
             output = f"{key}: {values}"
             outputs.append(output)
     return " || ".join(outputs)
