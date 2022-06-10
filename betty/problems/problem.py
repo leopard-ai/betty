@@ -137,7 +137,7 @@ class Problem:
 
         if self._fp16:
             assert torch.cuda.is_available()
-            self.scaler = torch.cuda.amp.GradScaler(init_scale=1024.)
+            self.scaler = torch.cuda.amp.GradScaler(init_scale=1024.0)
 
         # Logging INFO
         # TODO: Replace print with logging
@@ -402,6 +402,25 @@ class Problem:
         for param in list(self.trainable_parameters()):
             if hasattr(param, "grad"):
                 del param.grad
+
+    def state_dict(self):
+        state_dict = {}
+        state_dict["module"] = self.module.state_dict()
+        state_dict["optimizer"] = self.optimizer.state_dict()
+        if self.scheduler is not None:
+            state_dict["scheduler"] = self.scheduler.state_dict()
+        if self._fp16:
+            state_dict["scaler"] = self.scaler.state_dict()
+
+        return state_dict
+
+    def load_state_dict(self, state_dict):
+        self.module.load_state_dict(state_dict["module"])
+        self.optimizer.load_state_dict(state_dict["optimizer"])
+        if self.scheduler is not None and "scheduler" in state_dict:
+            self.scheduler.load_state_dict(state_dict["scheduler"])
+        if self._fp16 and "scaler" in state_dict:
+            self.scaler.load_state_dict(state_dict["scaler"])
 
     @abc.abstractmethod
     def cache_states(self):
