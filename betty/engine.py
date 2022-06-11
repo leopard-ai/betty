@@ -89,7 +89,7 @@ class Engine:
         # check & set multiplier for each problem
         for problem in self.problems:
             problem.add_logger(self.logger)
-            problem.initialize()
+            problem.initialize(self.config)
 
         end = time.time()
         self.logger.info(f"Time spent on initialization: {end-start:.3f} (s)\n")

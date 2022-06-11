@@ -33,6 +33,7 @@ class Problem:
     ):
         self._name = name
         self._config = config if config is not None else Config()
+        self.engine_config = None
         self.device = device
 
         # computation graph depedency
@@ -82,11 +83,14 @@ class Problem:
         self.ready = None
         self._count = 0
 
-    def initialize(self):
+    def initialize(self, engine_config):
         """
         ``initialize`` patches/sets up module, optimizer, data loader, etc. after compiling a
         user-provided configuration (e.g., fp16 training, iterative differentiation)
         """
+        # engine config
+        self.engine_config = engine_config
+
         # initialize update ready to False
         if self._leaf:
             assert len(self._children) == 0
@@ -124,6 +128,8 @@ class Problem:
                 self.module = self.configure_module()
         assert self.module is not None, "Module must be specified!"
         self.module.to(self.device)
+        if engine_config.distributed and torch.cuda.device_count() > 1:
+            self.module = torch.nn.DataParallel(self.module)
 
         # set up optimizer
         if self.is_implemented("configure_optimizer"):

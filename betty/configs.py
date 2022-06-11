@@ -53,3 +53,6 @@ class EngineConfig:
 
     # logger
     logger_type: str = "none"
+
+    # distributed training
+    distributed: bool = False
