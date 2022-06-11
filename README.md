@@ -173,8 +173,8 @@ Happy multilevel optimization programming!
 
 ### Training
 - Gradient accumulation
-- FP16 training (unstable)
-- Distributed data-parallel training (TODO)
+- FP16 training
+- non-distributed data-parallel
 
 ### Logging
 - [(PyTorch) TensorBoard](https://pytorch.org/docs/stable/tensorboard.html)
