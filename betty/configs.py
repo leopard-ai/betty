@@ -16,7 +16,6 @@ class Config:
     first_order: bool = True
     retain_graph: bool = False
     allow_unused: bool = True
-    roll_back: bool = False
 
     # gradient accumulation
     gradient_accumulation: int = 1
@@ -53,6 +52,9 @@ class EngineConfig:
 
     # logger
     logger_type: str = "none"
+
+    # roll back
+    roll_back: bool = False
 
     # distributed training
     distributed: bool = False
