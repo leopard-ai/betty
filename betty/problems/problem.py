@@ -143,6 +143,7 @@ class Problem:
             if self.configure_scheduler is not None:
                 self.scheduler = self.configure_scheduler()
 
+        # set up fp16 training
         if self._fp16:
             assert torch.cuda.is_available()
             self.scaler = torch.cuda.amp.GradScaler(init_scale=1024.0)
@@ -202,9 +203,8 @@ class Problem:
         # calculate parameter update
         if self._count % self.gas == 0:
             self.optimizer_step()
-            if self.scheduler is not None and not self._roll_back:
-                self.scheduler.step()
 
+            # param callback (e.g., parameter clipping)
             if self.is_implemented("param_callback"):
                 self.param_callback(self.trainable_parameters())
 
@@ -232,33 +232,43 @@ class Problem:
             # one step grdient descent
             loss_dict = self.one_step_descent()
 
+            # lr scheduler step
+            if self.scheduler is not None and not self._roll_back:
+                self.scheduler.step()
+
             # logging
             if self.log_step > 0 and self._count % self.log_step == 0:
                 self.log(loss_dict, global_step)
 
-            # call parent step after unrolling
-            if self._training:
-                if self._count % (self._unroll_steps * self.gas) == 0:
-                    for problem in self._parents:
-                        idx = problem.children.index(self)
-                        problem.ready[idx] = True
-                        problem.step_normal(global_step=global_step)
+            # call parent step_normal after unrolling
+            if self._training and self._count % (self._unroll_steps * self.gas) == 0:
+                for problem in self._parents:
+                    idx = problem.children.index(self)
+                    problem.ready[idx] = True
+                    problem.step_normal(global_step=global_step)
 
-                    self._inner_loop_start = True
+                self._inner_loop_start = True
 
             self.ready = [False for _ in range(len(self._children))]
 
     def step_after_roll_back(self):
         if self.check_ready() and self._training:
             if self._roll_back:
+                # recover from cached states
                 self.recover_states()
 
+                # one step gradient step
                 _ = self.one_step_descent(load_batch=False)
 
+                # lr scheduler
+                if self.scheduler is not None:
+                    self.scheduler.step()
+
+                # call parent step_after_roll_back
                 for problem in self._parents:
                     idx = problem.children.index(self)
                     problem.ready[idx] = True
-                    problem.step_roll_back()
+                    problem.step_after_roll_back()
 
             self.ready = [False for _ in range(len(self._children))]
 
