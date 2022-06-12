@@ -76,13 +76,13 @@ class Problem:
         self._retain_graph = config.retain_graph
         self._allow_unused = config.allow_unused
         self._unroll_steps = config.unroll_steps
-        self._roll_back = config.roll_back
+        self._roll_back = False
         self._inner_loop_start = True
         self._training = True
         self.ready = None
         self._count = 0
 
-    def initialize(self):
+    def initialize(self, engine_config):
         """
         ``initialize`` patches/sets up module, optimizer, data loader, etc. after compiling a
         user-provided configuration (e.g., fp16 training, iterative differentiation)
@@ -100,6 +100,8 @@ class Problem:
             parent_config = problem.config
             first_order.append(parent_config.first_order)
         self._first_order = all(first_order)
+        if len(self._parents) > 0:
+            self._roll_back = engine_config.roll_back
 
         # compile children configurations
         children_unroll_steps = []
@@ -173,21 +175,39 @@ class Problem:
         else:
             return self.training_step(batch)
 
-    def step(self, batch=None, global_step=None):
-        """
-        ``step`` method abstracts a one-step gradient descent update with four sub-steps:
-        1) data loading, 2) cost calculation, 3) gradient calculation, and 4) parameter update.
-        It also calls upper-level problems' step methods after unrolling gradient steps based on
-        the hierarchical dependency graph.
+    def one_step_descent(self, load_batch=True):
+        # load data
+        if load_batch:
+            self.cur_batch = self.get_batch()
 
-        :param batch:
-            training batch for a one-step gradient descent update. If ``None``, it will
-            automatically load batch from the internal user-provided data loader.
-            Defaults to None.
-        :type batch: Any, optional
-        :param global_step: global step of the whole multilevel optimization. Defaults to None.
-        :type global_step: int, optional
-        """
+        # calculate loss
+        loss, loss_dict = self.get_loss()
+
+        # calculate gradient (a.k.a backward)
+        self.backward(
+            loss=loss,
+            params=self.trainable_parameters(),
+            paths=self._paths,
+            create_graph=not self._first_order,
+            retain_graph=self._retain_graph,
+            allow_unused=self._allow_unused,
+        )
+
+        # calculate parameter update
+        if self._count % self.gas == 0:
+            self.optimizer_step()
+            if self.scheduler is not None and not self._roll_back:
+                self.scheduler.step()
+
+            if self.is_implemented("param_callback"):
+                self.param_callback(self.trainable_parameters())
+
+            # zero-out grad
+            self.zero_grad()
+
+        return loss_dict
+
+    def step_normal(self, global_step=None):
         if self.check_ready():
             # loop start
             if self._inner_loop_start:
@@ -199,90 +219,56 @@ class Problem:
                 if self._roll_back:
                     self.cache_states()
 
-            # increase count
+            # increase count (local step)
             if self._training:
                 self._count += 1
 
-            # load data
-            self.cur_batch = self.get_batch() if batch is None else batch
-
-            # calculate loss
-            loss, loss_dict = self.get_loss()
+            # one step grdient descent
+            loss_dict = self.one_step_descent()
 
             # logging
             if self.log_step > 0 and self._count % self.log_step == 0:
-                loss_log = log_from_loss_dict(loss_dict)
-                if global_step is None:
-                    self.logger.info(
-                        f'[Problem "{self._name}"] [Local Step {self._count}] ' f"{loss_log}"
-                    )
-                else:
-                    self.logger.info(
-                        f'[Problem "{self._name}"] [Global Step {global_step}] '
-                        f"[Local Step {self._count}] "
-                        f"{loss_log}"
-                    )
-                cur_step = global_step
-                if global_step is None or self.log_local_step:
-                    cur_step = self._count
-                self.log(loss_dict, cur_step)
+                self.log(loss_dict, global_step)
 
-            # calculate gradient (a.k.a backward)
-            self.backward(
-                loss=loss,
-                params=self.trainable_parameters(),
-                paths=self._paths,
-                create_graph=not self._first_order,
-                retain_graph=self._retain_graph,
-                allow_unused=self._allow_unused,
-            )
-
-            # calculate parameter update
-            if self._count % self.gas == 0:
-                self.optimizer_step()
-                if self.scheduler is not None and not self._roll_back:
-                    self.scheduler.step()
-
-                if self.is_implemented("param_callback"):
-                    self.param_callback(self.trainable_parameters())
-
-                # zero-out grad
-                self.zero_grad()
-
-            # call parent step function
+            # call parent step after unrolling
             if self._training:
                 if self._count % (self._unroll_steps * self.gas) == 0:
                     for problem in self._parents:
                         idx = problem.children.index(self)
                         problem.ready[idx] = True
-                        problem.step(global_step=global_step)
+                        problem.step_normal(global_step=global_step)
 
                     self._inner_loop_start = True
 
-                    if self._roll_back:
-                        self.recover_states()
+            self.ready = [False for _ in range(len(self._children))]
 
-                        loss, _ = self.get_loss()
+    def step_after_roll_back(self):
+        if self.check_ready() and self._training:
+            if self._roll_back:
+                self.recover_states()
 
-                        self.backward(
-                            loss=loss,
-                            params=self.trainable_parameters(),
-                            paths=self._paths,
-                            create_graph=not self._first_order,
-                            retain_graph=self._retain_graph,
-                            allow_unused=self._allow_unused,
-                        )
+                _ = self.one_step_descent(load_batch=False)
 
-                        self.optimizer_step()
-                        if self.scheduler is not None and self._roll_back:
-                            self.scheduler.step()
-
-                        if self.is_implemented("param_callback"):
-                            self.param_callback(self.trainable_parameters())
-
-                        self.zero_grad()
+                for problem in self._parents:
+                    idx = problem.children.index(self)
+                    problem.ready[idx] = True
+                    problem.step_roll_back()
 
             self.ready = [False for _ in range(len(self._children))]
+
+    def step(self, global_step=None):
+        """
+        ``step`` method abstracts a one-step gradient descent update with four sub-steps:
+        1) data loading, 2) cost calculation, 3) gradient calculation, and 4) parameter update.
+        It also calls upper-level problems' step methods after unrolling gradient steps based on
+        the hierarchical dependency graph.
+
+        :param global_step: global step of the whole multilevel optimization. Defaults to None.
+        :type global_step: int, optional
+        """
+        self.step_normal(global_step=global_step)
+        if self._count % (self._unroll_steps * self.gas) == 0:
+            self.step_after_roll_back()
 
     def get_batch(self):
         """
@@ -456,7 +442,7 @@ class Problem:
         """
         return all(self.ready)
 
-    def log(self, stats, step):
+    def log(self, stats, global_step):
         """
         Log (training) stats to the ``self.logger``
 
@@ -465,7 +451,18 @@ class Problem:
         :param step: global/local step associated with the ``stats``.
         :type step: int
         """
-        self.logger.log(stats, tag=self._name, step=step)
+        loss_log = log_from_loss_dict(stats)
+        if global_step is None:
+            self.logger.info(f'[Problem "{self._name}"] [Local Step {self._count}] {loss_log}')
+        else:
+            self.logger.info(
+                f'[Problem "{self._name}"] [Global Step {global_step}] [Local Step {self._count}] '
+                f"{loss_log}"
+            )
+        cur_step = global_step
+        if global_step is None or self.log_local_step:
+            cur_step = self._count
+        self.logger.log(stats, tag=self._name, step=cur_step)
 
     def set_problem_attr(self, problem):
         """
