@@ -55,3 +55,6 @@ class EngineConfig:
 
     # roll back
     roll_back: bool = False
+
+    # distributed training
+    distributed: bool = False
