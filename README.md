@@ -13,13 +13,13 @@
 pip install betty
 ```
 
-## What is Betty?
+## Intro: What is Betty?
 Betty is a [PyTorch](https://pytorch.org) library for multilevel optimization (MLO) that
 provides a unified programming interface for a number of MLO applications including
 meta-learning, hyperparameter optimization, neural architecture search, data
-reweighting, and reinforcement learning.
+reweighting, adversarial learning, and reinforcement learning.
 
-## Why Betty?
+## Benefits: Why Betty?
 Implementing multilevel optimization is notoriously complicated. For example, it
 requires approximating gradients using iterative/implicit differentiation, and writing
 nested for-loops to handle hierarchical dependencies between multiple levels.
@@ -31,13 +31,37 @@ two things to implement any MLO program:
 1. Define each level's optimization problem using the [Problem](#problem) class.
 2. Define the hierarchical problem structure using the [Engine](#engine) class.
 
-**[TODO]** From here, Betty performs automatic differentiation for the MLO program,
+From here, Betty performs automatic differentiation for the MLO program,
 choosing from a set of provided gradient approximation methods, in order to carry out
 robust, high-performance MLO. A number of [template examples](examples/) show how Betty
 can be used for differentiable HPO, NAS, data-reweighting, pretraining/finetuning, and
 more.
 
-## How to use Betty?
+## Applications: What can you do with Betty?
+In layman's terms, MLO can be used for modeling *optimal decision making processes* for
+multiple players in games. For example, consider following applications that can be
+modeled as a two-player game.
+- **Adversarial learning**: Two players are (A) an attacker and (B) defender. An
+attacker optimizes its decision (e.g. perturbation in images) to maximize its benefits
+(e.g. poor classification accuracy) given the current defender's strategy. Thus, a
+defender should proactively *guess* how an attacker will respond to defender's decision
+(e.g. regularization loss), and adjust its decision that defends any attacker's strategy
+to maximize its benefits (e.g.classification accuracy).
+- **Hyperparameter optimization**: Two players are (A) a main network player and (B) a
+hyperparameter player. A main network player optimizes its decision (i.e. main network
+parameter) to maximize its benefits (i.e. training loss). In the meantime, a
+hyperparameter player should guess how a main network player will respond to its
+current decision (i.e. hyperparameter) and accordingly adjust its decision in the
+direction of maximizing its benefits based on its guess.
+
+As one may have already noticed, the above examples are similar with human's behaviors
+in the game. In poker, each player should guess how other players will respond to their
+current decision (i.e. card), and optimize a strategy to maximize a benefit based on
+their guess. This is in contrary to traditional machine learning, which can be
+understood as *pattern recognition* in essence. We hope Betty would be used as a tool
+for studying human's intelligence beyond pattern recognition!
+
+## Examples: How to use Betty?
 ### Problem
 #### Basics
 Each level problem can be defined with seven components: (1) module, (2) optimizer, (3)
