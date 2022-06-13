@@ -123,8 +123,7 @@ class Pretraining(ImplicitProblem):
         return self.module(x)
 
     def training_step(self, batch):
-        inputs = batch[0].to(device)
-        targets = batch[1].to(device)
+        inputs, targets, _ = batch
         outs = self.module(inputs)
         loss_raw = F.cross_entropy(outs, targets, reduction="none")
 
@@ -134,7 +133,7 @@ class Pretraining(ImplicitProblem):
         else:
             logit = self.reweight(inputs)
             weight = torch.sigmoid(logit)
-            loss = torch.mean(loss_raw * weight) # / weight.detach().mean().item()
+            loss = torch.mean(loss_raw * weight) #/ weight.detach().mean().item()
 
         return loss
 
@@ -156,8 +155,7 @@ class Finetuning(ImplicitProblem):
         return self.module(x)
 
     def training_step(self, batch):
-        inputs = batch[0].to(device)
-        targets = batch[1].to(device)
+        inputs, targets, _ = batch
         outs = self(inputs)
         ce_loss = F.cross_entropy(outs, targets, reduction="none")
         ce_loss = torch.mean(ce_loss)
@@ -193,8 +191,7 @@ class Reweighting(ImplicitProblem):
         return out
 
     def training_step(self, batch):
-        inputs = batch[0].to(device)
-        targets = batch[1].to(device)
+        inputs, targets, _ = batch
         outs = self.finetune(inputs)
         loss = F.cross_entropy(outs, targets)
 
@@ -239,7 +236,6 @@ class LBIEngine(Engine):
 
 
 # Define configs
-roll_back = not args.baseline
 reweight_config = Config(type="darts", retain_graph=True)
 finetune_config = Config(type="darts", unroll_steps=1, allow_unused=False)
 pretrain_config = Config(type="darts", unroll_steps=1, allow_unused=False)
