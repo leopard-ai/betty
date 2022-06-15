@@ -32,9 +32,7 @@ two things to implement any MLO program:
 2. Define the hierarchical problem structure using the [Engine](#engine) class.
 
 ## Applications
-Betty can be used for implementing a wide range of MLO applications including
-hyperparameter optimization, neural architecture serach, data reweighting, etc. We
-provide several implementation examples for:
+We provide reference implementations of several MLO applications, including:
 - [Hyperparameter Optimization](examples/logistic_regression_hpo/)
 - [Neural Architecture Search](examples/neural_architecture_search/)
 - [Data Reweighting](examples/learning_to_reweight/)
