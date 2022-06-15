@@ -31,10 +31,6 @@ two things to implement any MLO program:
 1. Define each level's optimization problem using the [Problem](#problem) class.
 2. Define the hierarchical problem structure using the [Engine](#engine) class.
 
-From here, Betty performs automatic differentiation for the MLO program,
-choosing from a set of provided gradient approximation methods, in order to carry out
-robust, high-performance MLO.
-
 ## Applications
 Betty can be used for implementing a wide range of MLO applications including
 hyperparameter optimization, neural architecture serach, data reweighting, etc. We
@@ -44,6 +40,7 @@ provide several implementation examples for:
 - [Data Reweighting](examples/learning_to_reweight/)
 - [Domain Adaptation for Pretraining & Finetuning](examples/learning_by_ignoring/)
 - [(Implicit) Model-Agnostic Meta-Learning](examples/maml/) (Under development)
+
 While each of above examples traditionally have distinct implementation styles, one
 should notice that our implementation shares the same code structure thanks to Betty.
 We plan to implement more MLO applications in the future.
