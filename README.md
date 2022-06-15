@@ -13,13 +13,13 @@
 pip install betty
 ```
 
-## Intro: What is Betty?
+## Introduction
 Betty is a [PyTorch](https://pytorch.org) library for multilevel optimization (MLO) and/or
 generalized meta-learning that provides a unified programming interface for a number of
 MLO applications including meta-learning, hyperparameter optimization, neural architecture
 search, data reweighting, adversarial learning, and reinforcement learning.
 
-## Benefits: Why Betty?
+## Benefits
 Implementing multilevel optimization is notoriously complicated. For example, it
 requires approximating gradients using iterative/implicit differentiation, and writing
 nested for-loops to handle hierarchical dependencies between multiple levels.
@@ -35,21 +35,20 @@ From here, Betty performs automatic differentiation for the MLO program,
 choosing from a set of provided gradient approximation methods, in order to carry out
 robust, high-performance MLO.
 
-## Applications: What can you do with Betty?
+## Applications
 Betty can be used for implementing a wide range of MLO applications including
 hyperparameter optimization, neural architecture serach, data reweighting, etc. We
 provide several implementation examples for:
 - [Hyperparameter Optimization](examples/logistic_regression_hpo/)
-- [Neural Architecture Search (DARTS)](examples/neural_architecture_search/)
-- [Data Reweighting (MWN)](examples/learning_to_reweight/)
+- [Neural Architecture Search](examples/neural_architecture_search/)
+- [Data Reweighting](examples/learning_to_reweight/)
 - [Domain Adaptation for Pretraining & Finetuning](examples/learning_by_ignoring/)
 - [(Implicit) Model-Agnostic Meta-Learning](examples/maml/) (Under development)
- 
 While each of above examples traditionally have distinct implementation styles, one
 should notice that our implementation shares the same code structure thanks to Betty.
 We plan to implement more MLO applications in the future.
 
-## Examples: How to use Betty?
+## Quick Start
 ### Problem
 #### Basics
 Each level problem can be defined with seven components: (1) module, (2) optimizer, (3)
