@@ -2,7 +2,7 @@
   Betty
 </h3>
 <p align="center">
-  An automatic differentiation library for multilevel optimization<br>
+  An automatic differentiation library for multilevel optimization and generalized meta-learning<br>
   <a href="https://www.google.com/">Tutorial</a> |
   <a href="https://www.google.com/">Docs</a> |
   <a href="https://www.google.com/">Examples</a> |
@@ -14,10 +14,10 @@ pip install betty
 ```
 
 ## Intro: What is Betty?
-Betty is a [PyTorch](https://pytorch.org) library for multilevel optimization (MLO) that
-provides a unified programming interface for a number of MLO applications including
-meta-learning, hyperparameter optimization, neural architecture search, data
-reweighting, adversarial learning, and reinforcement learning.
+Betty is a [PyTorch](https://pytorch.org) library for multilevel optimization (MLO) and/or
+generalized meta-learning that provides a unified programming interface for a number of
+MLO applications including meta-learning, hyperparameter optimization, neural architecture
+search, data reweighting, adversarial learning, and reinforcement learning.
 
 ## Benefits: Why Betty?
 Implementing multilevel optimization is notoriously complicated. For example, it
@@ -33,33 +33,22 @@ two things to implement any MLO program:
 
 From here, Betty performs automatic differentiation for the MLO program,
 choosing from a set of provided gradient approximation methods, in order to carry out
-robust, high-performance MLO. A number of [template examples](examples/) show how Betty
-can be used for differentiable HPO, NAS, data-reweighting, pretraining/finetuning, and
-more.
+robust, high-performance MLO.
 
 ## Applications: What can you do with Betty?
-In layman's terms, MLO can be used for modeling *optimal decision making processes* for
-multiple players in games. For example, consider following applications that can be
-modeled as a two-player game.
-- **Adversarial learning**: Two players are (A) an attacker and (B) defender. An
-attacker optimizes its decision (e.g. perturbation in images) to maximize its benefits
-(e.g. poor classification accuracy) given the current defender's strategy. Thus, a
-defender should proactively *guess* how an attacker will respond to defender's decision
-(e.g. regularization loss), and adjust its decision that defends any attacker's strategy
-to maximize its benefits (e.g.classification accuracy).
-- **Hyperparameter optimization**: Two players are (A) a main network player and (B) a
-hyperparameter player. A main network player optimizes its decision (i.e. main network
-parameter) to maximize its benefits (i.e. training loss). In the meantime, a
-hyperparameter player should guess how a main network player will respond to its
-current decision (i.e. hyperparameter) and accordingly adjust its decision in the
-direction of maximizing its benefits based on its guess.
-
-As one may have already noticed, the above examples are similar with human's behaviors
-in the game. In poker, each player should guess how other players will respond to their
-current decision (i.e. card), and optimize a strategy to maximize a benefit based on
-their guess. This is in contrary to traditional machine learning, which can be
-understood as *pattern recognition* in essence. We hope Betty would be used as a tool
-for studying human's intelligence beyond pattern recognition!
+Betty can be used for implementing a wide range of MLO applications including
+hyperparameter optimization, neural architecture serach, data reweighting, etc. We
+provide several implementation examples in the [examples](examples/)
+directory.
+- [Hyperparameter Optimization](examples/logistic_regression_hpo/)
+- [Neural Architecture Search (DARTS)](examples/neural_architecture_search/)
+- [Data Reweighting (MWN)](examples/learning_to_reweight/)
+- [Domain Adaptation for Pretraining & Finetuning](examples/learning_by_ignoring/)
+- [(Implicit) Model-Agnostic Meta-Learning](examples/maml/) (Under development)
+ 
+While each of above examples traditionally have distinct implementation styles, one
+should notice that our implementation shares the same code structure thanks to Betty.
+We plan to implement more MLO applications in the future.
 
 ## Examples: How to use Betty?
 ### Problem
