@@ -194,7 +194,17 @@ class Reweighting(ImplicitProblem):
         inputs, targets, _ = batch
         outs = self.finetune(inputs)
         loss = F.cross_entropy(outs, targets)
+        reg_loss = self.reg_loss()
 
+        return loss + reg_loss
+
+    def reg_loss(self):
+        loss = 0
+        for (n1, p1), (n2, p2) in zip(
+            self.finetune.module.named_parameters(), self.pretrain.module.named_parameters()
+        ):
+            lam = 0 if "fc" in n1 else args.lam
+            loss = loss + lam * (p1 - p2).pow(2).sum()
         return loss
 
     def configure_train_data_loader(self):
@@ -254,7 +264,7 @@ if args.baseline:
     u2l = {}
 else:
     u2l = {reweight: [pretrain]}
-    l2u = {pretrain: [finetune], finetune: [reweight]}
+    l2u = {pretrain: [finetune, reweight], finetune: [reweight]}
 dependencies = {"u2l": u2l, "l2u": l2u}
 
 engine = LBIEngine(config=engine_config, problems=problems, dependencies=dependencies)
