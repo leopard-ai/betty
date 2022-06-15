@@ -43,7 +43,7 @@ provide several implementation examples for:
 
 While each of above examples traditionally have distinct implementation styles, one
 should notice that our implementation shares the same code structure thanks to Betty.
-We plan to implement more MLO applications in the future.
+More examples are on the way!
 
 ## Quick Start
 ### Problem
