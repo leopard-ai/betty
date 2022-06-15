@@ -41,8 +41,8 @@ provide several implementation examples for:
 - [Domain Adaptation for Pretraining & Finetuning](examples/learning_by_ignoring/)
 - [(Implicit) Model-Agnostic Meta-Learning](examples/maml/) (Under development)
 
-While each of above examples traditionally have distinct implementation styles, one
-should notice that our implementation shares the same code structure thanks to Betty.
+While each of above examples traditionally has a distinct implementation style, one
+should notice that our implementations share the same code structure thanks to Betty.
 More examples are on the way!
 
 ## Quick Start
