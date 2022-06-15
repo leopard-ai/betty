@@ -38,8 +38,7 @@ robust, high-performance MLO.
 ## Applications: What can you do with Betty?
 Betty can be used for implementing a wide range of MLO applications including
 hyperparameter optimization, neural architecture serach, data reweighting, etc. We
-provide several implementation examples in the [examples](examples/)
-directory.
+provide several implementation examples for:
 - [Hyperparameter Optimization](examples/logistic_regression_hpo/)
 - [Neural Architecture Search (DARTS)](examples/neural_architecture_search/)
 - [Data Reweighting (MWN)](examples/learning_to_reweight/)
