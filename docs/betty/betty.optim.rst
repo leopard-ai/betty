@@ -32,7 +32,3 @@ Below is the list of differentiable optimizers supported by Betty.
    :members:
    :exclude-members: step
    :undoc-members:
-
-.. automodule:: betty.optim.fp16.fp16_optimizer
-   :members:
-   :undoc-members:
