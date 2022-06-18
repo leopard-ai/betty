@@ -46,16 +46,23 @@ Getting Started
 
 - :doc:`Installation <quickstart/installation>`
 - :doc:`Tutorial <quickstart/tutorial>`
-- :doc:`Examples <examples>`
 
 .. toctree::
-   :caption: Quick Start
+   :caption: Get Started
    :maxdepth: 2
    :hidden:
 
    Installation<quickstart/installation.rst>
    Major Concepts<quickstart/concept.rst>
    Tutorial<quickstart/tutorial.rst>
+
+.. toctree::
+   :caption: Tutorial
+   :maxdepth: 2
+   :hidden:
+
+   Basic<tutorial/basic/basic.rst>
+   Intermediate<tutorial/intermediate/intermediate.rst>
 
 .. toctree::
    :caption: API Docs
