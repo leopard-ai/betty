@@ -60,5 +60,7 @@ via ``EngineConfig``:
 
 Memory optimization results
 ---------------------------
+We perform ablation study to analyze how each technique affects GPU memroy usage.
+The result is shown in the below table.
 
 Table
