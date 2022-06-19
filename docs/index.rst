@@ -45,7 +45,7 @@ Getting Started
 ---------------
 
 - :doc:`Installation <quickstart/installation>`
-- :doc:`Tutorial <quickstart/tutorial>`
+- :doc:`Tutorial <tutorial/basic/basic>`
 
 .. toctree::
    :caption: Get Started

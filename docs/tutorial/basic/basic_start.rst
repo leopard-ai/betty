@@ -201,7 +201,7 @@ to calculate gradient for MWN parameters. This can be easily specified with
 
 .. code:: python
 
-    reweight_config = Config(type='darts', retain_graph=True)
+    reweight_config = Config(type='darts')
 
 **Problem Instantiation**
 
@@ -275,8 +275,8 @@ problem for a pre-determined number of steps (``step`` attribute in ``hpo_config
 Results
 -------
 
-The full code of the above example can be found
-`here <https://github.com/sangkeun00/betty/tree/main/examples/learning_to_reweight>`_.
+The full code of the above example can be found in this
+`link <https://github.com/sangkeun00/betty/tree/main/examples/learning_to_reweight>`_.
 If everything runs correctly, you should see something like below on your screen:
 
 On long-tailed CIFAR10 image classification benchmark, our MWN implementation achieves:

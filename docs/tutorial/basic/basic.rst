@@ -4,10 +4,13 @@ Basic
 Learn how to write a general MLO program and basic features of Betty. We will use "Data Reweighting
 for Long-Tailed Image Classification" as our example throughout this tutorial.
 
-- :doc:`Start MLO <basic_start>`
-- :doc:`Add validation <basic_validation>`
-- :doc:`Enable logging <basic_logging>`
-- :doc:`Reduce GPU memory footprint <basic_memory>`
+Step 1: :doc:`How to write an MLO program <basic_start>`
+
+Step 2: :doc:`Add validation for an MLO program <basic_validation>`
+
+Step 3: :doc:`Enable logging <basic_logging>`
+
+Step 4: :doc:`Reduce GPU memory footprint <basic_memory>`
 
 .. toctree::
    :hidden:
