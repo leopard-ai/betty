@@ -251,10 +251,11 @@ iterations, which can be specified in ``EngineConfig``.
 .. code:: python
     
     from betty.configs import EngineConfig
+    from betty.engine import Engine
 
     problems = [hpo, classifier]
     engine_config = EngineConfig(train_iters=10000)
-    engine = HPOEngine(config=engine_config, problems=problems, dependencies=dependencies)
+    engine = Engine(config=engine_config, problems=problems, dependencies=dependencies)
 
 **Execution of Multilevel Optimization**
 
@@ -268,3 +269,16 @@ problem for a pre-determined number of steps (``step`` attribute in ``hpo_config
 .. code:: python
 
     engine.run()
+
+|
+
+Results
+-------
+
+The full code of the above example can be found
+`here <https://github.com/sangkeun00/betty/tree/main/examples/learning_to_reweight>`_.
+If everything runs correctly, you should see something like below on your screen:
+
+On long-tailed CIFAR10 image classification benchmark, our MWN implementation achieves:
+
+Table
