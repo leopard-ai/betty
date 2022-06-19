@@ -3,12 +3,13 @@ Intermediate
 
 Customize sub-parts of your MLO program (e.g., hypergradient calculation).
 
-- :doc:`Custom hypergradient <intermediate_hypergradient>`
-- :doc:`Distributed training <intermediate_distributed>` (Coming soon)
+Intermediate 1: :doc:`Custom hypergradient <intermediate_hypergradient>`
+
+Intermediate 2: :doc:`Distributed training <intermediate_distributed>` (Coming soon)
 
 .. toctree::
    :hidden:
    :maxdepth: 1
 
-   Hypergradient<intermediate_hypergradient.rst>
+   Custom Hypergradient<intermediate_hypergradient.rst>
    Distributed Training (Soon)<intermediate_distributed.rst>
