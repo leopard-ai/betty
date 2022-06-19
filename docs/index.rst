@@ -54,7 +54,6 @@ Getting Started
 
    Installation<quickstart/installation.rst>
    Major Concepts<quickstart/concept.rst>
-   Tutorial<quickstart/tutorial.rst>
 
 .. toctree::
    :caption: Tutorial
