@@ -8,14 +8,30 @@ under the ``betty/hypergradient`` directory where they should implement their
 own algorithm, and add a new algorithm to ``betty/hypergradient/__init__.py``
 so that the ``Problem`` class can import and use it.
 
-In the python file, users should define how matrix-vector multiplication
-between best-response Jacobian of the current problem and the given vector
-is calculated:
+Recall that automatic differentiation for MLO is achieved by iteratively
+performing matrix-vector mulitplication with best-response Jacobian (See
+:doc:`../../quickstart/concept_autodiff`):
+
+.. math::
+
+    \begin{flalign}
+        &&\text{Calculate}\,:\quad&\frac{\partial w^*(\lambda)}{\partial \lambda}\times v &&\quad\quad\quad\text{(3)}\\
+        &&\text{Given}\,:\quad&w^*(\lambda) = \underset{w}{\mathrm{argmin}}\;\mathcal{C}(w, \lambda) &&\quad\quad\quad\text{(4)}
+    \end{flalign}
+
+In the python file, users should define how above "Calculate" part would be
+performed given :math:`\lambda, w,\text{ and } v`. 
+
 
 .. code:: python
 
     # betty/hypergradient/new_hypergrad.py
     def myhypergrad(vector, curr, prev):
+        """
+        vector: corresponds to v
+        curr: corresponds to the upper-level problem whose parameter is \lambda
+        prev: corresponds to the lower-level problem whose parameter is w
+        """
         ...
         return matrix_vecotr_multiplication_with_best_response_Jacobian
 

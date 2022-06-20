@@ -31,8 +31,6 @@ provide a reference for implementing a validation procedure:
 
         print('acc:', acc, '|| best_acc:', self.best_acc)
 
-        return acc
-
 Users can also specify how often they want to perform a validation procedure via
 ``EngineConfig``.
 
