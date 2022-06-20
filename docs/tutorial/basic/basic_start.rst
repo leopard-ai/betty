@@ -11,7 +11,7 @@ bilevel optimization as follows:
 .. math::
 
         w^*=\underset{w}{\mathrm{argmin}}\;\mathcal{L}_{rwt}(\theta^*(w))\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\;\;\,\text{Reweighting}\\
-        \text{s.t. }\theta^*(w)=\underset{\theta}{\mathrm{argmin}}\;\frac{1}{N}\sum_{i=1}^n\mathcal{R}(L^i_{cls}(\theta);w)\cdot L^i_{train}(\theta)\quad\quad\quad\text{Classification}
+        \text{s.t. }\theta^*(w)=\underset{\theta}{\mathrm{argmin}}\;\frac{1}{N}\sum_{i=1}^n\mathcal{R}(L^i_{cls}(\theta);w)\cdot L^i_{cls}(\theta)\quad\quad\quad\text{Classification}
 
 where :math:`\theta` is the classifier network parameters, :math:`L_{cls}^i` is the
 classification loss (cross-entropy) for the :math:`i`-th training sample,
