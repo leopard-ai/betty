@@ -1,21 +1,22 @@
 Quick Start
 ===========
 
-Throughout our tutorials, we will use
-**Data Reweighting for Long-Tailed Image Classification** as our main example.
-The basic context is that we aim to mitigate a class imbalance problem (or long-tailed
-distribution problem) by re-assigning higher/lower weights to data from rare/common
-classes. In particular, `Meta-Weight-Net (MWN) <https://arxiv.org/abs/1902.07379>`_
-proposes to approach data reweighting with bilevel optimization as follows:
+Throughout our tutorials, we will use **Data Reweighting for Long-Tailed Image
+Classification** as our running example.  The basic context is that we aim to mitigate a
+class imbalance problem (or long-tailed distribution problem) by re-assigning
+higher/lower weights to data from rare/common classes. In particular, `Meta-Weight-Net
+(MWN) <https://arxiv.org/abs/1902.07379>`_ proposes to approach data reweighting with
+bilevel optimization as follows:
 
 .. math::
 
         \theta^*=\underset{\theta}{\mathrm{argmin}}\;\mathcal{L}_{val}(w^*(\theta))\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\;\;\,\text{Reweighting}\\
         \text{s.t. }w^*(\theta)=\underset{w}{\mathrm{argmin}}\;\frac{1}{N}\sum_{i=1}^n\mathcal{R}(L^i_{train}(w);\theta)\cdot L^i_{train}(w)\quad\quad\quad\text{Classification}
 
-where :math:`w` is the network weight, :math:`L_{train}^i` is the training loss for the
-:math:`i`-th training sample, and :math:`\theta` is the MWN :math:`\mathcal{R}`'s weight,
-which reweights each training sample given its training loss :math:`L^i_{train}`.
+where :math:`w` is the classifier network parameters, :math:`L_{train}^i` is the
+training loss for the :math:`i`-th training sample, :math:`\mathcal{L}_{val}` is the
+**[TODO]**, and :math:`\theta` is the MWN :math:`\mathcal{R}`'s weight, which reweights
+each training sample given its training loss :math:`L^i_{train}`.
 
 Now that we have a problem formulation, we need to (1) define each level problem with
 the ``Problem`` class, and (2) define dependencies between problems with the ``Engine``

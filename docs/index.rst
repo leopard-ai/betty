@@ -3,10 +3,10 @@ Betty Documentation
 
 Introduction
 ------------
-Betty is a `PyTorch <https://pytorch.org>`_ library for multilevel optimization (MLO) and/or
-generalized meta-learning that provides a unified programming interface for a number of
-MLO applications including meta-learning, hyperparameter optimization, neural architecture
-search, data reweighting, adversarial learning, and reinforcement learning.
+Betty is a `PyTorch <https://pytorch.org>`_ library for multilevel optimization (MLO)
+and generalized meta-learning that provides a unified programming interface for a number
+of MLO applications including meta-learning, hyperparameter optimization, neural
+architecture search, data reweighting, adversarial learning, and reinforcement learning.
 
 Benefits
 --------
