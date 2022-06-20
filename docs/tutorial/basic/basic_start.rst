@@ -10,13 +10,14 @@ bilevel optimization as follows:
 
 .. math::
 
-        \theta^*=\underset{\theta}{\mathrm{argmin}}\;\mathcal{L}_{val}(w^*(\theta))\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\;\;\,\text{Reweighting}\\
-        \text{s.t. }w^*(\theta)=\underset{w}{\mathrm{argmin}}\;\frac{1}{N}\sum_{i=1}^n\mathcal{R}(L^i_{train}(w);\theta)\cdot L^i_{train}(w)\quad\quad\quad\text{Classification}
+        w^*=\underset{w}{\mathrm{argmin}}\;\mathcal{L}_{rwt}(\theta^*(w))\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\;\;\,\text{Reweighting}\\
+        \text{s.t. }\theta^*(w)=\underset{\theta}{\mathrm{argmin}}\;\frac{1}{N}\sum_{i=1}^n\mathcal{R}(L^i_{cls}(\theta);w)\cdot L^i_{train}(\theta)\quad\quad\quad\text{Classification}
 
-where :math:`w` is the classifier network parameters, :math:`L_{train}^i` is the
-training loss for the :math:`i`-th training sample, :math:`\mathcal{L}_{val}` is the
-**[TODO]**, and :math:`\theta` is the MWN :math:`\mathcal{R}`'s weight, which reweights
-each training sample given its training loss :math:`L^i_{train}`.
+where :math:`\theta` is the classifier network parameters, :math:`L_{cls}^i` is the
+classification loss (cross-entropy) for the :math:`i`-th training sample,
+:math:`\mathcal{L}_{rwt}` is the loss for the reweighting level (cross-entropy) and
+:math:`w` is the MWN :math:`\mathcal{R}`'s parameters, which reweights each training
+sample given its training loss :math:`L^i_{train}`.
 
 Now that we have a problem formulation, we need to (1) define each level problem with
 the ``Problem`` class, and (2) define dependencies between problems with the ``Engine``
