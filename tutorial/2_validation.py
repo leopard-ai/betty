@@ -78,8 +78,9 @@ class Reweight(ImplicitProblem):
     def training_step(self, batch):
         inputs, labels = batch
         outputs = self.classifier(inputs)
+        loss = F.cross_entropy(outputs, labels.long())
 
-        return F.cross_entropy(outputs, labels.long())
+        return loss
 
 
 reweight_config = Config(type="darts")

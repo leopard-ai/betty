@@ -18,9 +18,6 @@ from betty.problems import ImplicitProblem
 from betty.configs import Config, EngineConfig
 
 
-BASELINE = False
-
-
 def build_dataset(reweight_size=1000, imbalanced_factor=100):
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
@@ -81,11 +78,13 @@ class Reweight(ImplicitProblem):
     def training_step(self, batch):
         inputs, labels = batch
         outputs = self.classifier(inputs)
+        loss = F.cross_entropy(outputs, labels.long())
+        acc = (outputs.argmax(dim=1) == labels.long()).float().mean().item() * 100
 
-        return F.cross_entropy(outputs, labels.long())
+        return {"loss": loss, "acc": acc}
 
 
-reweight_config = Config(type="darts")
+reweight_config = Config(type="darts", log_step=100)
 reweight = Reweight(
     name="reweight",
     module=reweight_module,
@@ -113,15 +112,13 @@ class Classifier(ImplicitProblem):
         inputs, labels = batch
         outputs = self.module(inputs)
         loss = F.cross_entropy(outputs, labels.long(), reduction="none")
-        if BASELINE:
-            return torch.mean(loss)
         loss_reshape = torch.reshape(loss, (-1, 1))
         weight = self.reweight(loss_reshape.detach())
 
         return torch.mean(weight * loss_reshape)
 
 
-classifier_config = Config(type="darts", unroll_steps=1)
+classifier_config = Config(unroll_steps=1)
 classifier = Classifier(
     name="classifier",
     module=classifier_module,
@@ -148,18 +145,14 @@ class ReweightingEngine(Engine):
         acc = correct / total * 100
         if self.best_acc < acc:
             self.best_acc = acc
-        return {"acc": acc, "best_acc": self.best_acc}
 
+        return {"acc": acc, "best_acc": self.best_acc}
 
 engine_config = EngineConfig(train_iters=3000, valid_step=100)
 
-if BASELINE:
-    problems = [classifier]
-    u2l, l2u = {}, {}
-else:
-    problems = [reweight, classifier]
-    u2l = {reweight: [classifier]}
-    l2u = {classifier: [reweight]}
+problems = [reweight, classifier]
+u2l = {reweight: [classifier]}
+l2u = {classifier: [reweight]}
 dependencies = {"l2u": l2u, "u2l": u2l}
 
 engine = ReweightingEngine(config=engine_config, problems=problems, dependencies=dependencies)
