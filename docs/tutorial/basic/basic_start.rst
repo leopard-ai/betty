@@ -1,11 +1,11 @@
-Start
-=====
+Quick Start
+===========
 
-Many real-world datasets suffer from class imbalance due to underlying long-tailed data
-distributions. Learning with imbalanced data could have negative societal impacts such as
-discrimination towards underrepresented groups. Data reweighting has been proposed as one
-solution to class imbalance problems by assigning higher/lower weights to data from
-rare/common classes. In particular, `Meta-Weight-Net (MWN) <https://arxiv.org/abs/1902.07379>`_
+Throughout our tutorials, we will use
+**Data Reweighting for Long-Tailed Image Classification** as our main example.
+The basic context is that we aim to mitigate a class imbalance problem (or long-tailed
+distribution problem) by re-assigning higher/lower weights to data from rare/common
+classes. In particular, `Meta-Weight-Net (MWN) <https://arxiv.org/abs/1902.07379>`_
 proposes to approach data reweighting with bilevel optimization as follows:
 
 .. math::

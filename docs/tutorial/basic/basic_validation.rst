@@ -10,7 +10,7 @@ MLO program. More specifically, the validation procedure can be added by:
 2. implementing a ``validation`` method
 
 In this tutorial, we reuse the data reweighting example from :doc:`basic_start`, and
-provide a reference for implementing a validation procedure as presented below:
+provide a reference for implementing a validation procedure:
 
 .. code:: python
 
