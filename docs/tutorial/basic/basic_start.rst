@@ -2,11 +2,11 @@ Quick Start
 ===========
 
 Throughout our tutorials, we will use **Data Reweighting for Long-Tailed Image
-Classification** as our running example.  The basic context is that we aim to mitigate a
-class imbalance problem (or long-tailed distribution problem) by re-assigning
+Classification** as our running example.  The basic context is that we aim to mitigate
+a class imbalance problem (or long-tailed distribution problem) by re-assigning
 higher/lower weights to data from rare/common classes. In particular, `Meta-Weight-Net
-(MWN) <https://arxiv.org/abs/1902.07379>`_ proposes to approach data reweighting with
-bilevel optimization as follows:
+(MWN) <https://arxiv.org/abs/1902.07379>`_ formulates data reweighting as bilevel
+optimization as follows:
 
 .. math::
 
@@ -23,23 +23,90 @@ Now that we have a problem formulation, we need to (1) define each level problem
 the ``Problem`` class, and (2) define dependencies between problems with the ``Engine``
 class.
 
-.. container:: toggle
 
-    .. container:: header
-
-        **Show/Hide Code**
-
-    .. code-block:: python
-       :linenos:
-
-       from plone import api
 
 .. NOTE: the following bar gives a small gap between sections for readability.
 
 |
 
+Basic setup
+-----------
+
+Before diving into the MLO part, we do basic setups such as importing dependencies and
+constructing imbalanced (or long-tailed) dataset. This part is not directly relevant to
+MLO, so users can simply copy and paste it to their code.
+
+.. raw:: html
+
+   <details>
+   <summary><a>Preparation code</a></summary>
+
+.. code-block:: python
+
+    # import dependency
+    import copy
+    import numpy as np
+
+    import torch
+    import torch.nn as nn
+    import torch.nn.functional as F
+    import torch.optim as optim
+    from torch.utils.data import DataLoader
+    from torchvision import transforms
+    from torchvision.datasets import MNIST
+
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    # Construct imbalanced (or long-tailed) dataset
+    def build_dataset(reweight_size=1000, imbalanced_factor=100):
+        transform = transforms.Compose(
+            [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
+        )
+        dataset = MNIST(root="./data", train=True, download=True, transform=transform)
+
+        num_classes = len(dataset.classes)
+        num_meta = int(reweight_size / num_classes)
+
+        index_to_meta = []
+        index_to_train = []
+
+        imbalanced_num_list = []
+        sample_num = int((len(dataset.targets) - reweight_size) / num_classes)
+        for class_index in range(num_classes):
+            imbalanced_num = sample_num / (imbalanced_factor ** (class_index / (num_classes - 1)))
+            imbalanced_num_list.append(int(imbalanced_num))
+        np.random.shuffle(imbalanced_num_list)
+
+        for class_index in range(num_classes):
+            index_to_class = [
+                index for index, label in enumerate(dataset.targets) if label == class_index
+            ]
+            np.random.shuffle(index_to_class)
+            index_to_meta.extend(index_to_class[:num_meta])
+            index_to_class_for_train = index_to_class[num_meta:]
+
+            index_to_class_for_train = index_to_class_for_train[: imbalanced_num_list[class_index]]
+
+            index_to_train.extend(index_to_class_for_train)
+
+        reweight_dataset = copy.deepcopy(dataset)
+        dataset.data = dataset.data[index_to_train]
+        dataset.targets = list(np.array(dataset.targets)[index_to_train])
+        reweight_dataset.data = reweight_dataset.data[index_to_meta]
+        reweight_dataset.targets = list(np.array(reweight_dataset.targets)[index_to_meta])
+
+        return dataset, reweight_dataset
+
+    classifier_dataset, reweight_dataset = build_dataset(imbalanced_factor=100)
+
+.. raw:: html
+
+   </details>
+
 Problem
 -------
+
 In this example, we have a MLO program consisting of two problem levels: *upper* and
 *lower*. We respectively refer to these two problems as **Reweight** and **Classifier**,
 and create ``Problem`` classes for each of them.  As introduced in the
@@ -67,23 +134,22 @@ configuration as follows.
 .. code:: python
 
     # Module
-    classifier_module = ResNet32(num_classes=10)
+    classifier_module = nn.Sequential(
+        nn.Flatten(), nn.Linear(784, 200), nn.ReLU(), nn.Linear(200, 10)
+    )
 
     # Optimizer
-    classifier_optimizer = optim.SGD(classifier_module.parameters(),
-                                     lr=0.1,
-                                     momentum=0.9,
-                                     weight_decay=5e-4)
+    classifier_optimizer = optim.SGD(classifier_module.parameters(), lr=0.1, momentum=0.9)
 
     # Data Loader
-    classifier_dataloader, *_ = build_dataloader(dataset="cifar10",
-                                                 imbalanced_factor=50,
-                                                 batch_size=100)
+    classifier_dataloader = DataLoader(
+        classifier_dataset, batch_size=100, shuffle=True, pin_memory=True
+    )
 
     # LR Scheduler
-    classifier_scheduler = optim.lr_scheduler.MultiStepLR(classifier_optimizer,
-                                                          milestones=[5000, 7500, 9000],
-                                                          gamma=0.1)
+    classifier_scheduler = optim.lr_scheduler.MultiStepLR(
+        classifier_optimizer, milestones=[1500, 2500], gamma=0.1
+    )
 
 **Loss Function**
 
@@ -118,16 +184,16 @@ writing the loss function.
 
 **Training Configuration**
 
-Since the **Classifier** problem is the lowest-level problem, it doesn't require any
-best-response Jacobian calculation from the lower-level problems. Rather, it uses
-PyTorch's default autodiff procedure to calculate the gradient. Therefore, we don't need
-to specify anything for the training configuration for this problem.
+Training configuration can be provided by a Python dataclass ``Config``. Since 
+**Classifier** is the lower-level problem, we only need to specify how many steps
+we want to unroll before updating the upper-level **Reweight** problem. We choose
+the simplest one-step unrolling for our example.
 
 .. code:: python
 
     from betty.configs import Config
 
-    classifier_config = Config()
+    classifier_config = Config(unroll_steps=1)
 
 **Problem Instantiation**
 
@@ -144,7 +210,7 @@ problem.
         scheduler=classifier_scheduler,
         train_data_loader=classifier_dataloader,
         config=classifier_config,
-        device="cuda"
+        device=device
     )
 
 |
@@ -163,27 +229,18 @@ importance weight.
 .. code:: python
 
     # Module
-    class MLP(nn.Module):
-        def __init__(self, hidden_size=100):
-            super(MLP, self).__init__()
-            self.fc1 = nn.Linear(1, hidden_size)
-            self.fc2 = nn.Linear(hidden_size, 1)
-
-        def forward(self, x):
-            x = self.fc2(F.relu(self.fc1(x)))
-            weight = torch.sigmoid(x)
-
-            return weight
-
-    reweight_module = MLP(hidden_size=100)
-
+    reweight_module = nn.Sequential(
+        nn.Linear(1, 100), nn.ReLU(), nn.Linear(100, 1), nn.Sigmoid()
+    )
+    
     # Optimizer
     reweight_optimizer = optim.Adam(reweight_module.parameters(), lr=1e-5)
-    
+
     # Data Loader
-    _, reweight_dataloader, *_ = build_dataloader(dataset="cifar10",
-                                                  imbalanced_factor=50,
-                                                  batch_size=100)
+    reweight_dataloader = DataLoader(
+        reweight_dataset, batch_size=100, shuffle=True, pin_memory=True
+    )
+
 
 **Loss Function**
 
@@ -229,7 +286,7 @@ We can now instantiate the ``Problem`` class for the **Reweight** problem! We us
         optimizer=reweight_optimizer,
         train_data_loader=reweight_dataloader,
         config=reweight_config,
-        device="cuda"
+        device=device
     )
 
 |
@@ -258,7 +315,7 @@ lower-level problem.
 
 To instantiate the ``Engine`` class, we need to provide all involved problems as well as
 the Engine configuration. Since we already defined all problems, we can simply combine
-them in a Python list. In addition, we perform our multilevel optimization for 10,000
+them in a Python list. In addition, we perform our multilevel optimization for 3,000
 iterations, which can be specified in ``EngineConfig``.
 
 .. code:: python
@@ -267,7 +324,7 @@ iterations, which can be specified in ``EngineConfig``.
     from betty.engine import Engine
 
     problems = [hpo, classifier]
-    engine_config = EngineConfig(train_iters=10000)
+    engine_config = EngineConfig(train_iters=3000)
     engine = Engine(config=engine_config, problems=problems, dependencies=dependencies)
 
 **Execution of Multilevel Optimization**
@@ -287,6 +344,12 @@ problem for a pre-determined number of steps (``step`` attribute in ``hpo_config
 
 Results
 -------
+
+Once the training is done, we perform the validation procedure *manually* as below:
+
+.. code::
+
+    
 
 The full code of the above example can be found in this
 `link <https://github.com/sangkeun00/betty/tree/main/examples/learning_to_reweight>`_.
