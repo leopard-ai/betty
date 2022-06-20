@@ -393,9 +393,9 @@ in the below table:
 +---------------+---------------+
 |               | Test Accuracy |
 +===============+===============+
-| Baseline      | 95.41%        |
+| Baseline      | 91.82%        |
 +---------------+---------------+
-| + Reweighting | 91.82%        |
+| Reweighting   | 95.41%        |
 +---------------+---------------+
 
 The above result shows that long-tailed image classification can clearly benefit from
