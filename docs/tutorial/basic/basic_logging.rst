@@ -37,11 +37,11 @@ implemented as:
                 out = self.inner(x)
                 correct += (out.argmax(dim=1) == target).sum().item()
                 total += x.size(0)
-        acc = correct / total * 100
-        if self.best_acc < acc:
-            self.best_acc = acc
+            acc = correct / total * 100
+            if self.best_acc < acc:
+                self.best_acc = acc
 
-        return {"acc": acc, "best_acc": best_acc}
+            return {"acc": acc, "best_acc": self.best_acc}
 
 Finally, users can specify how often they want to log these metrics in ``Config``
 and ``EngineConfig`` respectively for training (``Problem``) and validation
