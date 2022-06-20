@@ -19,7 +19,6 @@ from betty.configs import Config, EngineConfig
 
 
 BASELINE = False
-device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 def build_dataset(reweight_size=1000, imbalanced_factor=100):
@@ -63,6 +62,11 @@ def build_dataset(reweight_size=1000, imbalanced_factor=100):
 
 
 classifier_dataset, reweight_dataset = build_dataset(reweight_size=1000, imbalanced_factor=100)
+transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
+valid_dataset = MNIST(root="./data", train=False, transform=transform)
+valid_dataloader = DataLoader(valid_dataset, batch_size=100, pin_memory=True)
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 ####################
@@ -77,9 +81,8 @@ class Reweight(ImplicitProblem):
     def training_step(self, batch):
         inputs, labels = batch
         outputs = self.classifier(inputs)
-        loss = F.cross_entropy(outputs, labels.long())
 
-        return loss
+        return F.cross_entropy(outputs, labels.long())
 
 
 reweight_config = Config(type="darts")
@@ -130,6 +133,24 @@ classifier = Classifier(
 )
 
 
+class ReweightingEngine(Engine):
+    @torch.no_grad()
+    def validation(self):
+        correct = 0
+        total = 0
+        if not hasattr(self, "best_acc"):
+            self.best_acc = -1
+        for x, target in valid_dataloader:
+            x, target = x.to(device), target.to(device)
+            out = self.classifier(x)
+            correct += (out.argmax(dim=1) == target).sum().item()
+            total += x.size(0)
+        acc = correct / total * 100
+        if self.best_acc < acc:
+            self.best_acc = acc
+        return {"acc": acc, "best_acc": self.best_acc}
+
+
 engine_config = EngineConfig(train_iters=3000, valid_step=100)
 
 if BASELINE:
@@ -141,20 +162,5 @@ else:
     l2u = {classifier: [reweight]}
 dependencies = {"l2u": l2u, "u2l": u2l}
 
-engine = Engine(config=engine_config, problems=problems, dependencies=dependencies)
+engine = ReweightingEngine(config=engine_config, problems=problems, dependencies=dependencies)
 engine.run()
-
-# Validation
-transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
-valid_dataset = MNIST(root="./data", train=False, transform=transform)
-valid_dataloader = DataLoader(valid_dataset, batch_size=100, pin_memory=True)
-
-correct = 0
-total = 0
-for x, target in valid_dataloader:
-    x, target = x.to(device), target.to(device)
-    out = classifier(x)
-    correct += (out.argmax(dim=1) == target).sum().item()
-    total += x.size(0)
-acc = correct / total * 100
-print("Classification Accuracy:", acc)
