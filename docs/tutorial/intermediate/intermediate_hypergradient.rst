@@ -15,8 +15,8 @@ performing matrix-vector mulitplication with best-response Jacobian (See
 .. math::
 
     \begin{flalign}
-        &&\text{Calculate}\,:\quad&\frac{\partial w^*(\lambda)}{\partial \lambda}\times v &&\quad\quad\quad\text{(3)}\\
-        &&\text{Given}\,:\quad&w^*(\lambda) = \underset{w}{\mathrm{argmin}}\;\mathcal{C}(w, \lambda) &&\quad\quad\quad\text{(4)}
+        &&\text{Calculate}\,:\quad&\frac{\partial w^*(\lambda)}{\partial \lambda}\times v\\[2ex]
+        &&\text{Given}\,:\quad&w^*(\lambda) = \underset{w}{\mathrm{argmin}}\;\mathcal{C}(w, \lambda)
     \end{flalign}
 
 In the python file, users should define how above "Calculate" part would be
