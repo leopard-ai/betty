@@ -18,7 +18,7 @@ from betty.problems import ImplicitProblem
 from betty.configs import Config, EngineConfig
 
 
-BASELINE = False
+BASELINE = True
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
@@ -118,7 +118,7 @@ class Classifier(ImplicitProblem):
         return torch.mean(weight * loss_reshape)
 
 
-classifier_config = Config(type="darts", unroll_steps=1)
+classifier_config = Config(unroll_steps=1)
 classifier = Classifier(
     name="classifier",
     module=classifier_module,
@@ -130,7 +130,7 @@ classifier = Classifier(
 )
 
 
-engine_config = EngineConfig(train_iters=3000, valid_step=100)
+engine_config = EngineConfig(train_iters=3000)
 
 if BASELINE:
     problems = [classifier]

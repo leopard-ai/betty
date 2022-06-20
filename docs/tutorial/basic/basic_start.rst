@@ -34,7 +34,7 @@ Basic setup
 
 Before diving into the MLO part, we do basic setups such as importing dependencies and
 constructing imbalanced (or long-tailed) dataset. This part is not directly relevant to
-MLO, so users can simply copy and paste it to their code.
+MLO, so users can simply copy and paste it to their code. We set our imbalance factor to
 
 .. raw:: html
 
@@ -121,7 +121,7 @@ Lower-level Problem (Classifier)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In our data reweighting example, the lower-level problem corresponds to the long-tailed
-CIFAR image classification task. Specifically, we set the imbalance factor to 50, meaning
+MNIST image classification task. Specifically, we set the imbalance factor to 100, meaning
 that the most common class has 50 times more data than the least common class. The data
 loader code is adopted from
 `here
@@ -347,14 +347,58 @@ Results
 
 Once the training is done, we perform the validation procedure *manually* as below:
 
-.. code::
+.. code:: python
 
-    
+    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
+    valid_dataset = MNIST(root="./data", train=False, transform=transform)
+    valid_dataloader = DataLoader(valid_dataset, batch_size=100, pin_memory=True)
+
+    correct = 0
+    total = 0
+    for x, target in valid_dataloader:
+        x, target = x.to(device), target.to(device)
+        out = classifier(x)
+        correct += (out.argmax(dim=1) == target).sum().item()
+        total += x.size(0)
+    acc = correct / total * 100
+    print("Imbalanced Classification Accuracy:", acc)
 
 The full code of the above example can be found in this
-`link <https://github.com/sangkeun00/betty/tree/main/examples/learning_to_reweight>`_.
+`link <https://github.com/sangkeun00/betty/blob/main/tutorial/1_quick_start.py>`_.
 If everything runs correctly, you should see something like below on your screen:
 
-On long-tailed CIFAR10 image classification benchmark, our MWN implementation achieves:
+.. code:: python
 
-Table
+    [2022-06-20 13:01:48] [INFO] Initializing Multilevel Optimization...
+
+    [2022-06-20 13:01:51] [INFO] *** Problem Information ***
+    [2022-06-20 13:01:51] [INFO] Name: reweight
+    [2022-06-20 13:01:51] [INFO] Uppers: []
+    [2022-06-20 13:01:51] [INFO] Lowers: ['classifier']
+    [2022-06-20 13:01:51] [INFO] Paths: [['reweight', 'classifier', 'reweight']]
+
+    [2022-06-20 13:01:51] [INFO] *** Problem Information ***
+    [2022-06-20 13:01:51] [INFO] Name: classifier
+    [2022-06-20 13:01:51] [INFO] Uppers: ['reweight']
+    [2022-06-20 13:01:51] [INFO] Lowers: []
+    [2022-06-20 13:01:51] [INFO] Paths: []
+
+    [2022-06-20 13:01:51] [INFO] Time spent on initialization: 3.124 (s)
+
+    Classification Accuracy: 95.41
+
+Finally, we compare our data reweighting result with the baseline without reweighting
+in the below table:
+
++---------------+---------------+
+|               | Test Accuracy |
++===============+===============+
+| Baseline      | 95.41%        |
++---------------+---------------+
+| + Reweighting | 91.82%        |
++---------------+---------------+
+
+The above result shows that long-tailed image classification can clearly benefit from
+data reweighting!
+
+Happy Multilevel Optimization!
