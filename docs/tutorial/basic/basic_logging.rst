@@ -41,7 +41,7 @@ implemented as:
         if self.best_acc < acc:
             self.best_acc = acc
 
-        {"acc": acc, "best_acc": best_acc}
+        return {"acc": acc, "best_acc": best_acc}
 
 Finally, users can specify how often they want to log these metrics in ``Config``
 and ``EngineConfig`` respectively for training (``Problem``) and validation
