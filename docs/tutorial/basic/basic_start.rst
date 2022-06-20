@@ -23,6 +23,17 @@ Now that we have a problem formulation, we need to (1) define each level problem
 the ``Problem`` class, and (2) define dependencies between problems with the ``Engine``
 class.
 
+.. container:: toggle
+
+    .. container:: header
+
+        **Show/Hide Code**
+
+    .. code-block:: python
+       :linenos:
+
+       from plone import api
+
 .. NOTE: the following bar gives a small gap between sections for readability.
 
 |
