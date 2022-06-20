@@ -202,4 +202,4 @@ We welcome contributions from the community! Please see
 our [contributing guidelines](CONTRIBUTING.md) for details on how to contributed to Betty.
 
 ## License
-Betty is licensed under the [MIT License](LICENSE).
+Betty is licensed under the [Apache License 2.0](LICENSE).
