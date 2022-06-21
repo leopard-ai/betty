@@ -65,10 +65,9 @@ class Classifier(ImplicitProblem):
         inputs, labels = batch
         outputs = self.module(inputs)
         loss = F.cross_entropy(outputs, labels)
-        acc = (outputs.argmax(dim=1) == labels.long()).float().mean().item() * 100
 
         # Returned dict will be automatically logged with the logging tool (e.g. TensorBoard)
-        return {'loss': loss, 'acc': acc}
+        return loss
 
 # set up problem configuration
 cls_config = Config(type='darts', unroll_steps=1, log_step=100)
@@ -99,7 +98,6 @@ class Classifier(ImplicitProblem):
         inputs, labels = batch
         outputs = self.module(inputs)
         loss = F.cross_entropy(outputs, labels)
-        acc = (outputs.argmax(dim=1) == labels.long()).float().mean().item() * 100
         
         """
         accessing weight decay hyperparameter from another problem HPO can be achieved
@@ -108,7 +106,7 @@ class Classifier(ImplicitProblem):
         weight_decay = self.hpo()
         reg_loss = weight_decay * sum([p.norm().pow(2) for p in self.module.parameters()])
         
-        return {'loss': loss + reg_loss, 'acc': acc}
+        return loss + reg_loss
 
 cls_prob = Classifier(name='classifier', module=...)
 ```
