@@ -190,7 +190,7 @@ def ResNet50():
 classifier_module = ResNet50()
 classifier_optimizer = optim.SGD(classifier_module.parameters(), lr=0.01, momentum=0.9)
 classifier_scheduler = optim.lr_scheduler.MultiStepLR(
-    classifier_optimizer, milestones=[1500, 2500], gamma=0.1
+    classifier_optimizer, milestones=[6000, 8500], gamma=0.1
 )
 
 
@@ -236,7 +236,7 @@ class ReweightingEngine(Engine):
         return {"acc": acc, "best_acc": self.best_acc}
 
 
-engine_config = EngineConfig(train_iters=3000, valid_step=100, distributed=distributed)
+engine_config = EngineConfig(train_iters=10000, valid_step=100, distributed=distributed)
 
 problems = [reweight, classifier]
 u2l = {reweight: [classifier]}
