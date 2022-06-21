@@ -150,6 +150,7 @@ class HPOEngine(Engine):
             outputs = self.classifer(inputs)
             loss += F.cross_entropy(outputs, targets)
             
+        # Returned dict will be automatically logged after each validation
         return {'loss': loss}
 ...
 engine = HPOEngine(problems=problems, dependencies=dependencies, config=engine_config)
