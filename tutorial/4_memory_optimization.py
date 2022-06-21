@@ -84,7 +84,7 @@ class Reweight(ImplicitProblem):
         return {"loss": loss, "acc": acc}
 
 
-reweight_config = Config(type="darts", log_step=100)
+Config(type="darts", log_step=100, fp16=True)
 reweight = Reweight(
     name="reweight",
     module=reweight_module,
@@ -148,7 +148,7 @@ class ReweightingEngine(Engine):
 
         return {"acc": acc, "best_acc": self.best_acc}
 
-engine_config = EngineConfig(train_iters=3000, valid_step=100)
+engine_config = EngineConfig(train_iters=3000, valid_step=100, distributed=True)
 
 problems = [reweight, classifier]
 u2l = {reweight: [classifier]}
