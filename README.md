@@ -71,7 +71,7 @@ class Classifier(ImplicitProblem):
         return {'loss': loss, 'acc': acc}
 
 # set up problem configuration
-cls_config = Config(type='darts', step=1, log_step=10, fp16=False, retain_graph=True)
+cls_config = Config(type='darts', unroll_steps=1, log_step=100)
 
 # Classifier problem class instantiation
 cls_prob = Classifier(name='classifier',
