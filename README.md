@@ -66,7 +66,6 @@ class Classifier(ImplicitProblem):
         outputs = self.module(inputs)
         loss = F.cross_entropy(outputs, labels)
 
-        # Returned dict will be automatically logged with the logging tool (e.g. TensorBoard)
         return loss
 
 # set up problem configuration
