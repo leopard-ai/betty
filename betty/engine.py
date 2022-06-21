@@ -16,7 +16,7 @@ class Engine:
     dependencies. It also provides a primitive for executing multilevel optimization.
     """
 
-    def __init__(self, config, problems, dependencies=None):
+    def __init__(self, config, problems, dependencies=None, env=None):
         # config
         self.config = config if config is not None else EngineConfig()
         self.train_iters = 0
@@ -34,6 +34,9 @@ class Engine:
 
         # dependencies
         self.dependencies = dependencies
+
+        # env
+        self.env = env
 
         # initialize
         self.initialize()
@@ -86,10 +89,12 @@ class Engine:
         # Parse dependency
         self.parse_dependency()
 
-        # check & set multiplier for each problem
+        # problem initialization
         for problem in self.problems:
             problem.add_logger(self.logger)
             problem.initialize(self.config)
+            if self.env is not None:
+                problem.add_env(self.env)
 
         end = time.time()
         self.logger.info(f"Time spent on initialization: {end-start:.3f} (s)\n")

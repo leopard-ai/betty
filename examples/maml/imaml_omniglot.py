@@ -20,8 +20,7 @@ argparser = argparse.ArgumentParser()
 argparser.add_argument("--n_way", type=int, help="n way", default=5)
 argparser.add_argument("--k_spt", type=int, help="k shot for support set", default=5)
 argparser.add_argument("--k_qry", type=int, help="k shot for query set", default=15)
-argparser.add_argument("--inner_steps", type=int, help="number of inner steps", default=10)
-argparser.add_argument("--device", type=str, help="device", default="cuda")
+argparser.add_argument("--inner_steps", type=int, help="number of inner steps", default=5)
 argparser.add_argument("--task_num", type=int, help="meta batch size, namely task num", default=16)
 argparser.add_argument("--seed", type=int, help="random seed", default=1)
 arg = argparser.parse_args()
@@ -53,13 +52,8 @@ db_test = OmniglotNShot(
 )
 
 
-class Flatten(nn.Module):
-    def forward(self, x):
-        return x.view(x.size(0), -1)
-
-
 class Net(nn.Module):
-    def __init__(self, n_way, device):
+    def __init__(self, n_way):
         super(Net, self).__init__()
         self.net = nn.Sequential(
             nn.Conv2d(1, 64, 3),
@@ -74,91 +68,74 @@ class Net(nn.Module):
             nn.BatchNorm2d(64, momentum=1, affine=True),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2, 2),
-            Flatten(),
+            nn.Flatten(),
             nn.Linear(64, n_way),
-        ).to(device)
+        )
 
     def forward(self, x):
-        return self.net.forward(x)
+        return self.net(x)
 
 
-class Parent(ImplicitProblem):
-    def forward(self, *args, **kwargs):
-        return self.module(*args, **kwargs)
+parent_module = Net(arg.n_way)
+parent_optimizer = optim.Adam(parent_module.parameters(), lr=0.001)
+parent_scheduler = optim.lr_scheduler.StepLR(parent_optimizer, step_size=50, gamma=0.9)
 
-    def training_step(self, batch, *args, **kwargs):
-        x_spt, y_spt, x_qry, y_qry = batch
+
+class Outer(ImplicitProblem):
+    def training_step(self, batch):
+        inputs, labels = batch
         accs = []
         loss = 0
         for idx in range(len(self._children)):
             net = getattr(self, f"inner_{idx}")
-            out = net(self.parent_batch[0][idx])
-            loss += F.cross_entropy(out, self.parent_batch[1][idx])
-            accs.append((out.argmax(dim=1) == self.parent_batch[1][idx]).detach())
+            out = net(inputs[idx])
+            loss += F.cross_entropy(out, labels[idx]) / len(self._children)
+            accs.append((out.argmax(dim=1) == labels[idx]).detach())
         acc = 100.0 * torch.cat(accs).float().mean().item()
-        self.parent_batch = (x_qry, y_qry)
-        self.child_batch = (x_spt, y_spt)
 
-        return {'loss': loss, 'acc': acc}
-
-    def configure_train_data_loader(self):
-        data_loader = db
-        x_spt, y_spt, x_qry, y_qry = next(data_loader)
-        self.parent_batch = (x_qry, y_qry)
-        self.child_batch = (x_spt, y_spt)
-        return data_loader
-
-    def configure_module(self):
-        return Net(arg.n_way, self.device)
-
-    def configure_optimizer(self):
-        return optim.Adam(self.module.parameters(), lr=0.001)
-
-    def configure_scheduler(self):
-        return optim.lr_scheduler.StepLR(self.optimizer, step_size=20, gamma=0.9)
+        return {"loss": loss, "acc": acc}
 
 
-class Child(ImplicitProblem):
-    def forward(self, x):
-        return self.module(x)
-
-    def training_step(self, batch, *args, **kwargs):
-        child_idx = self.outer.children.index(self)
-        inputs, targets = self.outer.child_batch
-        inputs, targets = inputs[child_idx], targets[child_idx]
-        out = self.module(inputs)
-        loss = F.cross_entropy(out, targets) + self.reg_loss()
+class Inner(ImplicitProblem):
+    def training_step(self, batch):
+        idx = self.outer.children.index(self)
+        inputs, labels = batch
+        out = self.module(inputs[idx])
+        loss = F.cross_entropy(out, labels[idx]) + self.reg_loss()
 
         return loss
 
     def reg_loss(self):
         return 0.25 * sum(
-            [
-                (p1 - p2).pow(2).sum()
-                for p1, p2 in zip(self.trainable_parameters(), self.outer.trainable_parameters())
-            ]
+            [(p1 - p2).pow(2).sum() for p1, p2 in zip(self.parameters(), self.outer.parameters())]
         )
 
     def on_inner_loop_start(self):
         self.module.load_state_dict(self.outer.module.state_dict())
 
-    def configure_train_data_loader(self):
-        return db_test
 
-    def configure_module(self):
-        return Net(arg.n_way, self.device)
-
-    def configure_optimizer(self):
-        return optim.SGD(self.module.parameters(), lr=0.1)
+class MAMLEngine(Engine):
+    def train_step(self):
+        for leaf in self.leaves:
+            leaf.step(global_step=self.global_step)
 
 
-parent_config = Config(type="cg", cg_alpha=0.00001, cg_iterations=2, log_step=10)
-child_config = Config(type="darts", unroll_steps=5)
+parent_config = Config(log_step=10)
+child_config = Config(type="darts", unroll_steps=arg.inner_steps)
 
-parent = Parent(name="outer", config=parent_config, device=arg.device)
-children = [
-    Child(name="inner", config=child_config, device=arg.device) for _ in range(arg.task_num)
-]
+parent = Outer(
+    name="outer",
+    module=parent_module,
+    optimizer=parent_optimizer,
+    scheduler=parent_scheduler,
+    config=parent_config)
+children = []
+for _ in range(arg.task_num):
+    child_module = Net(arg.n_way)
+    child_optimizer = optim.SGD(child_module.parameters(), lr=0.1)
+    child = Inner(name="inner", module=child_module, optimizer=child_optimizer, config=child_config)
+    children.append(child)
+
 problems = children + [parent]
 u2l = {parent: children}
 l2u = {}

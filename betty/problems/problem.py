@@ -35,6 +35,8 @@ class Problem:
         self._config = config if config is not None else Config()
         self.engine_config = None
         self.device = device
+        if self.device is None:
+            self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         # computation graph depedency
         # ! dependency can be defined both in ``Module'' class and ``Engine'' class
@@ -54,6 +56,9 @@ class Problem:
         # optimizer & lr scheduler
         self.optimizer = optimizer
         self.scheduler = scheduler
+
+        # environment
+        self.env = None
 
         # fp16
         self._fp16 = config.fp16
@@ -121,8 +126,9 @@ class Problem:
         train_data_loader = self.train_data_loader
         if self.is_implemented("configure_train_data_loader"):
             train_data_loader = self.configure_train_data_loader()
-        assert train_data_loader is not None, "Train data loader must be specified!"
-        self.train_data_iterator = iter(train_data_loader)
+        if train_data_loader is not None:
+            assert self.is_implemented("get_batch")
+            self.train_data_iterator = iter(train_data_loader)
 
         # set up module for the current level
         if self.is_implemented("configure_module"):
@@ -545,6 +551,15 @@ class Problem:
         """
         if self.logger is None:
             self.logger = logger
+
+    def add_env(self, env):
+        """
+        Add environment to the current problem.
+
+        :param logger: logger defined by users in ``Engine``.
+        """
+        if self.env is None:
+            self.env = env
 
     @abc.abstractmethod
     def parameters(self):
