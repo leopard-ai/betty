@@ -188,13 +188,14 @@ class Problem:
         else:
             return self.training_step(batch)
 
-    def one_step_descent(self, load_batch=True):
+    def one_step_descent(self, batch=None):
         # load data
-        if load_batch:
+        if batch is None:
             self.cur_batch = self.get_batch()
+            batch = self.cur_batch
 
         # calculate loss
-        loss, loss_dict = self.get_loss()
+        loss, loss_dict = self.get_loss(batch)
 
         # calculate gradient (a.k.a backward)
         self.backward(
@@ -264,7 +265,7 @@ class Problem:
                 self.recover_states()
 
                 # one step gradient step
-                _ = self.one_step_descent(load_batch=False)
+                _ = self.one_step_descent(batch=self.cur_batch)
 
                 # lr scheduler
                 if self.scheduler is not None:
@@ -311,7 +312,7 @@ class Problem:
 
         return batch
 
-    def get_loss(self):
+    def get_loss(self, batch):
         """
         Calculate loss and log metrics for the current batch based on the user-defined loss
         function.
@@ -319,7 +320,7 @@ class Problem:
         :return: loss and log metrics (e.g. classification accuracy)
         :rtype: dict
         """
-        maybe_loss_dict = self.training_step_exec(self.cur_batch)
+        maybe_loss_dict = self.training_step_exec(batch)
         is_dict = isinstance(maybe_loss_dict, dict)
         loss = maybe_loss_dict["loss"] if is_dict else maybe_loss_dict
         loss_no_scale = loss.item()

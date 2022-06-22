@@ -11,7 +11,8 @@ import torch.optim as optim
 
 from betty.engine import Engine
 from betty.problems import ImplicitProblem
-from betty.configs import Config
+from betty.configs import Config, EngineConfig
+from betty.envs import Env
 
 from support.omniglot_loader import OmniglotNShot
 
@@ -25,6 +26,7 @@ argparser.add_argument("--task_num", type=int, help="meta batch size, namely tas
 argparser.add_argument("--seed", type=int, help="random seed", default=1)
 arg = argparser.parse_args()
 
+device = "cuda" if torch.cuda.is_available() else "cpu"
 torch.manual_seed(arg.seed)
 if torch.cuda.is_available():
     torch.cuda.manual_seed_all(arg.seed)
@@ -37,7 +39,6 @@ db = OmniglotNShot(
     k_shot=arg.k_spt,
     k_query=arg.k_qry,
     imgsz=28,
-    device=arg.device,
 )
 
 db_test = OmniglotNShot(
@@ -47,7 +48,6 @@ db_test = OmniglotNShot(
     k_shot=arg.k_spt,
     k_query=arg.k_qry,
     imgsz=28,
-    device=arg.device,
     mode="test",
 )
 
@@ -78,12 +78,13 @@ class Net(nn.Module):
 
 parent_module = Net(arg.n_way)
 parent_optimizer = optim.Adam(parent_module.parameters(), lr=0.001)
-parent_scheduler = optim.lr_scheduler.StepLR(parent_optimizer, step_size=50, gamma=0.9)
+parent_scheduler = optim.lr_scheduler.StepLR(parent_optimizer, step_size=100, gamma=0.9)
 
 
 class Outer(ImplicitProblem):
     def training_step(self, batch):
         inputs, labels = batch
+        inputs, labels = inputs.cuda(), labels.cuda()
         accs = []
         loss = 0
         for idx in range(len(self._children)):
@@ -95,31 +96,102 @@ class Outer(ImplicitProblem):
 
         return {"loss": loss, "acc": acc}
 
+    def get_batch(self):
+        x_spt, y_spt, x_qry, y_qry = self.env.batch
+        return (x_qry, y_qry)
+
 
 class Inner(ImplicitProblem):
     def training_step(self, batch):
-        idx = self.outer.children.index(self)
         inputs, labels = batch
+        inputs, labels = inputs.cuda(), labels.cuda()
+        idx = self.outer.children.index(self)
         out = self.module(inputs[idx])
         loss = F.cross_entropy(out, labels[idx]) + self.reg_loss()
 
         return loss
 
     def reg_loss(self):
-        return 0.25 * sum(
-            [(p1 - p2).pow(2).sum() for p1, p2 in zip(self.parameters(), self.outer.parameters())]
+        return 0.5 * sum(
+            [
+                (p1 - p2).pow(2).sum()
+                for p1, p2 in zip(self.trainable_parameters(), self.outer.trainable_parameters())
+            ]
         )
+
+    def get_batch(self):
+        x_spt, y_spt, x_qry, y_qry = self.env.batch
+        return (x_spt, y_spt)
 
     def on_inner_loop_start(self):
         self.module.load_state_dict(self.outer.module.state_dict())
 
+    def configure_module(self):
+        return Net(arg.n_way)
+
+    def configure_optimizer(self):
+        return optim.SGD(self.module.parameters(), lr=0.1)
+
+
+class MAMLEnv(Env):
+    def __init__(self):
+        super().__init__()
+
+        self.data_loader = db
+        self.batch = None
+
+    def step(self):
+        try:
+            self.batch = next(self.data_loader)
+        except StopIteration:
+            self.data_iterator = iter(db)
+            self.batch = next(self.data_loader)
+
 
 class MAMLEngine(Engine):
     def train_step(self):
+        if self.global_step % arg.inner_steps == 1:
+            self.env.step()
         for leaf in self.leaves:
             leaf.step(global_step=self.global_step)
 
+    def validation(self):
+        if not hasattr(self, "best_acc"):
+            self.best_acc = -1
+        test_iter = len(db_test.datasets_cache['test']) // arg.task_num + 1
+        test_loader = iter(db_test)
+        test_net = Net(arg.n_way).to(device)
+        test_optim = optim.SGD(test_net.parameters(), lr=0.1)
+        accs = []
+        for _ in range(test_iter):
+            batch = next(test_loader)
+            x_spts, y_spts, x_qrys, y_qrys = batch
+            x_spts, y_spts, x_qrys, y_qrys = (
+                x_spts.to(device),
+                y_spts.to(device),
+                x_qrys.to(device),
+                y_qrys.to(device),
+            )
+            for x_spt, y_spt, x_qry, y_qry in zip(x_spts, y_spts, x_qrys, y_qrys):
+                test_net.load_state_dict(self.outer.module.state_dict())
+                for _ in range(arg.inner_steps):
+                    out = test_net(x_spt)
+                    loss = F.cross_entropy(out, y_spt)
+                    test_optim.zero_grad()
+                    loss.backward()
+                    test_optim.step()
 
+                out = test_net(x_qry)
+                accs.append((out.argmax(dim=1) == y_qry).detach())
+
+        acc = 100.0 * torch.cat(accs).float().mean().item()
+        if acc > self.best_acc:
+            self.best_acc = acc
+
+        return {"acc": acc, "best_acc": self.best_acc}
+
+
+engine_config = EngineConfig(valid_step=100)
 parent_config = Config(log_step=10)
 child_config = Config(type="darts", unroll_steps=arg.inner_steps)
 
@@ -128,19 +200,16 @@ parent = Outer(
     module=parent_module,
     optimizer=parent_optimizer,
     scheduler=parent_scheduler,
-    config=parent_config)
-children = []
-for _ in range(arg.task_num):
-    child_module = Net(arg.n_way)
-    child_optimizer = optim.SGD(child_module.parameters(), lr=0.1)
-    child = Inner(name="inner", module=child_module, optimizer=child_optimizer, config=child_config)
-    children.append(child)
-
+    config=parent_config,
+    device=device,
+)
+children = [Inner(name="inner", config=child_config, device=device) for _ in range(arg.task_num)]
+env = MAMLEnv()
 problems = children + [parent]
 u2l = {parent: children}
 l2u = {}
 for c in children:
     l2u[c] = [parent]
 dependencies = {"u2l": u2l, "l2u": l2u}
-engine = Engine(config=None, problems=problems, dependencies=dependencies)
+engine = MAMLEngine(config=engine_config, problems=problems, dependencies=dependencies, env=env)
 engine.run()

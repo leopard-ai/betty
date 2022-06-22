@@ -95,6 +95,7 @@ class Engine:
             problem.initialize(self.config)
             if self.env is not None:
                 problem.add_env(self.env)
+                self.env.set_problem_attr(problem)
 
         end = time.time()
         self.logger.info(f"Time spent on initialization: {end-start:.3f} (s)\n")
