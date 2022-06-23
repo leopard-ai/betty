@@ -1,13 +1,13 @@
 Validation
 ==========
 
-Unlike traditional neural network training, validation for MLO is defined for the
-*whole program* instead of *each level*. Thus, we intentionally design Betty to
-handle the validation procedure in the ``Engine`` class, which handles the overall
-MLO program. More specifically, the validation procedure can be added by:
+Unlike traditional neural network training, validation for MLO is defined for the *whole
+program* instead of *each level*. Thus, we intentionally design Betty to handle the
+validation procedure in the ``Engine`` class, which handles the overall MLO program.
+More specifically, the validation procedure can be implemented by:
 
-1. subclassing the ``Engine`` class
-2. implementing a ``validation`` method
+1. Subclassing the ``Engine`` class.
+2. Implementing a ``validation`` method.
 
 In this tutorial, we reuse the data reweighting example from :doc:`basic_start`, and
 provide a reference for implementing a validation procedure:
@@ -39,7 +39,7 @@ Users can also specify how often they want to perform a validation procedure via
     engine_config = EngineConfig(train_iters=3000, valid_step=100)
 
 Users can simply replace the default ``Engine`` class with their custom
-``ReweightEngline`` to instantiate and execute their MLO program.
+``ReweightingEngine`` to instantiate and execute their MLO program.
 
 .. code:: python
 
