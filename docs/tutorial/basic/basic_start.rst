@@ -10,31 +10,33 @@ optimization as follows:
 
 .. math::
 
-        w^*=\underset{w}{\mathrm{argmin}}\;\mathcal{L}_{rwt}(\theta^*(w))\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\;\;\,\text{Reweighting}\\
-        \text{s.t. }\theta^*(w)=\underset{\theta}{\mathrm{argmin}}\;\frac{1}{N}\sum_{i=1}^n\mathcal{R}(L^i_{cls}(\theta);w)\cdot L^i_{cls}(\theta)\quad\quad\quad\text{Classification}
+        w^*=\underset{w}{\mathrm{argmin}}\;\mathcal{L}_{reweight}(\theta^*(w))\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\;\;\,\text{Reweighting}\\
+        \text{s.t. }\theta^*(w)=\underset{\theta}{\mathrm{argmin}}\;\frac{1}{N}\sum_{i=1}^n\mathcal{R}(L^i_{class}(\theta);w)\cdot L^i_{class}(\theta)\quad\quad\quad\text{Classification}
 
-where :math:`\theta` is the classifier network parameters, :math:`L_{cls}^i` is the
-classification loss (cross-entropy) for the :math:`i`-th training sample,
-:math:`\mathcal{L}_{rwt}` is the loss for the reweighting level (cross-entropy) and
-:math:`w` is the MWN :math:`\mathcal{R}`'s parameters, which reweights each training
-sample given its training loss :math:`L^i_{train}`.
+where :math:`\theta` denotes the classifier network's parameters, :math:`L_{class}^i` is
+the classification loss (cross-entropy) for the :math:`i`-th training sample,
+:math:`\mathcal{L}_{reweight}` is the loss for the reweighting level (cross-entropy),
+and :math:`w` denotes the parameters for MWN :math:`\mathcal{R}`, which reweights each
+training sample given training loss :math:`L^i_{class}`.
 
 Now that we have a problem formulation, we need to (1) define each level problem with
 the ``Problem`` class, and (2) define dependencies between problems with the ``Engine``
 class.
 
 
-
 .. NOTE: the following bar gives a small gap between sections for readability.
 
 |
 
+
 Basic setup
 -----------
 
-Before diving into the MLO part, we do basic setups such as importing dependencies and
-constructing imbalanced (or long-tailed) dataset. This part is not directly relevant to
-MLO, so users can simply copy and paste it to their code. We set our imbalance factor to
+Before diving into MLO, we do basic setup such as importing dependencies and
+constructing the imbalanced (or long-tailed) dataset. Here, we set the data imbalance
+factor to 100, meaning that the most common class has 50 times more data than the least
+common class. This part is not directly relevant to MLO, so users can simply copy and
+paste the following code.
 
 .. raw:: html
 
@@ -43,7 +45,7 @@ MLO, so users can simply copy and paste it to their code. We set our imbalance f
 
 .. code-block:: python
 
-    # import dependency
+    # import dependencies
     import copy
     import numpy as np
 
@@ -104,30 +106,30 @@ MLO, so users can simply copy and paste it to their code. We set our imbalance f
 
    </details>
 
+|
+
 Problem
 -------
 
 In this example, we have a MLO program consisting of two problem levels: *upper* and
 *lower*. We respectively refer to these two problems as **Reweight** and **Classifier**,
-and create ``Problem`` classes for each of them.  As introduced in the
-:doc:`Software Design <../../quickstart/concept_software>` chapter, each problem is defined
-by (1) module, (2) optimizer, (3) data loader, (4) loss function, (5) training configuration,
-and (6) other optional components (e.g. learning rate scheduler). Everything except for (4)
-loss function can be provided through the class constructor, and (4) can be provided via the
-``training_step`` method. In the following subsections, we provide a step-by-step guide
-for identifying and implementing each of these components in the ``Problem`` class.
+and create ``Problem`` classes for each of them.  As introduced in the :doc:`Software
+Design <../../quickstart/concept_software>` chapter, each problem is defined by (1)
+module, (2) optimizer, (3) data loader, (4) loss function, (5) training configuration,
+and (6) other optional components (e.g. learning rate scheduler). Everything except for
+(4) loss function can be provided through the class constructor, and (4) can be provided
+via the ``training_step`` method. In the following subsections, we provide a
+step-by-step guide for implementing each of these components in the ``Problem`` class,
+for both the lower-level and upper-level problems.
 
 Lower-level Problem (Classifier)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In our data reweighting example, the lower-level problem corresponds to the long-tailed
-MNIST image classification task. Specifically, we set the imbalance factor to 100, meaning
-that the most common class has 50 times more data than the least common class. The data
-loader code is adopted from
-`here
+MNIST image classification task. The data loader code is adopted from `here
 <https://github.com/ShiYunyi/Meta-Weight-Net_Code-Optimization/blob/main/noisy_long_tail_CIFAR.py>`_.
-We can respectively define the module, optimizer, data loader, loss function, and training
-configuration as follows.
+We can respectively define the module, optimizer, data loader, loss function, and
+training configuration as follows.
 
 **Module, Optimizer, Data Loader, (optional) Scheduler**
 
@@ -176,18 +178,18 @@ Unlike other components, the loss function should be directly implemented in the
 In this example, we aim to overcome a long-tailed distribution by reweighting each data
 sample (e.g. increasing weights for data from rare classes while decreasing weights for
 data from common classes). This is achieved by interacting with the upper-level
-**Reweight** problem. The Engine class will provide an access to the **Reweight** problem
-via its name for the **Classifier** problem (i.e.
-:code:`weight = self.reweight(loss_vector_reshape.detach())`). Thus, users should be
-aware of names of other problems, with which the current problem interacts, when
-writing the loss function.
+**Reweight** problem. The Engine class will provide an access to the **Reweight**
+problem via its name for the **Classifier** problem (i.e. in the line :code:`weight =
+self.reweight(loss_vector_reshape.detach())`). Thus, users should be aware of names of
+other problems, with which the current problem interacts, when writing the loss
+function.
 
 **Training Configuration**
 
-Training configuration can be provided by a Python dataclass ``Config``. Since 
-**Classifier** is the lower-level problem, we only need to specify how many steps
-we want to unroll before updating the upper-level **Reweight** problem. We choose
-the simplest one-step unrolling for our example.
+Training configuration can be provided by a Python dataclass ``Config``. Since
+**Classifier** is the lower-level problem, we only need to specify how many steps we
+want to unroll before updating the upper-level **Reweight** problem. We choose the
+simplest one-step unrolling for our example.
 
 .. code:: python
 
@@ -219,9 +221,9 @@ Upper-level Problem (Reweight)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 While the lower-level problem is a classification problem, the upper-level problem is a
-reweighting problem. Specifically,
-`Meta-Weight-Net (MWN) <https://arxiv.org/abs/1902.07379>`_ proposes to reweight each
-data sample with one hidden layer MLP that takes a loss value as an input and outputs an
+reweighting problem. Specifically, `Meta-Weight-Net (MWN)
+<https://arxiv.org/abs/1902.07379>`_ proposes to reweight each data sample using an MLP
+with a single hidden layer, which takes a loss value as an input and outputs an
 importance weight. 
 
 **Module, Optimizer, Data Loader**
@@ -262,11 +264,11 @@ classifier problem via its name (i.e. :code:`self.classifier`).
 
 **Training Configuration**
 
-MWN parameters don't affect the loss function of the **Reweight** problem
-directly, but only indirectly through the optimal parameters of the classifier
-problem. Thus, gradient for MWN should be calculated using hypergradient. In our
-example, we use *implicit differentiation with finite difference (a.k.a. DARTS)*
-to calculate gradient for MWN parameters. This can be easily specified with
+MWN parameters don't affect the loss function of the **Reweight** problem directly, but
+only indirectly through the optimal parameters of the classifier problem. Thus, gradient
+for MWN should be calculated using hypergradients. In our example, we use *implicit
+differentiation with finite difference (a.k.a. DARTS)* to calculate gradients for MWN
+parameters. This can be easily specified with
 ``Config``.
 
 .. code:: python
@@ -275,7 +277,7 @@ to calculate gradient for MWN parameters. This can be easily specified with
 
 **Problem Instantiation**
 
-We can now instantiate the ``Problem`` class for the **Reweight** problem! We use
+We can now instantiate the ``Problem`` class for the **Reweight** problem. We use
 'reweight' as the ``name`` for this problem.
 
 .. code:: python
@@ -323,7 +325,7 @@ iterations, which can be specified in ``EngineConfig``.
     from betty.configs import EngineConfig
     from betty.engine import Engine
 
-    problems = [hpo, classifier]
+    problems = [reweight, classifier]
     engine_config = EngineConfig(train_iters=3000)
     engine = Engine(config=engine_config, problems=problems, dependencies=dependencies)
 
@@ -332,9 +334,9 @@ iterations, which can be specified in ``EngineConfig``.
 Finally, multilevel optimization can be excuted by running ``engine.run()``, which calls
 the ``step`` method of the lowermost problem (i.e. **Classifier**), which corresponds to a
 single step of gradient descent. After unrolling gradient descent for the lower-most
-problem for a pre-determined number of steps (``step`` attribute in ``hpo_config``), the
-``step`` method of **Classifier** will automatically call the ``step`` method of
-**Reweight** according to the provided dependencies.
+problem for a pre-determined number of steps (``unroll_steps`` attribute in
+``classifier_config``), the ``step`` method of **Classifier** will automatically call
+the ``step`` method of **Reweight** according to the provided dependencies.
 
 .. code:: python
 
