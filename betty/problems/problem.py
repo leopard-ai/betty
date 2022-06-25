@@ -63,9 +63,8 @@ class Problem:
         # fp16
         self._fp16 = config.fp16
         if self._fp16:
-            self.dynamic_loss_scale = config.dynamic_loss_scale
             self.initial_dynamic_scale = config.initial_dynamic_scale
-            self.static_loss_scale = config.static_loss_scale
+            self.scale_factor = config.scale_factor
 
         # gradient accumulation
         self.gas = config.gradient_accumulation
@@ -152,7 +151,9 @@ class Problem:
         # set up fp16 training
         if self._fp16:
             assert torch.cuda.is_available()
-            self.scaler = torch.cuda.amp.GradScaler(init_scale=1024.0)
+            self.scaler = torch.cuda.amp.GradScaler(
+                init_scale=self.initial_dynamic_scale, growth_factor=self.scale_factor
+            )
 
         # Logging INFO
         # TODO: Replace print with logging

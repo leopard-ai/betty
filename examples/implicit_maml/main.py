@@ -150,7 +150,7 @@ class MAMLEnv(Env):
 
 class MAMLEngine(Engine):
     def train_step(self):
-        if self.global_step % arg.inner_steps == 1:
+        if self.global_step % arg.inner_steps == 1 or arg.inner_steps == 1:
             self.env.step()
         for leaf in self.leaves:
             leaf.step(global_step=self.global_step)

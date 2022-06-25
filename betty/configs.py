@@ -22,9 +22,8 @@ class Config:
 
     # fp16 training
     fp16: bool = False
-    dynamic_loss_scale: bool = False
-    initial_dynamic_scale: int = 2**32
-    static_loss_scale: float = 1.0
+    initial_dynamic_scale: float = 4096
+    scale_factor: float = 2.0
 
     # logging
     log_step: int = -1
