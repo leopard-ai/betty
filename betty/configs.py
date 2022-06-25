@@ -22,7 +22,7 @@ class Config:
 
     # fp16 training
     fp16: bool = False
-    initial_dynamic_scale: float = 4096
+    initial_dynamic_scale: float = 4096.0
     scale_factor: float = 2.0
 
     # logging
