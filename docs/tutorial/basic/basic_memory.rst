@@ -1,27 +1,26 @@
 Memory Optimization
 ===================
 
-As MLO involves multiple optimization problems, it tends to use more
-GPU memory than traiditional single-level optimization problems. Given the
-recent trend of Transformer-based large models (e.g., BERT, GPT), Betty
-strives to support large-scale MLO and meta-learning by implementing 
-various memory optimization techniques.
+As MLO involves multiple optimization problems, it tends to use more GPU memory than
+traditional single-level optimization problems. Given the recent trend of large models
+(e.g., Transformers, BERT, GPT), Betty strives to support large-scale MLO and
+meta-learning by implementing various memory optimization techniques.
 
 Currently, we support three memory optimization techniques:
 
-1. Gradient accumulation
-2. FP16 (half-precision) training
-3. (non-distributed) Data-parallel training
+1. Gradient accumulation.
+2. FP16 (half-precision) training.
+3. (Non-distributed) Data-parallel training.
 
 |
 
 Setup
 -----
 
-To better analyze the effect of memory optimization, we scale up our dataset and
-classifier network to CIFAR10 and ResNet50. As this is not directly relevant to
-this tutorial, users can simply copy and paste the code from below collapsable 
-code snippets.
+To better analyze the effects of memory optimization, we scale up our dataset and
+classifier network (from our data reweighting example in :doc:`basic_start`) to CIFAR10
+and ResNet50. As this is not directly relevant to this tutorial, users can copy and
+paste code from the collapsable code snippets below.
 
 .. raw:: html
 
@@ -183,8 +182,8 @@ code snippets.
 Gradient Accumulation
 ---------------------
 
-Gradient accumulation is an effetive way to reduce the interemediate states memory, by
-accumulating gradients from *multiple small* mini-batches rather than calculating
+Gradient accumulation is an effective way to reduce the memory of intermediate states by
+accumulating gradients from *multiple small* mini-batches rather than calculating the
 gradient of *one large* mini-batch. In Betty, gradient accumulation can be enabled for
 *each level* problem via ``Config`` as:
 
@@ -197,10 +196,10 @@ gradient of *one large* mini-batch. In Betty, gradient accumulation can be enabl
 FP16 Training
 -------------
 
-FP16 (or half-precision) training replaces some of full-precision operations (e.g.
+FP16 (or half-precision) training replaces some of the full-precision operations (e.g.
 linear) with half-precision operations at the cost of (potential) training instability.
-In Betty, users can easily enable FP16 training for *each level* problem via
-``Config`` as:
+In Betty, users can easily enable FP16 training for *each level* problem via ``Config``
+as:
 
 .. code:: python
 
@@ -208,14 +207,13 @@ In Betty, users can easily enable FP16 training for *each level* problem via
 
 |
 
-(non-distributed) Data-parallel training
+(Non-distributed) Data-parallel training
 ----------------------------------------
 
-Data-parallel training splits large-batch into several small batches across
-multiple GPUs and thereby reduce the memory footprint for intermediate states.
-While distributed data-parallel training normally achieves much better training
-speed, Betty currently only supports non-distributed data-parallel training
-via ``EngineConfig``:
+Data-parallel training splits large batches into several small batches across multiple
+GPUs and thereby reduces the memory footprint for intermediate states.  While
+distributed data-parallel training normally achieves much better training speed, Betty
+currently only supports non-distributed data-parallel training via ``EngineConfig``:
 
 .. code:: python
 
@@ -225,8 +223,8 @@ via ``EngineConfig``:
 
 Memory optimization results
 ---------------------------
-We perform ablation study to analyze how each technique affects GPU memroy usage.
-The result is shown in the below table.
+We perform an ablation study to analyze how each technique affects GPU memroy usage.
+The result is shown in the table below.
 
 +--------------+--------------+
 |              | Memory       |
@@ -238,4 +236,4 @@ The result is shown in the below table.
 | +Distributed | 3185/3077MiB |
 +--------------+--------------+
 
-For the distributed setting, we report two memory usages for each GPU.
+For the distributed setting, we report two memory usages (one for each GPU).

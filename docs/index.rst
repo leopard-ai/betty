@@ -37,9 +37,9 @@ provide several implementation examples for:
 - `Domain Adaptation for Pretraining & Finetuning <examples/learning_by_ignoring/>`_
 - `(Implicit) Model-Agnostic Meta-Learning <examples/maml/>`_ (Under development)
  
-While each of above examples traditionally have distinct implementation styles, one
-should notice that our implementation shares the same code structure thanks to Betty.
-We plan to implement more MLO applications in the future.
+While each of above examples traditionally have distinct implementation styles, Betty
+allows for common code structures and autodiff routines to be used in all examples. We
+plan to implement more MLO applications in the future.
 
 Getting Started
 ---------------

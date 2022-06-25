@@ -1,13 +1,13 @@
 Logging
 =======
 
-Monitoring metrics (e.g. training loss) is essentially in the ML development.
-Therefore, Betty provides an easy-to-use interface for logging whichever metrics
-that users are interested in for both training and validation procedures. In detail,
-users can enable logging by returning a Python dictionary in :code:`training_step` of
-the ``Problem`` class and :code:`validation` of the ``Engine`` class respectively for
-training and validation procedures. In our data reweighting example, this could be
-implemented as:
+Monitoring metrics (e.g. training loss) is essential in ML development.  Betty provides
+an easy-to-use interface for flexibly logging whichever metrics are of interest to
+users, for both training and validation procedures. Specifically, users can enable
+logging by returning a Python dictionary in :code:`training_step` of the ``Problem``
+class and :code:`validation` of the ``Engine`` class, respectively, for training and
+validation procedures. In our data reweighting example from :doc:`basic_start`, this can
+be implemented as:
 
 **Training (Problem)**
 
@@ -43,10 +43,10 @@ implemented as:
 
             return {"acc": acc, "best_acc": self.best_acc}
 
-Finally, users can specify how often they want to log these metrics in ``Config``
-and ``EngineConfig`` respectively for training (``Problem``) and validation
-(``Engine``). If users don't specify the log step in configurations, logging will
-be automatically diabled.
+Finally, users can specify how often they want to log these metrics in ``Config`` and
+``EngineConfig``, respectively, for training (``Problem``) and validation (``Engine``).
+If users don't specify the log step in configurations, logging will be automatically
+disabled.
 
 .. code:: python
 
@@ -56,7 +56,8 @@ be automatically diabled.
     # Validation (Engine)
     engine_config = EngineConfig(train_iters=3000, valid_step=100)
 
-Once logging is enabled, users should be able to see:
+When logging is enabled, users should see the following output upon executing
+``engine.run()``:
 
 .. code::
 

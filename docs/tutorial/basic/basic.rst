@@ -1,8 +1,9 @@
 Basic
 =====
 
-Learn how to write a general MLO program and basic features of Betty. We will use "Data Reweighting
-for Long-Tailed Image Classification" as our example throughout this tutorial.
+Learn how to write a general MLO program and the basic features of Betty. We will use
+**Data Reweighting for Long-Tailed Image Classification** as our running example
+throughout this tutorial.
 
 Basic 1: :doc:`How to write an MLO program (Quick Start) <basic_start>`
 
