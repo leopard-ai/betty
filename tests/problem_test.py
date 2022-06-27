@@ -123,37 +123,3 @@ class LogisticRegressionTest(unittest.TestCase):
         self.engine = Engine(
             config=self.engine_config, problems=problems, dependencies=dependencies
         )
-
-    def test_find_paths(self):
-        found_paths = self.outer.paths
-        self.assertTrue(len(found_paths) == 1)
-        self.assertTrue(len(found_paths[0]) == 3)
-        self.assertTrue(found_paths[0][0] == self.outer)
-        self.assertTrue(found_paths[0][1] == self.inner)
-        self.assertTrue(found_paths[0][2] == self.outer)
-
-    def test_check_leaf(self):
-        self.assertTrue(self.inner.leaf)
-        self.assertFalse(self.outer.leaf)
-
-    def test_set_problem_attr(self):
-        self.assertTrue(hasattr(self.engine, 'inner'))
-        self.assertTrue(hasattr(self.engine, 'outer'))
-
-    def test_parse_dependency(self):
-        self.assertTrue(self.outer in self.inner.parents)
-        self.assertTrue(self.inner in self.outer.children)
-        self.assertTrue(hasattr(self.inner, 'outer'))
-        self.assertTrue(hasattr(self.outer, 'inner'))
-
-    def test_train_step(self):
-        for i in range(10):
-            self.assertTrue(self.inner.count == i)
-            self.assertTrue(self.outer.count == 0)
-            self.engine.train_step()
-        self.assertTrue(self.inner.count == 10)
-        self.assertTrue(self.outer.count == 1)
-
-
-if __name__ == "__main__":
-    unittest.main()
