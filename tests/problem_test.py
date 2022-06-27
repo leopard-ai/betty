@@ -61,7 +61,7 @@ class Inner(ImplicitProblem):
         self.module.w.data.zero_()
 
 
-class LogisticRegressionTest(unittest.TestCase):
+class ProblemTest(unittest.TestCase):
     def setUp(self):
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -122,3 +122,7 @@ class LogisticRegressionTest(unittest.TestCase):
     def test_add_parent(self):
         self.inner.add_parent(self.outer)
         self.assertTrue(self.outer in self.inner.parents)
+
+
+if __name__ == "__main__":
+    unittest.main()

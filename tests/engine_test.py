@@ -61,7 +61,7 @@ class Inner(ImplicitProblem):
         self.module.w.data.zero_()
 
 
-class LogisticRegressionTest(unittest.TestCase):
+class EngineTest(unittest.TestCase):
     def setUp(self):
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
