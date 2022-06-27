@@ -2,8 +2,8 @@ import sys
 
 sys.path.insert(0, "./..")
 
-import numpy as np
 import unittest
+import numpy as np
 from sklearn.model_selection import train_test_split
 
 import torch
@@ -115,11 +115,10 @@ class LogisticRegressionTest(unittest.TestCase):
             device=device,
         )
 
-        problems = [self.outer, self.inner]
-        u2l = {self.outer: [self.inner]}
-        l2u = {self.inner: [self.outer]}
-        dependencies = {"l2u": l2u, "u2l": u2l}
+    def test_add_child(self):
+        self.outer.add_child(self.inner)
+        self.assertTrue(self.inner in self.outer.children)
 
-        self.engine = Engine(
-            config=self.engine_config, problems=problems, dependencies=dependencies
-        )
+    def test_add_parent(self):
+        self.inner.add_parent(self.outer)
+        self.assertTrue(self.outer in self.inner.parents)
