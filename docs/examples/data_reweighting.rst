@@ -7,9 +7,16 @@ from `Meta-Weight-Net: Learning an Explicit Mapping For Sample Weighting <https:
 
 **Classification Problem:** Here we train the weights ω of the classifier by minimizing the loss calculated on the training data set while imposing some weight on each sample loss (as given `here <https://arxiv.org/abs/1902.07379>`_). The model of the classifier is specified to be ResNet32 and we will be using the SGD algorithm for the optimization.
 
-**Meta Learning Problem:** Here we train the parameters Θ of the meta weight net by minimizing the loss calculated on the meta training data set (as given `here <https://arxiv.org/abs/1902.07379>`_). The model of the meta weight net is specified to be an MLP and we will be using the Adam algorithm for the optimization.
+**Meta Learning Problem:** Here we train the parameters Θ of the meta weight net
+by minimizing the loss calculated on the meta training data set (as given
+`here <https://arxiv.org/abs/1902.07379>`_). The model of the meta weight net is
+specified to be an MLP and we will be using the Adam algorithm for the optimization.
 
-Note that for calculating the loss of first level we need the forward pass of the second level and for calculating the loss of second level we need the forward pass of the first level. Hence we define the following dependencies. The first level depends on the second level through a ``'u2l'`` (upper to lower) dependency and the second level depends on the first level through a ``'l2u'`` (lower to upper) dependency.
+Note that for calculating the loss of first level we need the forward pass of the second
+level and for calculating the loss of second level we need the forward pass of the first
+level. Hence we define the following dependencies. The first level depends on the second
+level through a ``'u2l'`` (upper to lower) dependency and the second level depends on the
+first level through a ``'l2u'`` (lower to upper) dependency.
 
 Course of Action
 ------------------
@@ -21,17 +28,29 @@ In order to implement the data reweighting algorithm we will go through the foll
 
 Preparing Data
 ------------------
-Here we prepare the data that will be used for training the models in the different levels of the algorithm. We would require three different data sets. One will be ``train_dataloader`` which will be used in the first level. Second will be ``meta_dataloader`` which will be used in the second level. Finally we would have a ``test_dataloader`` which will be used in the validation stage. These data sets can be prepared as given `here <https://github.com/sangkeun00/betty/blob/main/examples/learning_to_reweight/data.py>`_.
+Here we prepare the data that will be used for training the models in the different
+levels of the algorithm. We would require three different data sets. One will be
+``train_dataloader`` which will be used in the first level. Second will be
+``meta_dataloader`` which will be used in the second level. Finally we would have a
+``test_dataloader`` which will be used in the validation stage. These data sets can
+be prepared as given
+`here <https://github.com/sangkeun00/betty/blob/main/examples/learning_to_reweight/data.py>`_.
 
 Designing Models
 ------------------
-Here we design the models used in the levels. We would have to prepare one model each for our two levels. The first level has the ``ResNet32`` model and the second level has the ``MLP`` model. Both of these models can be designed as given `here <https://github.com/sangkeun00/betty/blob/main/examples/learning_to_reweight/model.py>`_.
+Here we design the models used in the levels. We would have to prepare one model
+each for our two levels. The first level has the ``ResNet32`` model and the second
+level has the ``MLP`` model. Both of these models can be designed as given
+`here <https://github.com/sangkeun00/betty/blob/main/examples/learning_to_reweight/model.py>`_.
 
 Using Betty
 ------------------
-Now we will train our models using the data reweighting algorithm with the help of the ``betty``. We first import the required libraries. The code blocks used below can be found `here <https://github.com/sangkeun00/betty/blob/main/examples/learning_to_reweight/main.py>`_.
+Now we will train our models using the data reweighting algorithm with the help
+of the ``betty``. We first import the required libraries. The code blocks used
+below can be found
+`here <https://github.com/sangkeun00/betty/blob/main/examples/learning_to_reweight/main.py>`_.
 
-.. code-block:: py
+.. code-block:: python
 
  import torch
  import torch.nn.functional as F
@@ -52,11 +71,16 @@ Now we simply need to do two things to implement our algorithm:
 
 ``Problem``
 ^^^^^^^^^^^^^^^^^^^^^
-Each level problem can be defined with seven components: (1) module, (2) optimizer, (3) data loader, (4) loss function, (5) problem configuration, (6) name, and (7) other optional components (e.g. learning rate scheduler). The loss function (4) can be defined via the ``training_step`` method, while all other components can be provided through the class constructor.
+Each level problem can be defined with seven components: (1) module, (2) optimizer,
+(3) data loader, (4) loss function, (5) problem configuration, (6) name, and
+(7) other optional components (e.g. learning rate scheduler). The loss function
+(4) can be defined via the ``training_step`` method, while all other components can
+be provided through the class constructor.
 
-**First Level:** The first level is characterized by the follwing code. The comments along with the code assist the understanding.
+**First Level:** The first level is characterized by the follwing code. The comments
+along with the code assist the understanding.
 
-.. code-block:: py
+.. code-block:: python
  
  #all problem classes are supposed to be a subclass of ImplicitProblem
  #the Inner problem class specifies the classifier problem
@@ -72,9 +96,6 @@ Each level problem can be defined with seven components: (1) module, (2) optimiz
     def training_step(self, batch):
         inputs, labels = batch
 
-        #we move the inputs and labels to the desired device for better computation
-        inputs, labels = inputs.to(args.device), labels.to(args.device)
-
         #we calculate the predicted labels from the forward pass of the classifier
         outputs = self.forward(inputs)
 
@@ -87,7 +108,8 @@ Each level problem can be defined with seven components: (1) module, (2) optimiz
         #we can access the forward pass of other problems by using the 'name' attribute
         weight = self.outer(loss_vector_reshape.detach())
 
-        #we calculte the final loss as the mean of the product of the weights and indvidual sample losses
+        #we calculte the final loss as the mean of the product of the weights and indvidual
+        #sample losses
         loss = torch.mean(weight * loss_vector_reshape)
 
         return loss
@@ -120,9 +142,10 @@ Each level problem can be defined with seven components: (1) module, (2) optimiz
         )
         return scheduler
 
-**Second Level:** The first level is characterized by the follwing code. The comments along with the code assist the understanding.
+**Second Level:** The first level is characterized by the follwing code. The comments
+along with the code assist the understanding.
 
-.. code-block:: py
+.. code-block:: python
 
  #all problem classes are supposed to be a subclass of ImplicitProblem
  #the Outer problem class specifies the meta learning problem
@@ -138,15 +161,13 @@ Each level problem can be defined with seven components: (1) module, (2) optimiz
     def training_step(self, batch):
         inputs, labels = batch
 
-        #we move the inputs and labels to the desired device for better computation
-        inputs, labels = inputs.to(args.device), labels.to(args.device)
-
         #we calculate the predicted labels from the forward pass of the classifier
         #we do so by using the forward pass of the second level problem
         #we can access the forward pass of other problems by using the 'name' attribute
         outputs = self.inner(inputs)
 
-        #we calculte the final loss as the mean of the product of the weights and indvidual sample losses
+        #we calculte the final loss as the mean of the product of the weights and
+        #indvidual sample losses
         loss = F.cross_entropy(outputs, labels.long())
 
         #we calculate the accuracy of the predictions made
@@ -176,14 +197,15 @@ Each level problem can be defined with seven components: (1) module, (2) optimiz
 
 **Instantiation:** here we instantiate our porblem classes and make their respective objects which call their constructors.
 
-.. code-block:: py
+.. code-block:: python
 
     #we difine the configurations of both the problems using the Config library
     #configuration of a prooblem contains important specifications related to the problem
     outer_config = Config(type="darts", fp16=args.fp16, log_step=100)
     inner_config = Config(type="darts", fp16=args.fp16, unroll_steps=1)
 
-    #we instantiate the Inner and Outer problems and set their 'name', 'config', 'device' attributes
+    #we instantiate the Inner and Outer problems and set their 'name', 'config',
+    #'device' attributes
     outer = Outer(name="outer", config=outer_config, device=args.device)
     inner = Inner(name="inner", config=inner_config, device=args.device)
 
@@ -196,7 +218,7 @@ The Engine class handles the hierarchical dependencies between problems. In MLO,
 
 Since Engine manages the whole MLO program, you can also perform a global validation stage within it. All involved problems of the MLO program can again be accessed with their 'name' attribute.
 
-.. code-block:: py
+.. code-block:: python
 
     #initiate best accuracy
     best_acc = -1
@@ -263,9 +285,13 @@ Since Engine manages the whole MLO program, you can also perform a global valida
     engine.run()
     print(f"IF {args.imbalanced_factor} || Best Acc.: {best_acc}")
 
-With this the dependencies are defined and ``.run()`` method of ``Eninge`` class will start the program.
+With this the dependencies are defined and ``.run()`` method of ``Eninge`` class
+will start the program.
 
 Conclusion
 ------------------
 
-Once we define all optimization problems and the hierarchical dependencies between them respectively with the Problem class and the Engine class, all complicated internal mechanism of MLO such as gradient calculation, optimization execution order will be handled by Betty.
+Once we define all optimization problems and the hierarchical dependencies
+between them respectively with the Problem class and the Engine class, all
+complicated internal mechanism of MLO such as gradient calculation, optimization
+execution order will be handled by Betty.
