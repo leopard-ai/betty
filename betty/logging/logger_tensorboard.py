@@ -4,7 +4,11 @@ import socket
 from datetime import datetime
 
 import torch
-from torch.utils.tensorboard import SummaryWriter
+
+try:
+    from torch.utils.tensorboard import SummaryWriter
+except ImportError:
+    SummaryWriter = None
 
 from betty.logging.logger_base import LoggerBase
 
