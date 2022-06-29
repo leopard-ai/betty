@@ -5,12 +5,17 @@ Introduction
 Here we re-implement the data reweighting algorithm
 from `Meta-Weight-Net: Learning an Explicit Mapping For Sample Weighting <https://arxiv.org/abs/1902.07379>`_, which is a two level optimization algorithm. The first level or lower level problem is the classification problem and the second level or upper level problem is the meta learning problem.  These levels will be followed by a validation stage at the end. 
 
-**Classification Problem:** Here we train the weights ω of the classifier by minimizing the loss calculated on the training data set while imposing some weight on each sample loss (as given `here <https://arxiv.org/abs/1902.07379>`_). The model of the classifier is specified to be ResNet32 and we will be using the SGD algorithm for the optimization.
+**Classification Problem:** Here we train the weights :math:`\textbf{w}` of the classifier by minimizing the loss calculated on the training data set while imposing some meta weight on each sample loss. Let the :math:`i^{th}` sample loss be :math:`L_{i}^{train}(\textbf{w}) = l(y_i, y_{predicted})` and the :math:`i^{th}` meta weight be :math:`\mathcal{V}(L_{i}^{train}(\textbf{w}), \Theta)` then the objective for this problem will be,
 
-**Meta Learning Problem:** Here we train the parameters Θ of the meta weight net
-by minimizing the loss calculated on the meta training data set (as given
-`here <https://arxiv.org/abs/1902.07379>`_). The model of the meta weight net is
-specified to be an MLP and we will be using the Adam algorithm for the optimization.
+ `\textbf{w}^{*}(\Theta) = \mathrm{argmin} \mathcal{L}^{train}(\textbf{w} ; \Theta) = \frac{1}{N} \sum_{i=1}^{N}\mathcal{V}(L_{i}^{train}(\textbf{w}), \Theta)L_{i}^{train}(\textbf{w})`
+
+The model of the classifier is specified to be ResNet32 and we will be using the SGD algorithm for the optimization.
+
+**Meta Learning Problem:** Here we train the parameters :math:`\Theta` of the meta weight net by minimizing the loss calculated on the meta training data set. Let the :math:`i^{th}` sample loss on the meta data be :math:`L_{i}^{meta}(\textbf{w}) = l(y^{(meta)}_i, y^{(meta)}_{predicted})` then the objective of this problem will be,
+
+ `\Theta^{*} = \mathrm{argmin} \mathcal{L}^{meta}(\textbf{w}^{*}(\Theta)) = \frac{1}{M} \sum_{i=1}^{M}L_{i}^{meta}(\textbf{w}^{*}(\Theta))`
+
+The model of the meta weight net is specified to be an MLP and we will be using the Adam algorithm for the optimization. (For complete and detailed formulation of the loss functions see `here <https://arxiv.org/abs/1902.07379>`_)
 
 Note that for calculating the loss of first level we need the forward pass of the second
 level and for calculating the loss of second level we need the forward pass of the first
