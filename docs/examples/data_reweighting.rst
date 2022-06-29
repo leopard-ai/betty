@@ -2,20 +2,40 @@ Data Reweighting
 ===============
 Introduction
 ------------------
-Here we re-implement the data reweighting algorithm
-from `Meta-Weight-Net: Learning an Explicit Mapping For Sample Weighting <https://arxiv.org/abs/1902.07379>`_, which is a two level optimization algorithm. The first level or lower level problem is the classification problem and the second level or upper level problem is the meta learning problem.  These levels will be followed by a validation stage at the end. 
+Here we re-implement the data reweighting algorithm from
+`Meta-Weight-Net: Learning an Explicit Mapping For Sample Weighting <https://arxiv.org/abs/1902.07379>`_,
+which is a two level optimization algorithm. The first level or lower level
+problem is the classification problem and the second level or upper level
+problem is the meta learning problem.  These levels will be followed by a
+validation stage at the end. 
 
-**Classification Problem:** Here we train the weights :math:`\textbf{w}` of the classifier by minimizing the loss calculated on the training data set while imposing some meta weight on each sample loss. Let the :math:`i^{th}` sample loss be :math:`L_{i}^{train}(\textbf{w}) = l(y_i, y_{predicted})` and the :math:`i^{th}` meta weight be :math:`\mathcal{V}(L_{i}^{train}(\textbf{w}), \Theta)` then the objective for this problem will be,
+**Classification Problem:** Here we train the weights :math:`\textbf{w}` of the
+classifier by minimizing the loss calculated on the training data set while imposing
+some meta weight on each sample loss. Let the :math:`i^{th}` sample loss be
+:math:`L_{i}^{train}(\textbf{w}) = l(y_i, y_{predicted})` and the :math:`i^{th}`
+meta weight be :math:`\mathcal{V}(L_{i}^{train}(\textbf{w}), \Theta)` then the
+objective for this problem will be,
 
- `\textbf{w}^{*}(\Theta) = \mathrm{argmin} \mathcal{L}^{train}(\textbf{w} ; \Theta) = \frac{1}{N} \sum_{i=1}^{N}\mathcal{V}(L_{i}^{train}(\textbf{w}), \Theta)L_{i}^{train}(\textbf{w})`
+.. math::
 
-The model of the classifier is specified to be ResNet32 and we will be using the SGD algorithm for the optimization.
+    \textbf{w}^{*}(\Theta) = \mathrm{argmin} \mathcal{L}^{train}(\textbf{w} ; \Theta) = \frac{1}{N} \sum_{i=1}^{N}\mathcal{V}(L_{i}^{train}(\textbf{w}), \Theta)L_{i}^{train}(\textbf{w})
 
-**Meta Learning Problem:** Here we train the parameters :math:`\Theta` of the meta weight net by minimizing the loss calculated on the meta training data set. Let the :math:`i^{th}` sample loss on the meta data be :math:`L_{i}^{meta}(\textbf{w}) = l(y^{(meta)}_i, y^{(meta)}_{predicted})` then the objective of this problem will be,
+The model of the classifier is specified to be ResNet32 and we will be using
+the SGD algorithm for the optimization.
 
- `\Theta^{*} = \mathrm{argmin} \mathcal{L}^{meta}(\textbf{w}^{*}(\Theta)) = \frac{1}{M} \sum_{i=1}^{M}L_{i}^{meta}(\textbf{w}^{*}(\Theta))`
+**Meta Learning Problem:** Here we train the parameters :math:`\Theta` of the
+meta weight net by minimizing the loss calculated on the meta training data set.
+Let the :math:`i^{th}` sample loss on the meta data be
+:math:`L_{i}^{meta}(\textbf{w}) = l(y^{(meta)}_i, y^{(meta)}_{predicted})` then
+the objective of this problem will be,
 
-The model of the meta weight net is specified to be an MLP and we will be using the Adam algorithm for the optimization. (For complete and detailed formulation of the loss functions see `here <https://arxiv.org/abs/1902.07379>`_)
+.. math::
+    
+    \Theta^{*} = \mathrm{argmin} \mathcal{L}^{meta}(\textbf{w}^{*}(\Theta)) = \frac{1}{M} \sum_{i=1}^{M}L_{i}^{meta}(\textbf{w}^{*}(\Theta))
+
+The model of the meta weight net is specified to be an MLP and we will be using the Adam
+algorithm for the optimization. (For complete and detailed formulation of the loss
+functions see `here <https://arxiv.org/abs/1902.07379>`_)
 
 Note that for calculating the loss of first level we need the forward pass of the second
 level and for calculating the loss of second level we need the forward pass of the first
@@ -200,7 +220,8 @@ along with the code assist the understanding.
         )
         return meta_optimizer
 
-**Instantiation:** here we instantiate our porblem classes and make their respective objects which call their constructors.
+**Instantiation:** here we instantiate our porblem classes and make their respective
+objects which call their constructors.
 
 .. code-block:: python
 
@@ -214,14 +235,20 @@ along with the code assist the understanding.
     outer = Outer(name="outer", config=outer_config, device=args.device)
     inner = Inner(name="inner", config=inner_config, device=args.device)
 
-With this our problems are characterized and instansiated. Now we move on to set our ``Engine`` class.
+With this our problems are characterized and instansiated. Now we move on to set
+our ``Engine`` class.
 
 ``Engine``
 ^^^^^^^^^^^^^^^^^^^^^
 
-The Engine class handles the hierarchical dependencies between problems. In MLO, there are two types of dependencies: upper-to-lower ``'u2l'`` and lower-to-upper ``'l2u'``. Both types of dependencies can be defined with Python dictionary, where the key is the starting node and the value is the list of destination nodes.
+The Engine class handles the hierarchical dependencies between problems. In MLO, there
+are two types of dependencies: upper-to-lower ``'u2l'`` and lower-to-upper ``'l2u'``.
+Both types of dependencies can be defined with Python dictionary, where the key is the
+starting node and the value is the list of destination nodes.
 
-Since Engine manages the whole MLO program, you can also perform a global validation stage within it. All involved problems of the MLO program can again be accessed with their 'name' attribute.
+Since Engine manages the whole MLO program, you can also perform a global validation stage
+within it. All involved problems of the MLO program can again be accessed with their
+'name' attribute.
 
 .. code-block:: python
 
