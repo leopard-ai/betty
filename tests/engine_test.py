@@ -63,7 +63,7 @@ class Inner(ImplicitProblem):
 
 class EngineTest(unittest.TestCase):
     def setUp(self):
-        device = "cuda" if torch.cuda.is_available() else "cpu"
+        device = "cpu"
 
         # data preparation
         w_gt = np.random.randn(20)
