@@ -1,10 +1,36 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
+with open("betty/version.txt", "r") as fv:
+    version = fv.read()
+
+with open("requirements/requirements.txt", "r") as f:
+    requirements = f.read().splitlines()
+
+description = ("An automatic differentiation library for multilevel optimization and "
+               "generalized meta-learning")
+
+python_requires = ">=3.6.0"
+
+# run setup
 setup(
-    name='betty',
-    version='0.0.1',
-    packages=['betty'],
-    author='Sang Keun Choe',
-    author_email='sangkeuc@andrew.cmu.edu',
+    name="betty",
+    version=version,
+    author="Sang Keun Choe",
+    author_email="sangkeuc@andrew.cmu.edu",
+    description=description,
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/leopard-ai/betty",
+    keywords=["meta-learning", "pytorch", "multilevel optimization",],
+    packages=find_packages(exclude=["examples", "docs", "tests", "tutorials",]),
+    install_requires=requirements,
+    license="Apache",
+    python_requires=python_requires,
+    # Not sure
+    include_package_data=True,
+    classifiers=[],
 )
