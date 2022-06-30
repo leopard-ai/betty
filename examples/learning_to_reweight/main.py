@@ -1,6 +1,3 @@
-import sys
-
-sys.path.insert(0, "./../..")
 import argparse
 
 import torch
@@ -148,7 +145,7 @@ class ReweightingEngine(Engine):
         return {"acc": acc, "best_acc": best_acc}
 
 
-outer_config = Config(type="darts", fp16=args.fp16, log_step=100)
+outer_config = Config(type="darts", fp16=args.fp16, log_step=100, retain_graph=True)
 inner_config = Config(type="darts", fp16=args.fp16, unroll_steps=1)
 engine_config = EngineConfig(train_iters=10000, valid_step=100, distributed=args.distributed, roll_back=args.rollback)
 outer = Outer(name="outer", config=outer_config, device=args.device)

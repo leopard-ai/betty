@@ -1,7 +1,3 @@
-import sys
-
-sys.path.insert(0, "./../..")
-
 import numpy as np
 from sklearn.model_selection import train_test_split
 
@@ -108,7 +104,7 @@ class Child(ImplicitProblem):
 
 fp16 = True
 dynamic_loss_scale = False
-parent_config = Config(log_step=10, first_order=True, fp16=fp16)
+parent_config = Config(log_step=10, first_order=True, fp16=fp16, retain_graph=True)
 child_config = Config(type="cg", cg_iterations=3, cg_alpha=0.1, unroll_steps=100, fp16=fp16)
 
 parent = Parent(name="outer", config=parent_config, device=device)

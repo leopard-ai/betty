@@ -37,8 +37,9 @@ class IterativeProblem(Problem):
         # functorch installation check
         if not HAS_FUNCTORCH:
             raise ImportError(
-                "IterativeProblem requires functorch and pytorch>=1.11.0."
-                "Run 'pip install functorch'"
+                "IterativeProblem requires functorch and PyTorch 1.11. "
+                "Run 'pip install functorch'. "
+                "The functorch dependency will be deprecated in the future."
             )
         # functional modules
         self.fmodule = None
@@ -49,8 +50,8 @@ class IterativeProblem(Problem):
         self.buffers_cache = None
         self.opitmizer_state_dict_cache = None
 
-    def initialize(self):
-        super().initialize()
+    def initialize(self, engine_config):
+        super().initialize(engine_config=engine_config)
         # patch module to be functional so that gradient flows through param update
         # optimizer & scheduler should accordingly be patched as module gets patched
         self.initialize_optimizer_state()

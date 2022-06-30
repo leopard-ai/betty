@@ -1,7 +1,3 @@
-import sys
-
-sys.path.insert(0, "./../..")
-
 import os, time, glob
 import logging
 import argparse
@@ -159,10 +155,10 @@ class NASEngine(Engine):
         torch.save({"genotype": self.inner.module.genotype(alphas)}, "genotype.t7")
 
 
-outer_config = Config(type="darts", retain_graph=True, first_order=True)
-inner_config = Config(type="torch", unroll_steps=args.unroll_steps, roll_back=True)
+outer_config = Config(retain_graph=True, first_order=True)
+inner_config = Config(type='darts', unroll_steps=args.unroll_steps)
 engine_config = EngineConfig(
-    valid_step=args.report_freq * args.unroll_steps, train_iters=train_iters
+    valid_step=args.report_freq * args.unroll_steps, train_iters=train_iters, roll_back=True,
 )
 outer = Outer(name="outer", config=outer_config, device=device)
 inner = Inner(name="inner", config=inner_config, device=device)

@@ -1,9 +1,6 @@
 import argparse
-import sys
-
-sys.path.insert(0, "./../..")
-
 import numpy as np
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -192,7 +189,7 @@ class MAMLEngine(Engine):
 
 
 engine_config = EngineConfig(valid_step=100)
-parent_config = Config(log_step=10)
+parent_config = Config(log_step=10, retain_graph=True)
 child_config = Config(type="darts", unroll_steps=arg.inner_steps)
 
 parent = Outer(
