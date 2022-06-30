@@ -1,4 +1,1 @@
-functorch
-torch
-tensorboard
-wandb
+torch>=1.6.*

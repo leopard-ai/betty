@@ -3,10 +3,15 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from ast import Import
 from copy import deepcopy
 
 import torch
-import functorch
+try:
+    import functorch
+    HAS_FUNCTORCH = True
+except ImportError:
+    HAS_FUNCTORCH = False
 
 from betty.problems import Problem
 import betty.optim as optim
@@ -29,6 +34,12 @@ class IterativeProblem(Problem):
         device=None,
     ):
         super().__init__(name, config, module, optimizer, scheduler, train_data_loader, device)
+        # functorch installation check
+        if not HAS_FUNCTORCH:
+            raise ImportError(
+                "IterativeProblem requires functorch and pytorch>=1.11.0."
+                "Run 'pip install functorch'"
+            )
         # functional modules
         self.fmodule = None
         self.params = None

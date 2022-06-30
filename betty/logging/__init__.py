@@ -14,14 +14,16 @@ def type_check(logger_type):
         try:
             import wandb
         except ImportError:
-            get_logger().warning("[!] WandB is not installed. Default logger will be instead used.")
+            get_logger().warning(
+                "[!] WandB is not installed. The default logger will be instead used."
+            )
             logger_type = "none"
     elif logger_type == "tensorboard":
         try:
             from torch.utils.tensorboard import SummaryWriter
         except ImportError:
             get_logger().warning(
-                "[!] Tensorboard is not installed. Default logger will be instead used."
+                "[!] Tensorboard is not installed. The default logger will be instead used."
             )
             logger_type = "none"
 

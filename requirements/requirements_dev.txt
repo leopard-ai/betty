@@ -1,4 +1,4 @@
+-r requirements.txt
+
+black
 functorch
-torch
-tensorboard
-wandb

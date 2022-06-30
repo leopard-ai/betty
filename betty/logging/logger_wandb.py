@@ -7,8 +7,9 @@ from betty.logging.logger_base import LoggerBase
 
 try:
     import wandb
+    HAS_WANDB = True
 except ImportError:
-    wandb = None
+    HAS_WANDB = False
 
 
 class WandBLogger(LoggerBase):
@@ -26,6 +27,8 @@ class WandBLogger(LoggerBase):
         :param step: step value associated with ``stats`` to record
         :type step: int, optional
         """
+        if not HAS_WANDB:
+            return
         if stats is None:
             return
         for key, value in stats.items():

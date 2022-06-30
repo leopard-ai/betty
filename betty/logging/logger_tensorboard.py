@@ -7,8 +7,9 @@ import torch
 
 try:
     from torch.utils.tensorboard import SummaryWriter
+    HAS_TENSORBOARD = True
 except ImportError:
-    SummaryWriter = None
+    HAS_TENSORBOARD = False
 
 from betty.logging.logger_base import LoggerBase
 
@@ -39,6 +40,8 @@ class TensorBoardLogger(LoggerBase):
         :param step: step value associated with ``stats`` to record
         :type step: int, optional
         """
+        if not HAS_TENSORBOARD:
+            return
         if stats is None:
             return
         for key, values in stats.items():
