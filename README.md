@@ -5,8 +5,8 @@
   An automatic differentiation library for multilevel optimization and generalized meta-learning<br>
   <a href="https://www.google.com/">Tutorial</a> |
   <a href="https://www.google.com/">Docs</a> |
-  <a href="https://www.google.com/">Examples</a> |
-  <a href="https://www.google.com/">CASL Project</a>
+  <a href="https://github.com/leopard-ai/betty/tree/main/examples">Examples</a> |
+  <a href="https://www.casl-project.ai/">CASL Project</a>
 </p>
 
 ```bash
