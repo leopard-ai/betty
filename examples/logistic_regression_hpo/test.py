@@ -102,7 +102,7 @@ class Child(ImplicitProblem):
         self.module.w.data.zero_()
 
 
-parent_config = Config(log_step=10, first_order=True, retain_graph=False)
+parent_config = Config(log_step=10, first_order=True, retain_graph=True)
 child_config = Config(type="cg", cg_iterations=3, cg_alpha=0.1, unroll_steps=100)
 
 parent = Parent(name="outer", config=parent_config, device=device)
