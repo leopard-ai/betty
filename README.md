@@ -3,8 +3,8 @@
 </h3>
 <p align="center">
   An automatic differentiation library for multilevel optimization and generalized meta-learning<br>
-  <a href="https://www.google.com/">Tutorial</a> |
   <a href="https://www.google.com/">Docs</a> |
+  <a href="https://www.google.com/">Tutorials</a> |
   <a href="https://github.com/leopard-ai/betty/tree/main/examples">Examples</a> |
   <a href="https://www.casl-project.ai/">CASL Project</a>
 </p>
@@ -79,7 +79,7 @@ cls_prob = Classifier(name='classifier',
                       config=cls_config)
 ```
 
-#### Interaction with other problems
+#### Interactions between problems
 In MLO, each problem will often need to access modules from other problems to define its
 loss function. This can be achieved by using the `name` attribute as follows:
 
@@ -113,7 +113,7 @@ cls_prob = Classifier(name='classifier', module=...)
 #### Basics
 The `Engine` class handles the hierarchical dependencies between problems. In MLO, there
 are two types of dependencies: upper-to-lower (`u2l`) and lower-to-upper (`l2u`). Both
-types of dependencies can be defind with Python dictionary, where the key is the
+types of dependencies can be defined with a Python dictionary, where the key is the
 starting node and the value is the list of destination nodes.
 
 ```python
@@ -139,7 +139,7 @@ engine.run()
 ```
 
 Since `Engine` manages the whole MLO program, you can also perform a global validation stage within
-it. All involved problems of the MLO program can again be accessed with their names.
+it. All problems that comprise the MLO program can again be accessed with their names.
 ```python
 class HPOEngine(Engine):
     # set up global validation
@@ -158,10 +158,10 @@ engine.run()
 ```
 
 Once we define all optimization problems and the hierarchical dependencies between them
-respectively with the `Problem` class and the `Engine` class, all complicated internal
-mechanism of MLO such as gradient calculation, optimization execution order will be
-handled by Betty.  For more details and advanced features, users can check out our
-[Tutorial](https://www.google.com) and [Documentation](https://www.google.com).
+with, respectively, the `Problem` class and the `Engine` class, all complicated internal
+mechanisms of MLO such as gradient calculation and optimization execution order will be
+handled by Betty. For more details and advanced features, users can check out our
+[Documentation](https://www.google.com) and [Tutorials](https://www.google.com).
 
 Happy multilevel optimization programming!
 
@@ -196,8 +196,8 @@ If you use Betty in your research, please cite our arxiv paper with the followin
 ```
 
 ## Contributing
-We welcome contributions from the community! Please see
-our [contributing guidelines](CONTRIBUTING.md) for details on how to contributed to Betty.
+We welcome contributions from the community! Please see our [contributing
+guidelines](CONTRIBUTING.md) for details on how to contributed to Betty.
 
 ## License
 Betty is licensed under the [Apache 2.0 License](LICENSE).
