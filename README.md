@@ -6,6 +6,7 @@
   <a href="https://www.google.com/">Docs</a> |
   <a href="https://www.google.com/">Tutorials</a> |
   <a href="https://github.com/leopard-ai/betty/tree/main/examples">Examples</a> |
+  <a href="https://www.google.com/"">Paper</a> |
   <a href="https://www.casl-project.ai/">CASL Project</a>
 </p>
 
