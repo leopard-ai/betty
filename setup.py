@@ -10,8 +10,10 @@ with open("betty/version.txt", "r") as fv:
 with open("requirements/requirements.txt", "r") as f:
     requirements = f.read().splitlines()
 
-description = ("An automatic differentiation library for multilevel optimization and "
-               "generalized meta-learning")
+description = (
+    "An automatic differentiation library for multilevel optimization and "
+    "generalized meta-learning"
+)
 
 python_requires = ">=3.6.0"
 
@@ -25,8 +27,19 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/leopard-ai/betty",
-    keywords=["meta-learning", "pytorch", "multilevel optimization",],
-    packages=find_packages(exclude=["examples", "docs", "tests", "tutorials",]),
+    keywords=[
+        "meta-learning",
+        "pytorch",
+        "multilevel optimization",
+    ],
+    packages=find_packages(
+        exclude=[
+            "examples",
+            "docs",
+            "tests",
+            "tutorials",
+        ]
+    ),
     install_requires=requirements,
     license="Apache",
     python_requires=python_requires,

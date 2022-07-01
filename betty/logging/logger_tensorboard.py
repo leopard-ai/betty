@@ -7,6 +7,7 @@ import torch
 
 try:
     from torch.utils.tensorboard import SummaryWriter
+
     HAS_TENSORBOARD = True
 except ImportError:
     HAS_TENSORBOARD = False

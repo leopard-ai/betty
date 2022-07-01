@@ -1,4 +1,15 @@
 -r requirements.txt
 
+# formatting
 black
-functorch
+
+# examples
+sklearn>=0.23.1
+numpy>=1.19.0
+
+# sphinx
+sphinx>=4.0
+furo
+myst_parser>=0.15
+sphinx_design
+sphinx_inline_tabs
