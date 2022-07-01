@@ -21,9 +21,10 @@ MLO applications including meta-learning, hyperparameter optimization, neural
 architecture search, data reweighting, adversarial learning, and reinforcement learning.
 
 ## Benefits
-Implementing multilevel optimization is notoriously complicated. For example, it
-requires approximating gradients using iterative/implicit differentiation, and writing
-nested for-loops to handle hierarchical dependencies between multiple levels.
+Implementing multilevel optimization/meta-learning is notoriously complicated. For
+example, it requires approximating gradients using iterative/implicit differentiation,
+and writing nested for-loops to handle hierarchical dependencies between multiple
+levels.
 
 Betty aims to abstract away low-level implementation details behind its API, while
 allowing users to write only high-level declarative code. Now, users simply need to do
