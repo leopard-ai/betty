@@ -1,10 +1,10 @@
 Data Reweighting
-===============
+================
 Introduction
-------------------
+------------
 Here we re-implement the data reweighting algorithm from
 `Meta-Weight-Net: Learning an Explicit Mapping For Sample Weighting <https://arxiv.org/abs/1902.07379>`_,
-which is a two level optimization algorithm. The first level or lower level
+which is a two level MLO program. The first level or lower level
 problem is the classification problem and the second level or upper level
 problem is the meta learning problem.  These levels will be followed by a
 validation stage at the end. 
@@ -33,9 +33,9 @@ the objective of this problem will be,
     
     \Theta^{*} = \mathrm{argmin} \mathcal{L}^{meta}(\textbf{w}^{*}(\Theta)) = \frac{1}{M} \sum_{i=1}^{M}L_{i}^{meta}(\textbf{w}^{*}(\Theta))
 
-The model of the meta weight net is specified to be an MLP and we will be using the Adam
-algorithm for the optimization. (For complete and detailed formulation of the loss
-functions see `here <https://arxiv.org/abs/1902.07379>`_)
+The model of the meta weight net is chosen to be an MLP and we will be using the Adam
+algorithm for the optimization. For complete and detailed formulation of the loss
+functions see `here <https://arxiv.org/abs/1902.07379>`__.
 
 Note that for calculating the loss of first level we need the forward pass of the second
 level and for calculating the loss of second level we need the forward pass of the first
@@ -44,36 +44,36 @@ level through a ``'u2l'`` (upper to lower) dependency and the second level depen
 first level through a ``'l2u'`` (lower to upper) dependency.
 
 Course of Action
-------------------
+----------------
 In order to implement the data reweighting algorithm we will go through the following pipeline,
 
 1. **Preparing Data:** Prepare the data that will be used for training.
 2. **Designing Models:** Design models that will be used in the two levels.
-3. **Using betty:** Finally using betty to implement the two level optimization algorithm.
+3. **Using betty:** Finally use Betty to implement the two level MLO program.
 
 Preparing Data
-------------------
+--------------
 Here we prepare the data that will be used for training the models in the different
-levels of the algorithm. We would require three different data sets. One will be
-``train_dataloader`` which will be used in the first level. Second will be
-``meta_dataloader`` which will be used in the second level. Finally we would have a
+levels of the algorithm. We will require three different data sets. The first is
+``train_dataloader`` which will be used in the first level. The second is
+``meta_dataloader`` which will be used in the second level. Finally we will have a
 ``test_dataloader`` which will be used in the validation stage. These data sets can
 be prepared as given
-`here <https://github.com/sangkeun00/betty/blob/main/examples/learning_to_reweight/data.py>`_.
+`here <https://github.com/sangkeun00/betty/blob/main/examples/learning_to_reweight/data.py>`__.
 
 Designing Models
 ------------------
-Here we design the models used in the levels. We would have to prepare one model
+Here we design the models used in the levels. We will have to prepare one model
 each for our two levels. The first level has the ``ResNet32`` model and the second
 level has the ``MLP`` model. Both of these models can be designed as given
-`here <https://github.com/sangkeun00/betty/blob/main/examples/learning_to_reweight/model.py>`_.
+`here <https://github.com/sangkeun00/betty/blob/main/examples/learning_to_reweight/model.py>`__.
 
 Using Betty
 ------------------
 Now we will train our models using the data reweighting algorithm with the help
-of the ``betty``. We first import the required libraries. The code blocks used
+of Betty. We first import the required libraries. The code blocks used
 below can be found
-`here <https://github.com/sangkeun00/betty/blob/main/examples/learning_to_reweight/main.py>`_.
+`here <https://github.com/sangkeun00/betty/blob/main/examples/learning_to_reweight/main.py>`__.
 
 .. code-block:: python
 
@@ -94,8 +94,8 @@ Now we simply need to do two things to implement our algorithm:
 1. Define each level's optimization problem using the ``Problem`` class.
 2. Define the hierarchical problem structure using the ``Engine`` class.
 
-``Problem``
-^^^^^^^^^^^^^^^^^^^^^
+Defining ``Problem``
+^^^^^^^^^^^^^^^^^^^^
 Each level problem can be defined with seven components: (1) module, (2) optimizer,
 (3) data loader, (4) loss function, (5) problem configuration, (6) name, and
 (7) other optional components (e.g. learning rate scheduler). The loss function
@@ -238,8 +238,8 @@ objects which call their constructors.
 With this our problems are characterized and instansiated. Now we move on to set
 our ``Engine`` class.
 
-``Engine``
-^^^^^^^^^^^^^^^^^^^^^
+Defining ``Engine``
+^^^^^^^^^^^^^^^^^^^
 
 The Engine class handles the hierarchical dependencies between problems. In MLO, there
 are two types of dependencies: upper-to-lower ``'u2l'`` and lower-to-upper ``'l2u'``.
@@ -321,9 +321,9 @@ With this the dependencies are defined and ``.run()`` method of ``Eninge`` class
 will start the program.
 
 Conclusion
-------------------
+----------
 
-Once we define all optimization problems and the hierarchical dependencies
-between them respectively with the Problem class and the Engine class, all
-complicated internal mechanism of MLO such as gradient calculation, optimization
-execution order will be handled by Betty.
+Once we define all optimization problems and the hierarchical dependencies between the
+problems with, respectively, the Problem class and the Engine class, all complicated
+internal mechanism of MLO such as gradient calculation and optimization execution order
+are handled by Betty.
