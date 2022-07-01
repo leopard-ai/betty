@@ -2,7 +2,7 @@ from typing import Tuple, Optional, List, Dict
 import torch.nn as nn
 import torch
 
-__all__ = ['Classifier']
+__all__ = ["Classifier"]
 
 
 class Classifier(nn.Module):
@@ -39,8 +39,14 @@ class Classifier(nn.Module):
 
     """
 
-    def __init__(self, backbone: nn.Module, num_classes: int, bottleneck: Optional[nn.Module] = None,
-                 bottleneck_dim: Optional[int] = -1, head: Optional[nn.Module] = None):
+    def __init__(
+        self,
+        backbone: nn.Module,
+        num_classes: int,
+        bottleneck: Optional[nn.Module] = None,
+        bottleneck_dim: Optional[int] = -1,
+        head: Optional[nn.Module] = None,
+    ):
         super(Classifier, self).__init__()
         self.backbone = backbone
         self.num_classes = num_classes
@@ -72,11 +78,11 @@ class Classifier(nn.Module):
 
     def get_parameters(self) -> List[Dict]:
         """A parameter list which decides optimization hyper-parameters,
-            such as the relative learning rate of each layer
+        such as the relative learning rate of each layer
         """
         params = [
             {"params": self.backbone.parameters(), "lr_mult": 0.1},
-            {"params": self.bottleneck.parameters(), "lr_mult": 1.},
-            {"params": self.head.parameters(), "lr_mult": 1.},
+            {"params": self.bottleneck.parameters(), "lr_mult": 1.0},
+            {"params": self.head.parameters(), "lr_mult": 1.0},
         ]
         return params

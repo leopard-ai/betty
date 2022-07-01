@@ -6,9 +6,10 @@ import torch
 
 
 class GradientReverseFunction(Function):
-
     @staticmethod
-    def forward(ctx: Any, input: torch.Tensor, coeff: Optional[float] = 1.) -> torch.Tensor:
+    def forward(
+        ctx: Any, input: torch.Tensor, coeff: Optional[float] = 1.0
+    ) -> torch.Tensor:
         ctx.coeff = coeff
         output = input * 1.0
         return output
@@ -29,31 +30,37 @@ class GradientReverseLayer(nn.Module):
 class WarmStartGradientReverseLayer(nn.Module):
     """Gradient Reverse Layer :math:`\mathcal{R}(x)` with warm start
 
-        The forward and backward behaviours are:
+    The forward and backward behaviours are:
 
-        .. math::
-            \mathcal{R}(x) = x,
+    .. math::
+        \mathcal{R}(x) = x,
 
-            \dfrac{ d\mathcal{R}} {dx} = - \lambda I.
+        \dfrac{ d\mathcal{R}} {dx} = - \lambda I.
 
-        :math:`\lambda` is initiated at :math:`lo` and is gradually changed to :math:`hi` using the following schedule:
+    :math:`\lambda` is initiated at :math:`lo` and is gradually changed to :math:`hi` using the following schedule:
 
-        .. math::
-            \lambda = \dfrac{2(hi-lo)}{1+\exp(- α \dfrac{i}{N})} - (hi-lo) + lo
+    .. math::
+        \lambda = \dfrac{2(hi-lo)}{1+\exp(- α \dfrac{i}{N})} - (hi-lo) + lo
 
-        where :math:`i` is the iteration step.
+    where :math:`i` is the iteration step.
 
-        Parameters:
-            - **alpha** (float, optional): :math:`α`. Default: 1.0
-            - **lo** (float, optional): Initial value of :math:`\lambda`. Default: 0.0
-            - **hi** (float, optional): Final value of :math:`\lambda`. Default: 1.0
-            - **max_iters** (int, optional): :math:`N`. Default: 1000
-            - **auto_step** (bool, optional): If True, increase :math:`i` each time `forward` is called.
-              Otherwise use function `step` to increase :math:`i`. Default: False
-        """
+    Parameters:
+        - **alpha** (float, optional): :math:`α`. Default: 1.0
+        - **lo** (float, optional): Initial value of :math:`\lambda`. Default: 0.0
+        - **hi** (float, optional): Final value of :math:`\lambda`. Default: 1.0
+        - **max_iters** (int, optional): :math:`N`. Default: 1000
+        - **auto_step** (bool, optional): If True, increase :math:`i` each time `forward` is called.
+          Otherwise use function `step` to increase :math:`i`. Default: False
+    """
 
-    def __init__(self, alpha: Optional[float] = 1.0, lo: Optional[float] = 0.0, hi: Optional[float] = 1.,
-                 max_iters: Optional[int] = 1000., auto_step: Optional[bool] = False):
+    def __init__(
+        self,
+        alpha: Optional[float] = 1.0,
+        lo: Optional[float] = 0.0,
+        hi: Optional[float] = 1.0,
+        max_iters: Optional[int] = 1000.0,
+        auto_step: Optional[bool] = False,
+    ):
         super(WarmStartGradientReverseLayer, self).__init__()
         self.alpha = alpha
         self.lo = lo
@@ -65,8 +72,11 @@ class WarmStartGradientReverseLayer(nn.Module):
     def forward(self, input: torch.Tensor) -> torch.Tensor:
         """"""
         coeff = np.float(
-            2.0 * (self.hi - self.lo) / (1.0 + np.exp(-self.alpha * self.iter_num / self.max_iters))
-            - (self.hi - self.lo) + self.lo
+            2.0
+            * (self.hi - self.lo)
+            / (1.0 + np.exp(-self.alpha * self.iter_num / self.max_iters))
+            - (self.hi - self.lo)
+            + self.lo
         )
         if self.auto_step:
             self.step()

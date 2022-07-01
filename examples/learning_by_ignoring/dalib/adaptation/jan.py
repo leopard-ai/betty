@@ -7,8 +7,7 @@ from dalib.modules.kernels import GaussianKernel
 from .dan import _update_index_matrix
 
 
-__all__ = ['JointMultipleKernelMaximumMeanDiscrepancy', 'ImageClassifier']
-
+__all__ = ["JointMultipleKernelMaximumMeanDiscrepancy", "ImageClassifier"]
 
 
 class JointMultipleKernelMaximumMeanDiscrepancy(nn.Module):
@@ -60,7 +59,12 @@ class JointMultipleKernelMaximumMeanDiscrepancy(nn.Module):
         >>> output = loss((z1_s, z2_s), (z1_t, z2_t))
     """
 
-    def __init__(self, kernels: Sequence[Sequence[nn.Module]], linear: Optional[bool] = True, thetas: Sequence[nn.Module] = None):
+    def __init__(
+        self,
+        kernels: Sequence[Sequence[nn.Module]],
+        linear: Optional[bool] = True,
+        thetas: Sequence[nn.Module] = None,
+    ):
         super(JointMultipleKernelMaximumMeanDiscrepancy, self).__init__()
         self.kernels = kernels
         self.index_matrix = None
@@ -72,18 +76,23 @@ class JointMultipleKernelMaximumMeanDiscrepancy(nn.Module):
 
     def forward(self, z_s: torch.Tensor, z_t: torch.Tensor) -> torch.Tensor:
         batch_size = int(z_s[0].size(0))
-        self.index_matrix = _update_index_matrix(batch_size, self.index_matrix, self.linear).to(z_s[0].device)
+        self.index_matrix = _update_index_matrix(
+            batch_size, self.index_matrix, self.linear
+        ).to(z_s[0].device)
 
         kernel_matrix = torch.ones_like(self.index_matrix)
-        for layer_z_s, layer_z_t, layer_kernels, theta in zip(z_s, z_t, self.kernels, self.thetas):
+        for layer_z_s, layer_z_t, layer_kernels, theta in zip(
+            z_s, z_t, self.kernels, self.thetas
+        ):
             layer_features = torch.cat([layer_z_s, layer_z_t], dim=0)
             layer_features = theta(layer_features)
             kernel_matrix *= sum(
-                [kernel(layer_features) for kernel in layer_kernels])  # Add up the matrix of each kernel
+                [kernel(layer_features) for kernel in layer_kernels]
+            )  # Add up the matrix of each kernel
 
         # Add 2 / (n-1) to make up for the value on the diagonal
         # to ensure loss is positive in the non-linear version
-        loss = (kernel_matrix * self.index_matrix).sum() + 2. / float(batch_size - 1)
+        loss = (kernel_matrix * self.index_matrix).sum() + 2.0 / float(batch_size - 1)
         return loss
 
 
@@ -92,6 +101,7 @@ class Theta(nn.Module):
     maximize loss respect to :math:`\theta`
     minimize loss respect to features
     """
+
     def __init__(self, dim: int):
         super(Theta, self).__init__()
         self.grl1 = GradientReverseLayer()
@@ -106,12 +116,16 @@ class Theta(nn.Module):
 
 
 class ImageClassifier(ClassifierBase):
-    def __init__(self, backbone: nn.Module, num_classes: int, bottleneck_dim: Optional[int] = 256):
+    def __init__(
+        self, backbone: nn.Module, num_classes: int, bottleneck_dim: Optional[int] = 256
+    ):
         bottleneck = nn.Sequential(
             nn.Linear(backbone.out_features, bottleneck_dim),
             nn.BatchNorm1d(bottleneck_dim),
             nn.ReLU(),
-            nn.Dropout(0.5)
+            nn.Dropout(0.5),
         )
         head = nn.Linear(bottleneck_dim, num_classes)
-        super(ImageClassifier, self).__init__(backbone, num_classes, bottleneck, bottleneck_dim, head)
+        super(ImageClassifier, self).__init__(
+            backbone, num_classes, bottleneck, bottleneck_dim, head
+        )

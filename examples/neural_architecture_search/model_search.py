@@ -114,7 +114,10 @@ class Cell(nn.Module):
         offset = 0
         # for each node, receive input from all previous intermediate nodes and s0, s1
         for _ in range(self.steps):  # 4
-            s = sum(self.layers[offset + j](h, weights[offset + j]) for j, h in enumerate(states))
+            s = sum(
+                self.layers[offset + j](h, weights[offset + j])
+                for j, h in enumerate(states)
+            )
             offset += len(states)
             # append one state since s is the elem-wise addition of all output
             states.append(s)
@@ -128,7 +131,16 @@ class Network(nn.Module):
     stack number:layer of cells and then flatten to fed a linear layer
     """
 
-    def __init__(self, c, num_classes, layers, criterion, steps=4, multiplier=4, stem_multiplier=3):
+    def __init__(
+        self,
+        c,
+        num_classes,
+        layers,
+        criterion,
+        steps=4,
+        multiplier=4,
+        stem_multiplier=3,
+    ):
         """
         :param c: 16
         :param num_classes: 10
@@ -263,7 +275,9 @@ class Network(nn.Module):
                 ]  # only has two inputs
                 for j in edges:  # for every input nodes j of current node i
                     k_best = None
-                    for k in range(len(W[j])):  # get strongest ops for current input j->i
+                    for k in range(
+                        len(W[j])
+                    ):  # get strongest ops for current input j->i
                         if k != PRIMITIVES.index("none"):
                             if k_best is None or W[j][k] > W[j][k_best]:
                                 k_best = k
@@ -277,7 +291,10 @@ class Network(nn.Module):
 
         concat = range(2 + self.steps - self.multiplier, self.steps + 2)
         genotype = Genotype(
-            normal=gene_normal, normal_concat=concat, reduce=gene_reduce, reduce_concat=concat
+            normal=gene_normal,
+            normal_concat=concat,
+            reduce=gene_reduce,
+            reduce_concat=concat,
         )
 
         return genotype

@@ -27,7 +27,9 @@ class BasicBlock(nn.Module):
             in_planes, planes, kernel_size=3, stride=stride, padding=1, bias=False
         )
         self.bn1 = nn.BatchNorm2d(planes)
-        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv2 = nn.Conv2d(
+            planes, planes, kernel_size=3, stride=1, padding=1, bias=False
+        )
         self.bn2 = nn.BatchNorm2d(planes)
 
         self.shortcut = nn.Sequential()
@@ -38,13 +40,20 @@ class BasicBlock(nn.Module):
                 """
                 self.shortcut = LambdaLayer(
                     lambda x: functional.pad(
-                        x[:, :, ::2, ::2], (0, 0, 0, 0, planes // 4, planes // 4), "constant", 0
+                        x[:, :, ::2, ::2],
+                        (0, 0, 0, 0, planes // 4, planes // 4),
+                        "constant",
+                        0,
                     )
                 )
             elif option == "B":
                 self.shortcut = nn.Sequential(
                     nn.Conv2d(
-                        in_planes, self.expansion * planes, kernel_size=1, stride=stride, bias=False
+                        in_planes,
+                        self.expansion * planes,
+                        kernel_size=1,
+                        stride=stride,
+                        bias=False,
                     ),
                     nn.BatchNorm2d(self.expansion * planes),
                 )

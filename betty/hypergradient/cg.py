@@ -28,14 +28,18 @@ def cg(vector, curr, prev):
     in_loss = curr.training_step_exec(curr.cur_batch)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        in_grad = grad_from_backward(in_loss, curr.trainable_parameters(), create_graph=True)
+        in_grad = grad_from_backward(
+            in_loss, curr.trainable_parameters(), create_graph=True
+        )
 
     x = [torch.zeros_like(vi) for vi in vector]
     r = [torch.zeros_like(vi).copy_(vi) for vi in vector]
     p = [torch.zeros_like(rr).copy_(rr) for rr in r]
 
     for _ in range(config.cg_iterations):
-        hvp = torch.autograd.grad(in_grad, curr.parameters(), grad_outputs=p, retain_graph=True)
+        hvp = torch.autograd.grad(
+            in_grad, curr.parameters(), grad_outputs=p, retain_graph=True
+        )
         hvp_vec = to_vec(hvp, alpha=config.cg_alpha)
         r_vec = to_vec(r)
         p_vec = to_vec(p)
@@ -52,7 +56,9 @@ def cg(vector, curr, prev):
         x, p, r = x_new, p_new, r_new
     x = [config.cg_alpha * xx for xx in x]
 
-    implicit_grad = torch.autograd.grad(in_grad, prev.trainable_parameters(), grad_outputs=x)
+    implicit_grad = torch.autograd.grad(
+        in_grad, prev.trainable_parameters(), grad_outputs=x
+    )
     implicit_grad = [neg_with_none(ig) for ig in implicit_grad]
 
     return implicit_grad

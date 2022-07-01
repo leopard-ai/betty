@@ -16,7 +16,9 @@ def flip1_corruption(corruption_ratio, num_classes):
     corruption_matrix = np.eye(num_classes) * (1 - corruption_ratio)
     row_indices = np.arange(num_classes)
     for i in range(num_classes):
-        corruption_matrix[i][np.random.choice(row_indices[row_indices != i])] = corruption_ratio
+        corruption_matrix[i][
+            np.random.choice(row_indices[row_indices != i])
+        ] = corruption_ratio
     return corruption_matrix
 
 
@@ -24,9 +26,9 @@ def flip2_corruption(corruption_ratio, num_classes):
     corruption_matrix = np.eye(num_classes) * (1 - corruption_ratio)
     row_indices = np.arange(num_classes)
     for i in range(num_classes):
-        corruption_matrix[i][np.random.choice(row_indices[row_indices != i], 2, replace=False)] = (
-            corruption_ratio / 2
-        )
+        corruption_matrix[i][
+            np.random.choice(row_indices[row_indices != i], 2, replace=False)
+        ] = (corruption_ratio / 2)
     return corruption_matrix
 
 
@@ -76,7 +78,9 @@ def build_dataloader(
     train_dataset = dataset_list[dataset](
         root="../data", train=True, download=True, transform=train_transforms
     )
-    test_dataset = dataset_list[dataset](root="../data", train=False, transform=test_transforms)
+    test_dataset = dataset_list[dataset](
+        root="../data", train=False, transform=test_transforms
+    )
 
     num_classes = len(train_dataset.classes)
     num_meta = int(num_meta_total / num_classes)
@@ -88,7 +92,9 @@ def build_dataloader(
         imbalanced_num_list = []
         sample_num = int((len(train_dataset.targets) - num_meta_total) / num_classes)
         for class_index in range(num_classes):
-            imbalanced_num = sample_num / (imbalanced_factor ** (class_index / (num_classes - 1)))
+            imbalanced_num = sample_num / (
+                imbalanced_factor ** (class_index / (num_classes - 1))
+            )
             imbalanced_num_list.append(int(imbalanced_num))
         np.random.shuffle(imbalanced_num_list)
         print(imbalanced_num_list)
@@ -97,14 +103,18 @@ def build_dataloader(
 
     for class_index in range(num_classes):
         index_to_class = [
-            index for index, label in enumerate(train_dataset.targets) if label == class_index
+            index
+            for index, label in enumerate(train_dataset.targets)
+            if label == class_index
         ]
         np.random.shuffle(index_to_class)
         index_to_meta.extend(index_to_class[:num_meta])
         index_to_class_for_train = index_to_class[num_meta:]
 
         if imbalanced_num_list is not None:
-            index_to_class_for_train = index_to_class_for_train[: imbalanced_num_list[class_index]]
+            index_to_class_for_train = index_to_class_for_train[
+                : imbalanced_num_list[class_index]
+            ]
 
         index_to_train.extend(index_to_class_for_train)
 
@@ -115,7 +125,9 @@ def build_dataloader(
     meta_dataset.targets = list(np.array(meta_dataset.targets)[index_to_meta])
 
     if corruption_type is not None:
-        corruption_matrix = corruption_list[corruption_type](corruption_ratio, num_classes)
+        corruption_matrix = corruption_list[corruption_type](
+            corruption_ratio, num_classes
+        )
         print(corruption_matrix)
         for index in range(len(train_dataset.targets)):
             p = corruption_matrix[train_dataset.targets[index]]
@@ -124,7 +136,9 @@ def build_dataloader(
     train_dataloader = DataLoader(
         train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True
     )
-    meta_dataloader = DataLoader(meta_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
+    meta_dataloader = DataLoader(
+        meta_dataset, batch_size=batch_size, shuffle=True, pin_memory=True
+    )
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, pin_memory=True)
 
     return train_dataloader, meta_dataloader, test_dataloader, imbalanced_num_list

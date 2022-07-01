@@ -53,7 +53,10 @@ class Inner(ImplicitProblem):
         outs, params = self.module(inputs)
         loss = (
             F.binary_cross_entropy_with_logits(outs, targets)
-            + 0.5 * (params.unsqueeze(0) @ torch.diag(self.outer()) @ params.unsqueeze(1)).sum()
+            + 0.5
+            * (
+                params.unsqueeze(0) @ torch.diag(self.outer()) @ params.unsqueeze(1)
+            ).sum()
         )
         return loss
 
@@ -91,7 +94,9 @@ class EngineTest(unittest.TestCase):
 
         # optimizer
         self.train_optimizer = torch.optim.SGD(self.train_module.parameters(), lr=0.1)
-        self.valid_optimizer = torch.optim.SGD(self.valid_module.parameters(), lr=0.1, momentum=0.9)
+        self.valid_optimizer = torch.optim.SGD(
+            self.valid_module.parameters(), lr=0.1, momentum=0.9
+        )
 
         self.train_config = Config(unroll_steps=10)
         self.valid_config = Config()
@@ -137,14 +142,14 @@ class EngineTest(unittest.TestCase):
         self.assertFalse(self.outer.leaf)
 
     def test_set_problem_attr(self):
-        self.assertTrue(hasattr(self.engine, 'inner'))
-        self.assertTrue(hasattr(self.engine, 'outer'))
+        self.assertTrue(hasattr(self.engine, "inner"))
+        self.assertTrue(hasattr(self.engine, "outer"))
 
     def test_parse_dependency(self):
         self.assertTrue(self.outer in self.inner.parents)
         self.assertTrue(self.inner in self.outer.children)
-        self.assertTrue(hasattr(self.inner, 'outer'))
-        self.assertTrue(hasattr(self.outer, 'inner'))
+        self.assertTrue(hasattr(self.inner, "outer"))
+        self.assertTrue(hasattr(self.outer, "inner"))
 
     def test_train_step(self):
         for i in range(10):

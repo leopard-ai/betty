@@ -11,6 +11,7 @@ class Config:
     """
     Training configuration for ``Problem``.
     """
+
     type: str = "darts"
     unroll_steps: int = 1
     first_order: bool = True
@@ -46,6 +47,7 @@ class EngineConfig:
     """
     Configuration for ``Engine``.
     """
+
     train_iters: int = 50000
     valid_step: int = 500
 

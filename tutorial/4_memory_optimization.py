@@ -47,7 +47,9 @@ def build_dataset(reweight_size=1000, imbalanced_factor=100):
     imbalanced_num_list = []
     sample_num = int((len(dataset.targets) - reweight_size) / num_classes)
     for class_index in range(num_classes):
-        imbalanced_num = sample_num / (imbalanced_factor ** (class_index / (num_classes - 1)))
+        imbalanced_num = sample_num / (
+            imbalanced_factor ** (class_index / (num_classes - 1))
+        )
         imbalanced_num_list.append(int(imbalanced_num))
     np.random.shuffle(imbalanced_num_list)
 
@@ -59,7 +61,9 @@ def build_dataset(reweight_size=1000, imbalanced_factor=100):
         index_to_meta.extend(index_to_class[:num_meta])
         index_to_class_for_train = index_to_class[num_meta:]
 
-        index_to_class_for_train = index_to_class_for_train[: imbalanced_num_list[class_index]]
+        index_to_class_for_train = index_to_class_for_train[
+            : imbalanced_num_list[class_index]
+        ]
 
         index_to_train.extend(index_to_class_for_train)
 
@@ -72,7 +76,9 @@ def build_dataset(reweight_size=1000, imbalanced_factor=100):
     return dataset, reweight_dataset
 
 
-classifier_dataset, reweight_dataset = build_dataset(reweight_size=1000, imbalanced_factor=100)
+classifier_dataset, reweight_dataset = build_dataset(
+    reweight_size=1000, imbalanced_factor=100
+)
 normalize = transforms.Normalize(
     mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
     std=[x / 255.0 for x in [63.0, 62.1, 66.7]],
@@ -87,8 +93,12 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 ####################
 ##### Reweight #####
 ####################
-reweight_dataloader = DataLoader(reweight_dataset, batch_size=100, shuffle=True, pin_memory=True)
-reweight_module = nn.Sequential(nn.Linear(1, 100), nn.ReLU(), nn.Linear(100, 1), nn.Sigmoid())
+reweight_dataloader = DataLoader(
+    reweight_dataset, batch_size=100, shuffle=True, pin_memory=True
+)
+reweight_module = nn.Sequential(
+    nn.Linear(1, 100), nn.ReLU(), nn.Linear(100, 1), nn.Sigmoid()
+)
 reweight_optimizer = optim.Adam(reweight_module.parameters(), lr=1e-5)
 
 
@@ -127,16 +137,24 @@ class Bottleneck(nn.Module):
         super(Bottleneck, self).__init__()
         self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=1, bias=False)
         self.bn1 = nn.BatchNorm2d(planes)
-        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
+        self.conv2 = nn.Conv2d(
+            planes, planes, kernel_size=3, stride=stride, padding=1, bias=False
+        )
         self.bn2 = nn.BatchNorm2d(planes)
-        self.conv3 = nn.Conv2d(planes, self.expansion * planes, kernel_size=1, bias=False)
+        self.conv3 = nn.Conv2d(
+            planes, self.expansion * planes, kernel_size=1, bias=False
+        )
         self.bn3 = nn.BatchNorm2d(self.expansion * planes)
 
         self.shortcut = nn.Sequential()
         if stride != 1 or in_planes != self.expansion * planes:
             self.shortcut = nn.Sequential(
                 nn.Conv2d(
-                    in_planes, self.expansion * planes, kernel_size=1, stride=stride, bias=False
+                    in_planes,
+                    self.expansion * planes,
+                    kernel_size=1,
+                    stride=stride,
+                    bias=False,
                 ),
                 nn.BatchNorm2d(self.expansion * planes),
             )
@@ -243,5 +261,7 @@ u2l = {reweight: [classifier]}
 l2u = {classifier: [reweight]}
 dependencies = {"l2u": l2u, "u2l": u2l}
 
-engine = ReweightingEngine(config=engine_config, problems=problems, dependencies=dependencies)
+engine = ReweightingEngine(
+    config=engine_config, problems=problems, dependencies=dependencies
+)
 engine.run()

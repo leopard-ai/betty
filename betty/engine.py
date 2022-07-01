@@ -73,7 +73,9 @@ class Engine:
                     self.logger.info(
                         f"[Validation] [Global Step {self.global_step}] " f"{log_loss}"
                     )
-                    self.logger.log(validation_stats, tag="validation", step=self.global_step)
+                    self.logger.log(
+                        validation_stats, tag="validation", step=self.global_step
+                    )
                     self.train()
 
     def initialize(self):
@@ -219,7 +221,9 @@ class Engine:
         """
         name = problem.name
         if name not in self._problem_name_dict:
-            assert not hasattr(self, name), f"Problem already has an attribute named {name}!"
+            assert not hasattr(
+                self, name
+            ), f"Problem already has an attribute named {name}!"
             self._problem_name_dict[name] = 0
             setattr(self, name, problem)
         elif self._problem_name_dict[name] == 0:

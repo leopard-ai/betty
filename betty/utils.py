@@ -17,7 +17,11 @@ def get_grad_norm(parameters):
         param_norm = p.grad.data.float().norm()
         total_norm += param_norm.item() ** 2
 
-    if total_norm == float("inf") or total_norm == -float("inf") or total_norm != total_norm:
+    if (
+        total_norm == float("inf")
+        or total_norm == -float("inf")
+        or total_norm != total_norm
+    ):
         total_norm = -1
 
     return total_norm
@@ -32,7 +36,11 @@ def get_weight_norm(parameters):
         param_norm = torch.norm(p, dtype=torch.float32)
         total_norm += param_norm.item() ** 2
 
-    if total_norm == float("inf") or total_norm == -float("inf") or total_norm != total_norm:
+    if (
+        total_norm == float("inf")
+        or total_norm == -float("inf")
+        or total_norm != total_norm
+    ):
         total_norm = -1
 
     return total_norm

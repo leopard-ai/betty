@@ -10,4 +10,6 @@ def grad_from_backward(loss, params, retain_graph=None, create_graph=False):
     #     grads.append(param.grad.clone())
     #     param.grad = None
     # return tuple(grads)
-    return torch.autograd.grad(loss, params, retain_graph=retain_graph, create_graph=create_graph)
+    return torch.autograd.grad(
+        loss, params, retain_graph=retain_graph, create_graph=create_graph
+    )

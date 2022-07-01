@@ -2,7 +2,7 @@ from typing import List, Dict
 import torch.nn as nn
 import torch
 
-__all__ = ['DomainDiscriminator']
+__all__ = ["DomainDiscriminator"]
 
 
 class DomainDiscriminator(nn.Module):
@@ -40,4 +40,4 @@ class DomainDiscriminator(nn.Module):
         return y
 
     def get_parameters(self) -> List[Dict]:
-        return [{"params": self.parameters(), "lr_mult": 1.}]
+        return [{"params": self.parameters(), "lr_mult": 1.0}]

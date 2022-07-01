@@ -7,6 +7,7 @@ from betty.logging.logger_base import LoggerBase
 
 try:
     import wandb
+
     HAS_WANDB = True
 except ImportError:
     HAS_WANDB = False

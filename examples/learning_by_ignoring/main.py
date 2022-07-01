@@ -56,19 +56,31 @@ elif args.dataset == "officehome":
 
 print(f"train source_task: {args.source_domain}")
 train_source_dataset = getDataset(
-    root=data_root, task=args.source_domain + "_train", download=True, transform=train_transform
+    root=data_root,
+    task=args.source_domain + "_train",
+    download=True,
+    transform=train_transform,
 )
 
 print(f"train target_task: {args.target_domain}")
 train_target_dataset = getDataset(
-    root=data_root, task=args.target_domain + "_train", download=True, transform=train_transform
+    root=data_root,
+    task=args.target_domain + "_train",
+    download=True,
+    transform=train_transform,
 )
 valid_target_dataset = getDataset(
-    root=data_root, task=args.target_domain + "_train", download=True, transform=test_transform
+    root=data_root,
+    task=args.target_domain + "_train",
+    download=True,
+    transform=test_transform,
 )
 
 test_target_dataset = getDataset(
-    root=data_root, task=args.target_domain + "_test", download=True, transform=test_transform
+    root=data_root,
+    task=args.target_domain + "_test",
+    download=True,
+    transform=test_transform,
 )
 
 train_loader = torch.utils.data.DataLoader(
@@ -130,7 +142,7 @@ class Pretraining(ImplicitProblem):
         else:
             logit = self.reweight(inputs)
             weight = torch.sigmoid(logit)
-            loss = torch.mean(loss_raw * weight) #/ weight.detach().mean().item()
+            loss = torch.mean(loss_raw * weight)  # / weight.detach().mean().item()
 
         return loss
 
@@ -144,7 +156,9 @@ class Pretraining(ImplicitProblem):
         return build_optimizer(self.module, args)
 
     def configure_scheduler(self):
-        return optim.lr_scheduler.StepLR(self.optimizer, step_size=args.step_size, gamma=args.gamma)
+        return optim.lr_scheduler.StepLR(
+            self.optimizer, step_size=args.step_size, gamma=args.gamma
+        )
 
 
 class Finetuning(ImplicitProblem):
@@ -179,7 +193,9 @@ class Finetuning(ImplicitProblem):
         return build_optimizer(self.module, args)
 
     def configure_scheduler(self):
-        return optim.lr_scheduler.StepLR(self.optimizer, step_size=args.step_size, gamma=args.gamma)
+        return optim.lr_scheduler.StepLR(
+            self.optimizer, step_size=args.step_size, gamma=args.gamma
+        )
 
 
 class Reweighting(ImplicitProblem):
@@ -198,7 +214,8 @@ class Reweighting(ImplicitProblem):
     def reg_loss(self):
         loss = 0
         for (n1, p1), (n2, p2) in zip(
-            self.finetune.module.named_parameters(), self.pretrain.module.named_parameters()
+            self.finetune.module.named_parameters(),
+            self.pretrain.module.named_parameters(),
         ):
             lam = 0 if "fc" in n1 else args.lam
             loss = loss + lam * (p1 - p2).pow(2).sum()
@@ -214,7 +231,9 @@ class Reweighting(ImplicitProblem):
         return build_optimizer(self.module, args)
 
     def configure_scheduler(self):
-        return optim.lr_scheduler.StepLR(self.optimizer, step_size=args.step_size, gamma=args.gamma)
+        return optim.lr_scheduler.StepLR(
+            self.optimizer, step_size=args.step_size, gamma=args.gamma
+        )
 
 
 best_acc = -1

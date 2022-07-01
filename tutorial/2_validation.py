@@ -33,7 +33,9 @@ def build_dataset(reweight_size=1000, imbalanced_factor=100):
     imbalanced_num_list = []
     sample_num = int((len(dataset.targets) - reweight_size) / num_classes)
     for class_index in range(num_classes):
-        imbalanced_num = sample_num / (imbalanced_factor ** (class_index / (num_classes - 1)))
+        imbalanced_num = sample_num / (
+            imbalanced_factor ** (class_index / (num_classes - 1))
+        )
         imbalanced_num_list.append(int(imbalanced_num))
     np.random.shuffle(imbalanced_num_list)
 
@@ -45,7 +47,9 @@ def build_dataset(reweight_size=1000, imbalanced_factor=100):
         index_to_meta.extend(index_to_class[:num_meta])
         index_to_class_for_train = index_to_class[num_meta:]
 
-        index_to_class_for_train = index_to_class_for_train[: imbalanced_num_list[class_index]]
+        index_to_class_for_train = index_to_class_for_train[
+            : imbalanced_num_list[class_index]
+        ]
 
         index_to_train.extend(index_to_class_for_train)
 
@@ -58,8 +62,12 @@ def build_dataset(reweight_size=1000, imbalanced_factor=100):
     return dataset, reweight_dataset
 
 
-classifier_dataset, reweight_dataset = build_dataset(reweight_size=1000, imbalanced_factor=100)
-transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
+classifier_dataset, reweight_dataset = build_dataset(
+    reweight_size=1000, imbalanced_factor=100
+)
+transform = transforms.Compose(
+    [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
+)
 valid_dataset = MNIST(root="./data", train=False, transform=transform)
 valid_dataloader = DataLoader(valid_dataset, batch_size=100, pin_memory=True)
 
@@ -69,8 +77,12 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 ####################
 ##### Reweight #####
 ####################
-reweight_dataloader = DataLoader(reweight_dataset, batch_size=100, shuffle=True, pin_memory=True)
-reweight_module = nn.Sequential(nn.Linear(1, 100), nn.ReLU(), nn.Linear(100, 1), nn.Sigmoid())
+reweight_dataloader = DataLoader(
+    reweight_dataset, batch_size=100, shuffle=True, pin_memory=True
+)
+reweight_module = nn.Sequential(
+    nn.Linear(1, 100), nn.ReLU(), nn.Linear(100, 1), nn.Sigmoid()
+)
 reweight_optimizer = optim.Adam(reweight_module.parameters(), lr=1e-5)
 
 
@@ -99,7 +111,9 @@ reweight = Reweight(
 classifier_dataloader = DataLoader(
     classifier_dataset, batch_size=100, shuffle=True, pin_memory=True
 )
-classifier_module = nn.Sequential(nn.Flatten(), nn.Linear(784, 200), nn.ReLU(), nn.Linear(200, 10))
+classifier_module = nn.Sequential(
+    nn.Flatten(), nn.Linear(784, 200), nn.ReLU(), nn.Linear(200, 10)
+)
 classifier_optimizer = optim.SGD(classifier_module.parameters(), lr=0.1, momentum=0.9)
 classifier_scheduler = optim.lr_scheduler.MultiStepLR(
     classifier_optimizer, milestones=[1500, 2500], gamma=0.1
@@ -155,5 +169,7 @@ u2l = {reweight: [classifier]}
 l2u = {classifier: [reweight]}
 dependencies = {"l2u": l2u, "u2l": u2l}
 
-engine = ReweightingEngine(config=engine_config, problems=problems, dependencies=dependencies)
+engine = ReweightingEngine(
+    config=engine_config, problems=problems, dependencies=dependencies
+)
 engine.run()

@@ -27,12 +27,19 @@ class VisDA2017(ImageList):
                 train.txt
                 validation.txt
     """
+
     download_list = [
-        ("image_list", "image_list.zip",
-         "https://cloud.tsinghua.edu.cn/f/58034129e0204ef6b840/?dl=1"),
+        (
+            "image_list",
+            "image_list.zip",
+            "https://cloud.tsinghua.edu.cn/f/58034129e0204ef6b840/?dl=1",
+        ),
         ("train", "train.tar", "http://csr.bu.edu/ftp/visda17/clf/train.tar"),
-        ("validation", "validation.tar",
-         "http://csr.bu.edu/ftp/visda17/clf/validation.tar")
+        (
+            "validation",
+            "validation.tar",
+            "http://csr.bu.edu/ftp/visda17/clf/validation.tar",
+        ),
     ]
     image_list = {
         "T": "image_list/train.txt",
@@ -46,31 +53,39 @@ class VisDA2017(ImageList):
         "T_train_big": "image_list/train_train_big.txt",
         "T_test_big": "image_list/train_test_big.txt",
         "V_train_big": "image_list/val_train_big.txt",
-        "V_test_big": "image_list/val_test_big.txt"
+        "V_test_big": "image_list/val_test_big.txt",
     }
     CLASSES = [
-        'aeroplane', 'bicycle', 'bus', 'car', 'horse', 'knife', 'motorcycle',
-        'person', 'plant', 'skateboard', 'train', 'truck'
+        "aeroplane",
+        "bicycle",
+        "bus",
+        "car",
+        "horse",
+        "knife",
+        "motorcycle",
+        "person",
+        "plant",
+        "skateboard",
+        "train",
+        "truck",
     ]
 
-    def __init__(self,
-                 root: str,
-                 task: str,
-                 download: Optional[bool] = False,
-                 **kwargs):
+    def __init__(
+        self, root: str, task: str, download: Optional[bool] = False, **kwargs
+    ):
         assert task in self.image_list
         data_list_file = os.path.join(root, self.image_list[task])
 
         if download:
-            list(
-                map(lambda args: download_data(root, *args),
-                    self.download_list))
+            list(map(lambda args: download_data(root, *args), self.download_list))
         else:
             list(
-                map(lambda file_name, _: check_exits(root, file_name),
-                    self.download_list))
+                map(
+                    lambda file_name, _: check_exits(root, file_name),
+                    self.download_list,
+                )
+            )
 
-        super(VisDA2017, self).__init__(root,
-                                        VisDA2017.CLASSES,
-                                        data_list_file=data_list_file,
-                                        **kwargs)
+        super(VisDA2017, self).__init__(
+            root, VisDA2017.CLASSES, data_list_file=data_list_file, **kwargs
+        )

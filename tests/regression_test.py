@@ -53,7 +53,10 @@ class Inner(ImplicitProblem):
         outs, params = self.module(inputs)
         loss = (
             F.binary_cross_entropy_with_logits(outs, targets)
-            + 0.5 * (params.unsqueeze(0) @ torch.diag(self.outer()) @ params.unsqueeze(1)).sum()
+            + 0.5
+            * (
+                params.unsqueeze(0) @ torch.diag(self.outer()) @ params.unsqueeze(1)
+            ).sum()
         )
         return loss
 
@@ -90,7 +93,9 @@ class RegressionTest(unittest.TestCase):
         self.valid_module = ParentNet().to(device)
 
         # optimizer
-        self.valid_optimizer = torch.optim.SGD(self.valid_module.parameters(), lr=1., momentum=0.9)
+        self.valid_optimizer = torch.optim.SGD(
+            self.valid_module.parameters(), lr=1.0, momentum=0.9
+        )
 
         self.valid_config = Config()
         self.engine_config = EngineConfig(train_iters=2000)
@@ -104,7 +109,6 @@ class RegressionTest(unittest.TestCase):
             config=self.valid_config,
             device=device,
         )
-
 
     def test_darts(self):
         self.train_config = Config(unroll_steps=100)
@@ -131,7 +135,9 @@ class RegressionTest(unittest.TestCase):
         self.assertTrue(loss < 0.48)
 
     def test_cg(self):
-        self.train_config = Config(type="cg", cg_iterations=3, cg_alpha=0.1, unroll_steps=100)
+        self.train_config = Config(
+            type="cg", cg_iterations=3, cg_alpha=0.1, unroll_steps=100
+        )
         self.train_module = ChildNet().to(self.device)
         self.train_optimizer = torch.optim.SGD(self.train_module.parameters(), lr=0.1)
         self.inner = Inner(
@@ -155,7 +161,9 @@ class RegressionTest(unittest.TestCase):
         self.assertTrue(loss < 0.48)
 
     def test_neumann(self):
-        self.train_config = Config(type="neumann", neumann_iterations=5, unroll_steps=100)
+        self.train_config = Config(
+            type="neumann", neumann_iterations=5, unroll_steps=100
+        )
         self.train_module = ChildNet().to(self.device)
         self.train_optimizer = torch.optim.SGD(self.train_module.parameters(), lr=0.1)
         self.inner = Inner(

@@ -85,7 +85,10 @@ class Child(ImplicitProblem):
         outs, params = self.module(inputs)
         loss = (
             F.binary_cross_entropy_with_logits(outs, targets)
-            + 0.5 * (params.unsqueeze(0) @ torch.diag(self.outer()) @ params.unsqueeze(1)).sum()
+            + 0.5
+            * (
+                params.unsqueeze(0) @ torch.diag(self.outer()) @ params.unsqueeze(1)
+            ).sum()
         )
         return loss
 

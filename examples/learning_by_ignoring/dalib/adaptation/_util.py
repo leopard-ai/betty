@@ -7,5 +7,5 @@ def binary_accuracy(output: torch.Tensor, target: torch.Tensor) -> float:
         batch_size = target.size(0)
         pred = (output >= 0.5).float().t().view(-1)
         correct = pred.eq(target.view(-1)).float().sum()
-        correct.mul_(100. / batch_size)
+        correct.mul_(100.0 / batch_size)
         return correct

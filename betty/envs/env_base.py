@@ -19,7 +19,9 @@ class Env:
         """
         name = problem.name
         if name not in self._problem_name_dict:
-            assert not hasattr(self, name), f"Problem already has an attribute named {name}!"
+            assert not hasattr(
+                self, name
+            ), f"Problem already has an attribute named {name}!"
             self._problem_name_dict[name] = 0
             setattr(self, name, problem)
         elif self._problem_name_dict[name] == 0:

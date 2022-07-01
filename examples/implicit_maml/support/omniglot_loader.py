@@ -68,7 +68,9 @@ class Omniglot(data.Dataset):
     def _check_exists(self):
         return os.path.exists(
             os.path.join(self.root, self.processed_folder, "images_evaluation")
-        ) and os.path.exists(os.path.join(self.root, self.processed_folder, "images_background"))
+        ) and os.path.exists(
+            os.path.join(self.root, self.processed_folder, "images_background")
+        )
 
     def download(self):
         from six.moves import urllib
@@ -163,11 +165,16 @@ class OmniglotNShot:
                     temp[label] = [img]
 
             self.x = []
-            for label, imgs in temp.items():  # labels info deserted , each label contains 20imgs
+            for (
+                label,
+                imgs,
+            ) in temp.items():  # labels info deserted , each label contains 20imgs
                 self.x.append(np.array(imgs))
 
             # as different class may have different number of imgs
-            self.x = np.array(self.x).astype(np.float)  # [[20 imgs],..., 1623 classes in total]
+            self.x = np.array(self.x).astype(
+                np.float
+            )  # [[20 imgs],..., 1623 classes in total]
             # each character contains 20 imgs
             print("data shape:", self.x.shape)  # [1623, 20, 84, 84, 1]
             temp = []  # Free memory
@@ -194,11 +201,16 @@ class OmniglotNShot:
 
         # save pointer of current read batch in total cache
         self.indexes = {"train": 0, "test": 0}
-        self.datasets = {"train": self.x_train, "test": self.x_test}  # original data cached
+        self.datasets = {
+            "train": self.x_train,
+            "test": self.x_test,
+        }  # original data cached
         print("DB: train", self.x_train.shape, "test", self.x_test.shape)
 
         self.datasets_cache = {
-            "train": self.load_data_cache(self.datasets["train"]),  # current epoch data cached
+            "train": self.load_data_cache(
+                self.datasets["train"]
+            ),  # current epoch data cached
             "test": self.load_data_cache(self.datasets["test"]),
         }
 
@@ -243,7 +255,9 @@ class OmniglotNShot:
 
                 for j, cur_class in enumerate(selected_cls):
 
-                    selected_img = np.random.choice(20, self.k_shot + self.k_query, False)
+                    selected_img = np.random.choice(
+                        20, self.k_shot + self.k_query, False
+                    )
 
                     # meta-training and meta-test
                     x_spt.append(data_pack[cur_class][selected_img[: self.k_shot]])
@@ -254,12 +268,14 @@ class OmniglotNShot:
                 # shuffle inside a batch
                 perm = np.random.permutation(self.n_way * self.k_shot)
                 x_spt = np.reshape(
-                    np.array(x_spt), (self.n_way * self.k_shot, 1, self.resize, self.resize)
+                    np.array(x_spt),
+                    (self.n_way * self.k_shot, 1, self.resize, self.resize),
                 )[perm]
                 y_spt = np.reshape(np.array(y_spt), (self.n_way * self.k_shot))[perm]
                 perm = np.random.permutation(self.n_way * self.k_query)
                 x_qry = np.reshape(
-                    np.array(x_qry), (self.n_way * self.k_query, 1, self.resize, self.resize)
+                    np.array(x_qry),
+                    (self.n_way * self.k_query, 1, self.resize, self.resize),
                 )[perm]
                 y_qry = np.reshape(np.array(y_qry), (self.n_way * self.k_query))[perm]
 
@@ -280,7 +296,9 @@ class OmniglotNShot:
                 np.array(x_qrys).astype(np.float32),
                 (self.batchsz, querysz, 1, self.resize, self.resize),
             )
-            y_qrys = np.reshape(np.array(y_qrys).astype(np.int), (self.batchsz, querysz))
+            y_qrys = np.reshape(
+                np.array(y_qrys).astype(np.int), (self.batchsz, querysz)
+            )
 
             x_spts, y_spts, x_qrys, y_qrys = [
                 torch.from_numpy(z) for z in [x_spts, y_spts, x_qrys, y_qrys]

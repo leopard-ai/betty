@@ -31,15 +31,28 @@ class Office31(ImageList):
                 dslr.txt
                 webcam.txt
     """
+
     download_list = [
-        ("image_list", "image_list.zip",
-         "https://cloud.tsinghua.edu.cn/f/1f5646f39aeb4d7389b9/?dl=1"),
-        ("amazon", "amazon.tgz",
-         "https://cloud.tsinghua.edu.cn/f/05640442cd904c39ad60/?dl=1"),
-        ("dslr", "dslr.tgz",
-         "https://cloud.tsinghua.edu.cn/f/a069d889628d4b468c32/?dl=1"),
-        ("webcam", "amazon.tgz",
-         "https://cloud.tsinghua.edu.cn/f/4c4afebf51384cf1aa95/?dl=1"),
+        (
+            "image_list",
+            "image_list.zip",
+            "https://cloud.tsinghua.edu.cn/f/1f5646f39aeb4d7389b9/?dl=1",
+        ),
+        (
+            "amazon",
+            "amazon.tgz",
+            "https://cloud.tsinghua.edu.cn/f/05640442cd904c39ad60/?dl=1",
+        ),
+        (
+            "dslr",
+            "dslr.tgz",
+            "https://cloud.tsinghua.edu.cn/f/a069d889628d4b468c32/?dl=1",
+        ),
+        (
+            "webcam",
+            "amazon.tgz",
+            "https://cloud.tsinghua.edu.cn/f/4c4afebf51384cf1aa95/?dl=1",
+        ),
     ]
     image_list = {
         "A": "image_list/amazon.txt",
@@ -68,41 +81,65 @@ class Office31(ImageList):
         "DW_train": "image_list/webcam_dslr_train.txt",
     }
     CLASSES = [
-        'back_pack', 'bike', 'bike_helmet', 'bookcase', 'bottle', 'calculator',
-        'desk_chair', 'desk_lamp', 'desktop_computer', 'file_cabinet',
-        'headphones', 'keyboard', 'laptop_computer', 'letter_tray',
-        'mobile_phone', 'monitor', 'mouse', 'mug', 'paper_notebook', 'pen',
-        'phone', 'printer', 'projector', 'punchers', 'ring_binder', 'ruler',
-        'scissors', 'speaker', 'stapler', 'tape_dispenser', 'trash_can'
+        "back_pack",
+        "bike",
+        "bike_helmet",
+        "bookcase",
+        "bottle",
+        "calculator",
+        "desk_chair",
+        "desk_lamp",
+        "desktop_computer",
+        "file_cabinet",
+        "headphones",
+        "keyboard",
+        "laptop_computer",
+        "letter_tray",
+        "mobile_phone",
+        "monitor",
+        "mouse",
+        "mug",
+        "paper_notebook",
+        "pen",
+        "phone",
+        "printer",
+        "projector",
+        "punchers",
+        "ring_binder",
+        "ruler",
+        "scissors",
+        "speaker",
+        "stapler",
+        "tape_dispenser",
+        "trash_can",
     ]
 
-    def __init__(self,
-                 root: str,
-                 task: str,
-                 download: Optional[bool] = True,
-                 **kwargs):
+    def __init__(self, root: str, task: str, download: Optional[bool] = True, **kwargs):
         assert task in self.image_list
         data_list_file = os.path.join(root, self.image_list[task])
-        if task == 'A_train':
+        if task == "A_train":
             domain_idx = 0
-        elif task == 'D_train':
+        elif task == "D_train":
             domain_idx = 1
-        elif task == 'W_train':
+        elif task == "W_train":
             domain_idx = 2
         else:
             domain_idx = -1
 
         if download:
-            list(
-                map(lambda args: download_data(root, *args),
-                    self.download_list))
+            list(map(lambda args: download_data(root, *args), self.download_list))
         else:
             list(
-                map(lambda file_name, _: check_exits(root, file_name),
-                    self.download_list))
+                map(
+                    lambda file_name, _: check_exits(root, file_name),
+                    self.download_list,
+                )
+            )
 
-        super(Office31, self).__init__(root,
-                                       Office31.CLASSES,
-                                       data_list_file=data_list_file,
-                                       domain_idx=domain_idx,
-                                       **kwargs)
+        super(Office31, self).__init__(
+            root,
+            Office31.CLASSES,
+            data_list_file=data_list_file,
+            domain_idx=domain_idx,
+            **kwargs
+        )

@@ -3,7 +3,9 @@ import torch.nn as nn
 import torch
 
 
-def classifier_discrepancy(predictions1: torch.Tensor, predictions2: torch.Tensor) -> torch.Tensor:
+def classifier_discrepancy(
+    predictions1: torch.Tensor, predictions2: torch.Tensor
+) -> torch.Tensor:
     r"""The `Classifier Discrepancy` in `Maximum Classiﬁer Discrepancy for Unsupervised Domain Adaptation <https://arxiv.org/abs/1712.02560>`_.
     The classfier discrepancy between predictions :math:`p_1` and :math:`p_2` can be described as:
 
@@ -46,7 +48,9 @@ class ImageClassifierHead(nn.Module):
         - Output: :math:`(minibatch, C)` where C = `num_classes`.
     """
 
-    def __init__(self, in_features: int, num_classes: int, bottleneck_dim: Optional[int] = 1024):
+    def __init__(
+        self, in_features: int, num_classes: int, bottleneck_dim: Optional[int] = 1024
+    ):
         super(ImageClassifierHead, self).__init__()
         self.head = nn.Sequential(
             nn.Dropout(0.5),
@@ -57,7 +61,7 @@ class ImageClassifierHead(nn.Module):
             nn.Linear(bottleneck_dim, bottleneck_dim),
             nn.BatchNorm1d(bottleneck_dim),
             nn.ReLU(),
-            nn.Linear(bottleneck_dim, num_classes)
+            nn.Linear(bottleneck_dim, num_classes),
         )
 
     def forward(self, inputs: torch.Tensor) -> torch.Tensor:

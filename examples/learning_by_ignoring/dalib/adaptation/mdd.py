@@ -53,16 +53,27 @@ class MarginDisparityDiscrepancy(nn.Module):
         >>> output = loss(y_s, y_s_adv, y_t, y_t_adv)
     """
 
-    def __init__(self, margin: Optional[int] = 4, reduction: Optional[str] = 'mean'):
+    def __init__(self, margin: Optional[int] = 4, reduction: Optional[str] = "mean"):
         super(MarginDisparityDiscrepancy, self).__init__()
         self.margin = margin
         self.reduction = reduction
 
-    def forward(self, y_s: torch.Tensor, y_s_adv: torch.Tensor, y_t: torch.Tensor, y_t_adv: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self,
+        y_s: torch.Tensor,
+        y_s_adv: torch.Tensor,
+        y_t: torch.Tensor,
+        y_t_adv: torch.Tensor,
+    ) -> torch.Tensor:
         _, prediction_s = y_s.max(dim=1)
         _, prediction_t = y_t.max(dim=1)
-        return self.margin * F.cross_entropy(y_s_adv, prediction_s, reduction=self.reduction) \
-               + F.nll_loss(shift_log(1. - F.softmax(y_t_adv, dim=1)), prediction_t, reduction=self.reduction)
+        return self.margin * F.cross_entropy(
+            y_s_adv, prediction_s, reduction=self.reduction
+        ) + F.nll_loss(
+            shift_log(1.0 - F.softmax(y_t_adv, dim=1)),
+            prediction_t,
+            reduction=self.reduction,
+        )
 
 
 def shift_log(x: torch.Tensor, offset: Optional[float] = 1e-6) -> torch.Tensor:
@@ -81,7 +92,7 @@ def shift_log(x: torch.Tensor, offset: Optional[float] = 1e-6) -> torch.Tensor:
     .. note::
         Input tensor falls in [0., 1.] and the output tensor falls in [-log(offset), 0]
     """
-    return torch.log(torch.clamp(x + offset, max=1.))
+    return torch.log(torch.clamp(x + offset, max=1.0))
 
 
 class ImageClassifier(nn.Module):
@@ -117,17 +128,24 @@ class ImageClassifier(nn.Module):
 
     """
 
-    def __init__(self, backbone: nn.Module, num_classes: int,
-                 bottleneck_dim: Optional[int] = 1024, width: Optional[int] = 1024):
+    def __init__(
+        self,
+        backbone: nn.Module,
+        num_classes: int,
+        bottleneck_dim: Optional[int] = 1024,
+        width: Optional[int] = 1024,
+    ):
         super(ImageClassifier, self).__init__()
         self.backbone = backbone
-        self.grl_layer = WarmStartGradientReverseLayer(alpha=1.0, lo=0.0, hi=0.1, max_iters=1000., auto_step=False)
+        self.grl_layer = WarmStartGradientReverseLayer(
+            alpha=1.0, lo=0.0, hi=0.1, max_iters=1000.0, auto_step=False
+        )
 
         self.bottleneck = nn.Sequential(
             nn.Linear(backbone.out_features, bottleneck_dim),
             nn.BatchNorm1d(bottleneck_dim),
             nn.ReLU(),
-            nn.Dropout(0.5)
+            nn.Dropout(0.5),
         )
         self.bottleneck[0].weight.data.normal_(0, 0.005)
         self.bottleneck[0].bias.data.fill_(0.1)
@@ -137,14 +155,14 @@ class ImageClassifier(nn.Module):
             nn.Linear(bottleneck_dim, width),
             nn.ReLU(),
             nn.Dropout(0.5),
-            nn.Linear(width, num_classes)
+            nn.Linear(width, num_classes),
         )
         # The adversarial classifier head
         self.adv_head = nn.Sequential(
             nn.Linear(bottleneck_dim, width),
             nn.ReLU(),
             nn.Dropout(0.5),
-            nn.Linear(width, num_classes)
+            nn.Linear(width, num_classes),
         )
         for dep in range(2):
             self.head[dep * 3].weight.data.normal_(0, 0.01)
@@ -173,8 +191,8 @@ class ImageClassifier(nn.Module):
         """
         params = [
             {"params": self.backbone.parameters(), "lr_mult": 0.1},
-            {"params": self.bottleneck.parameters(), "lr_mult": 1.},
-            {"params": self.head.parameters(), "lr_mult": 1.},
-            {"params": self.adv_head.parameters(), "lr_mult": 1}
+            {"params": self.bottleneck.parameters(), "lr_mult": 1.0},
+            {"params": self.head.parameters(), "lr_mult": 1.0},
+            {"params": self.adv_head.parameters(), "lr_mult": 1},
         ]
         return params

@@ -6,7 +6,7 @@ import numpy as np
 from qpsolvers import solve_qp
 
 
-__all__ = ['GaussianKernel']
+__all__ = ["GaussianKernel"]
 
 
 class GaussianKernel(nn.Module):
@@ -44,8 +44,12 @@ class GaussianKernel(nn.Module):
         - Outputs: :math:`(minibatch, minibatch)`
     """
 
-    def __init__(self, sigma: Optional[float] = None, track_running_stats: Optional[bool] = True,
-                 alpha: Optional[float] = 1.):
+    def __init__(
+        self,
+        sigma: Optional[float] = None,
+        track_running_stats: Optional[bool] = True,
+        alpha: Optional[float] = 1.0,
+    ):
         super(GaussianKernel, self).__init__()
         assert track_running_stats or sigma is not None
         self.sigma_square = torch.tensor(sigma * sigma) if sigma is not None else None
@@ -64,13 +68,15 @@ class GaussianKernel(nn.Module):
 def optimal_kernel_combinations(kernel_values: List[torch.Tensor]) -> torch.Tensor:
     # use quadratic program to get optimal kernel
     num_kernel = len(kernel_values)
-    kernel_values_numpy = array([float(k.detach().cpu().data.item()) for k in kernel_values])
+    kernel_values_numpy = array(
+        [float(k.detach().cpu().data.item()) for k in kernel_values]
+    )
     if np.all(kernel_values_numpy <= 0):
         beta = solve_qp(
             P=-np.eye(num_kernel),
             q=np.zeros(num_kernel),
             A=kernel_values_numpy,
-            b=np.array([-1.]),
+            b=np.array([-1.0]),
             G=-np.eye(num_kernel),
             h=np.zeros(num_kernel),
         )
@@ -79,7 +85,7 @@ def optimal_kernel_combinations(kernel_values: List[torch.Tensor]) -> torch.Tens
             P=np.eye(num_kernel),
             q=np.zeros(num_kernel),
             A=kernel_values_numpy,
-            b=np.array([1.]),
+            b=np.array([1.0]),
             G=-np.eye(num_kernel),
             h=np.zeros(num_kernel),
         )

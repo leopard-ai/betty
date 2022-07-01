@@ -11,7 +11,9 @@ jvp_fn_mapping = {"darts": darts, "neumann": neumann, "cg": cg, "reinforce": rei
 
 
 def get_grads(loss, path, retain_graph):
-    jvp = grad_from_backward(loss, path[1].trainable_parameters(), retain_graph=retain_graph)
+    jvp = grad_from_backward(
+        loss, path[1].trainable_parameters(), retain_graph=retain_graph
+    )
     for i in range(1, len(path) - 1):
         jvp_fn_type = path[i].config.type
         assert jvp_fn_type in jvp_fn_mapping

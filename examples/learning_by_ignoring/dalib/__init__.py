@@ -1,3 +1,3 @@
-__all__ = ['adaptation', 'modules', 'vision']
+__all__ = ["adaptation", "modules", "vision"]
 
-__version__ = '0.2'
+__version__ = "0.2"

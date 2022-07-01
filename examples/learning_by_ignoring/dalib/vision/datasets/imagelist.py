@@ -25,21 +25,21 @@ class ImageList(datasets.VisionDataset):
         The first value is the relative path of an image, and the second value is the label of the corresponding image.
         If your data_list_file has different formats, please over-ride `parse_data_file`.
     """
-    def __init__(self,
-                 root: str,
-                 classes: List[str],
-                 data_list_file: str,
-                 domain_idx: int,
-                 transform: Optional[Callable] = None,
-                 target_transform: Optional[Callable] = None):
-        super().__init__(root,
-                         transform=transform,
-                         target_transform=target_transform)
+
+    def __init__(
+        self,
+        root: str,
+        classes: List[str],
+        data_list_file: str,
+        domain_idx: int,
+        transform: Optional[Callable] = None,
+        target_transform: Optional[Callable] = None,
+    ):
+        super().__init__(root, transform=transform, target_transform=target_transform)
         self.data = self.parse_data_file(data_list_file)
         self.classes = classes
         self.class_to_idx = {
-            cls: idx
-            for idx, clss in enumerate(self.classes) for cls in clss
+            cls: idx for idx, clss in enumerate(self.classes) for cls in clss
         }
         self.loader = default_loader
         self.domain_idx = domain_idx

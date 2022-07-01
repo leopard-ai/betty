@@ -339,7 +339,13 @@ class Problem:
         return loss, loss_dict
 
     def backward(
-        self, loss, params, paths, create_graph=False, retain_graph=True, allow_unused=True
+        self,
+        loss,
+        params,
+        paths,
+        create_graph=False,
+        retain_graph=True,
+        allow_unused=True,
     ):
         """
         Calculate the gradient of ``loss`` with respect to ``params`` based on a user-defined
@@ -478,7 +484,9 @@ class Problem:
         """
         loss_log = log_from_loss_dict(stats)
         if global_step is None:
-            self.logger.info(f'[Problem "{self._name}"] [Local Step {self._count}] {loss_log}')
+            self.logger.info(
+                f'[Problem "{self._name}"] [Local Step {self._count}] {loss_log}'
+            )
         else:
             self.logger.info(
                 f'[Problem "{self._name}"] [Global Step {global_step}] [Local Step {self._count}] '
@@ -500,7 +508,9 @@ class Problem:
         """
         name = problem.name
         if name not in self._problem_name_dict:
-            assert not hasattr(self, name), f"Problem already has an attribute named {name}!"
+            assert not hasattr(
+                self, name
+            ), f"Problem already has an attribute named {name}!"
             self._problem_name_dict[name] = 0
             setattr(self, name, problem)
         elif self._problem_name_dict[name] == 0:

@@ -34,32 +34,48 @@ class OfficeCaltech(DatasetFolder):
                 webcam.txt
                 caltech.txt
     """
-    directories = {
-        "A": "amazon",
-        "D": "dslr",
-        "W": "webcam",
-        "C": "caltech"
-    }
-    CLASSES = ['back_pack', 'bike', 'calculator', 'headphones', 'keyboard',
-               'laptop_computer', 'monitor', 'mouse', 'mug', 'projector']
 
-    def __init__(self, root: str, task: str, download: Optional[bool] = False, **kwargs):
+    directories = {"A": "amazon", "D": "dslr", "W": "webcam", "C": "caltech"}
+    CLASSES = [
+        "back_pack",
+        "bike",
+        "calculator",
+        "headphones",
+        "keyboard",
+        "laptop_computer",
+        "monitor",
+        "mouse",
+        "mug",
+        "projector",
+    ]
+
+    def __init__(
+        self, root: str, task: str, download: Optional[bool] = False, **kwargs
+    ):
         if download:
             for dir in self.directories.values():
                 if not os.path.exists(os.path.join(root, dir)):
-                    download_and_extract_archive(url="https://cloud.tsinghua.edu.cn/f/bc427c57459c4194baf0/?dl=1",
-                                                 download_root=os.path.join(root, 'download'),
-                                                 filename="officecaltech.tgz", remove_finished=False, extract_root=root)
+                    download_and_extract_archive(
+                        url="https://cloud.tsinghua.edu.cn/f/bc427c57459c4194baf0/?dl=1",
+                        download_root=os.path.join(root, "download"),
+                        filename="officecaltech.tgz",
+                        remove_finished=False,
+                        extract_root=root,
+                    )
                     break
         else:
             list(map(lambda dir, _: check_exits(root, dir), self.directories.values()))
 
         super(OfficeCaltech, self).__init__(
-            os.path.join(root, self.directories[task]), default_loader, extensions=IMG_EXTENSIONS, **kwargs)
+            os.path.join(root, self.directories[task]),
+            default_loader,
+            extensions=IMG_EXTENSIONS,
+            **kwargs
+        )
         self.classes = OfficeCaltech.classes
-        self.class_to_idx = {cls: idx
-                             for idx, clss in enumerate(self.classes)
-                             for cls in clss}
+        self.class_to_idx = {
+            cls: idx for idx, clss in enumerate(self.classes) for cls in clss
+        }
 
     @property
     def num_classes(self):

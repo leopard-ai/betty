@@ -21,7 +21,11 @@ def build_optimizer(model, args, betas=None, weight_decay=None, lrs=None):
     optimizer = optim.Adam(
         [
             {
-                "params": [param for name, param in model.named_parameters() if "fc" not in name],
+                "params": [
+                    param
+                    for name, param in model.named_parameters()
+                    if "fc" not in name
+                ],
                 "lr": lr1,
             },
             {"params": model.fc.parameters(), "lr": lr2},

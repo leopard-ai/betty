@@ -35,7 +35,9 @@ class DifferentiableAdam(DifferentiableOptimizerBase):
                     grad = grad + (weight_decay * p)
 
                 state["exp_avg"] = state["exp_avg"] * beta1 + (1 - beta1) * grad
-                state["exp_avg_sq"] = state["exp_avg_sq"] * beta2 + (1 - beta2) * grad * grad
+                state["exp_avg_sq"] = (
+                    state["exp_avg_sq"] * beta2 + (1 - beta2) * grad * grad
+                )
 
                 if amsgrad:
                     state["max_exp_avg_sq"] = torch.max(

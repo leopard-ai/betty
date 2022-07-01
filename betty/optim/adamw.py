@@ -33,17 +33,23 @@ class DifferentiableAdamW(DifferentiableOptimizerBase):
                 bias_correction2 = 1 - beta2 ** state["step"]
 
                 state["exp_avg"] = state["exp_avg"] * beta1 + (1 - beta1) * grad
-                state["exp_avg_sq"] = state["exp_avg_sq"] * beta2 + (1 - beta2) * grad * grad
+                state["exp_avg_sq"] = (
+                    state["exp_avg_sq"] * beta2 + (1 - beta2) * grad * grad
+                )
 
                 if amsgrad:
                     state["max_exp_avg_sq"] = torch.max(
                         state["max_exp_avg_sq"], state["exp_avg_sq"]
                     )
                     denom = (
-                        state["max_exp_avg_sq"] / math.sqrt(bias_correction2) + param_group["eps"]
+                        state["max_exp_avg_sq"] / math.sqrt(bias_correction2)
+                        + param_group["eps"]
                     )
                 else:
-                    denom = state["exp_avg_sq"] / math.sqrt(bias_correction2) + param_group["eps"]
+                    denom = (
+                        state["exp_avg_sq"] / math.sqrt(bias_correction2)
+                        + param_group["eps"]
+                    )
 
                 step_size = param_group["lr"] / bias_correction1
                 p.update = step_size * (state["exp_avg"] / denom)

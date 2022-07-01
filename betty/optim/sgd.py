@@ -25,7 +25,10 @@ class DifferentiableSGD(DifferentiableOptimizerBase):
                     grad = grad + weight_decay * p
 
                 param_state = self.state[param_idx]
-                if "momentum_buffer" not in param_state or param_state["momentum_buffer"] is None:
+                if (
+                    "momentum_buffer" not in param_state
+                    or param_state["momentum_buffer"] is None
+                ):
                     buf = param_state["momentum_buffer"] = grad
                 else:
                     buf = param_state["momentum_buffer"]

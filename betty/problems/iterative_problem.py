@@ -7,8 +7,10 @@ from ast import Import
 from copy import deepcopy
 
 import torch
+
 try:
     import functorch
+
     HAS_FUNCTORCH = True
 except ImportError:
     HAS_FUNCTORCH = False
@@ -33,7 +35,9 @@ class IterativeProblem(Problem):
         train_data_loader=None,
         device=None,
     ):
-        super().__init__(name, config, module, optimizer, scheduler, train_data_loader, device)
+        super().__init__(
+            name, config, module, optimizer, scheduler, train_data_loader, device
+        )
         # functorch installation check
         if not HAS_FUNCTORCH:
             raise ImportError(
@@ -60,7 +64,9 @@ class IterativeProblem(Problem):
         self.patch_scheduler()
 
     def optimizer_step(self, *args, **kwargs):
-        assert not self._fp16, "[!] FP16 training is not supported for IterativeProblem."
+        assert (
+            not self._fp16
+        ), "[!] FP16 training is not supported for IterativeProblem."
         if self.is_implemented("custom_optimizer_step"):
             self.params = self.custom_optimizer_step(*args, **kwargs)
         else:

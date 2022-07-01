@@ -18,7 +18,9 @@ import utils
 
 
 parser = argparse.ArgumentParser("cifar")
-parser.add_argument("--data", type=str, default="../data", help="location of the data corpus")
+parser.add_argument(
+    "--data", type=str, default="../data", help="location of the data corpus"
+)
 parser.add_argument("--batchsz", type=int, default=64, help="batch size")
 parser.add_argument("--lr", type=float, default=0.025, help="init learning rate")
 parser.add_argument("--lr_min", type=float, default=0.001, help="min learning rate")
@@ -31,12 +33,18 @@ parser.add_argument("--init_ch", type=int, default=16, help="num of init channel
 parser.add_argument("--layers", type=int, default=8, help="total number of layers")
 parser.add_argument("--cutout", action="store_true", default=False, help="use cutout")
 parser.add_argument("--cutout_len", type=int, default=16, help="cutout length")
-parser.add_argument("--drop_path_prob", type=float, default=0.3, help="drop path probability")
+parser.add_argument(
+    "--drop_path_prob", type=float, default=0.3, help="drop path probability"
+)
 parser.add_argument(
     "--train_portion", type=float, default=0.5, help="portion of training/val splitting"
 )
-parser.add_argument("--arch_lr", type=float, default=3e-4, help="learning rate for arch encoding")
-parser.add_argument("--arch_wd", type=float, default=1e-3, help="weight decay for arch encoding")
+parser.add_argument(
+    "--arch_lr", type=float, default=3e-4, help="learning rate for arch encoding"
+)
+parser.add_argument(
+    "--arch_wd", type=float, default=1e-3, help="weight decay for arch encoding"
+)
 parser.add_argument("--arch_steps", type=int, default=4, help="architecture steps")
 parser.add_argument("--unroll_steps", type=int, default=1, help="unrolling steps")
 args = parser.parse_args()
@@ -45,8 +53,12 @@ os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
 device = torch.device("cuda:0")
 
 train_transform, valid_transform = utils.data_transforms_cifar10(args)
-train_data = dset.CIFAR10(root=args.data, train=True, download=True, transform=train_transform)
-valid_data = dset.CIFAR10(root=args.data, train=False, download=True, transform=valid_transform)
+train_data = dset.CIFAR10(
+    root=args.data, train=True, download=True, transform=train_transform
+)
+valid_data = dset.CIFAR10(
+    root=args.data, train=False, download=True, transform=valid_transform
+)
 
 test_queue = torch.utils.data.DataLoader(
     valid_data, batch_size=args.batchsz, shuffle=False, pin_memory=True, num_workers=2
@@ -57,7 +69,9 @@ indices = list(range(num_train))
 split = int(np.floor(args.train_portion * num_train))
 
 train_iters = int(
-    args.epochs * (num_train * args.train_portion // args.batchsz + 1) * args.unroll_steps
+    args.epochs
+    * (num_train * args.train_portion // args.batchsz + 1)
+    * args.unroll_steps
 )
 
 
@@ -92,7 +106,10 @@ class Outer(ImplicitProblem):
 
     def configure_optimizer(self):
         optimizer = optim.Adam(
-            self.module.parameters(), lr=args.arch_lr, betas=(0.5, 0.999), weight_decay=args.arch_wd
+            self.module.parameters(),
+            lr=args.arch_lr,
+            betas=(0.5, 0.999),
+            weight_decay=args.arch_wd,
         )
         return optimizer
 
@@ -122,11 +139,16 @@ class Inner(ImplicitProblem):
 
     def configure_module(self):
         criterion = nn.CrossEntropyLoss().to(device)
-        return Network(args.init_ch, 10, args.layers, criterion, steps=args.arch_steps).to(device)
+        return Network(
+            args.init_ch, 10, args.layers, criterion, steps=args.arch_steps
+        ).to(device)
 
     def configure_optimizer(self):
         optimizer = optim.SGD(
-            self.module.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.wd
+            self.module.parameters(),
+            lr=args.lr,
+            momentum=args.momentum,
+            weight_decay=args.wd,
         )
         return optimizer
 
@@ -156,9 +178,11 @@ class NASEngine(Engine):
 
 
 outer_config = Config(retain_graph=True, first_order=True)
-inner_config = Config(type='darts', unroll_steps=args.unroll_steps)
+inner_config = Config(type="darts", unroll_steps=args.unroll_steps)
 engine_config = EngineConfig(
-    valid_step=args.report_freq * args.unroll_steps, train_iters=train_iters, roll_back=True,
+    valid_step=args.report_freq * args.unroll_steps,
+    train_iters=train_iters,
+    roll_back=True,
 )
 outer = Outer(name="outer", config=outer_config, device=device)
 inner = Inner(name="inner", config=inner_config, device=device)

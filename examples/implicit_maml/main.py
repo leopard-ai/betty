@@ -18,8 +18,12 @@ argparser = argparse.ArgumentParser()
 argparser.add_argument("--n_way", type=int, help="n way", default=5)
 argparser.add_argument("--k_spt", type=int, help="k shot for support set", default=5)
 argparser.add_argument("--k_qry", type=int, help="k shot for query set", default=15)
-argparser.add_argument("--inner_steps", type=int, help="number of inner steps", default=5)
-argparser.add_argument("--task_num", type=int, help="meta batch size, namely task num", default=16)
+argparser.add_argument(
+    "--inner_steps", type=int, help="number of inner steps", default=5
+)
+argparser.add_argument(
+    "--task_num", type=int, help="meta batch size, namely task num", default=16
+)
 argparser.add_argument("--seed", type=int, help="random seed", default=1)
 arg = argparser.parse_args()
 
@@ -112,7 +116,9 @@ class Inner(ImplicitProblem):
         return 0.5 * sum(
             [
                 (p1 - p2).pow(2).sum()
-                for p1, p2 in zip(self.trainable_parameters(), self.outer.trainable_parameters())
+                for p1, p2 in zip(
+                    self.trainable_parameters(), self.outer.trainable_parameters()
+                )
             ]
         )
 
@@ -155,7 +161,7 @@ class MAMLEngine(Engine):
     def validation(self):
         if not hasattr(self, "best_acc"):
             self.best_acc = -1
-        test_iter = len(db_test.datasets_cache['test']) // arg.task_num + 1
+        test_iter = len(db_test.datasets_cache["test"]) // arg.task_num + 1
         test_loader = iter(db_test)
         test_net = Net(arg.n_way).to(device)
         test_optim = optim.SGD(test_net.parameters(), lr=0.1)
@@ -200,7 +206,9 @@ parent = Outer(
     config=parent_config,
     device=device,
 )
-children = [Inner(name="inner", config=child_config, device=device) for _ in range(arg.task_num)]
+children = [
+    Inner(name="inner", config=child_config, device=device) for _ in range(arg.task_num)
+]
 env = MAMLEnv()
 problems = children + [parent]
 u2l = {parent: children}
@@ -208,5 +216,7 @@ l2u = {}
 for c in children:
     l2u[c] = [parent]
 dependencies = {"u2l": u2l, "l2u": l2u}
-engine = MAMLEngine(config=engine_config, problems=problems, dependencies=dependencies, env=env)
+engine = MAMLEngine(
+    config=engine_config, problems=problems, dependencies=dependencies, env=env
+)
 engine.run()

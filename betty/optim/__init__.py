@@ -9,7 +9,7 @@ from .adamw import DifferentiableAdamW
 optimizer_mapping = {
     torch.optim.SGD: DifferentiableSGD,
     torch.optim.Adam: DifferentiableAdam,
-    torch.optim.AdamW: DifferentiableAdamW
+    torch.optim.AdamW: DifferentiableAdamW,
 }
 
 
@@ -50,11 +50,11 @@ def patch_scheduler(old_scheduler, new_optimizer):
     sig = inspect.signature(old_scheduler.__class__.__init__)
     for param in sig.parameters:
         key = param
-        if key == 'self':
+        if key == "self":
             continue
-        elif key == 'optimizer':
+        elif key == "optimizer":
             kwargs[key] = new_optimizer
-        elif key == 'last_epoch':
+        elif key == "last_epoch":
             kwargs[key] = getattr(old_scheduler, key) - 1
         else:
             value = getattr(old_scheduler, key)

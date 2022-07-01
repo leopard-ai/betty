@@ -32,7 +32,9 @@ def neumann(vector, curr, prev):
     in_loss = curr.training_step_exec(curr.cur_batch)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        in_grad = grad_from_backward(in_loss, curr.trainable_parameters(), create_graph=True)
+        in_grad = grad_from_backward(
+            in_loss, curr.trainable_parameters(), create_graph=True
+        )
     v2 = approx_inverse_hvp(
         vector,
         in_grad,
@@ -40,7 +42,9 @@ def neumann(vector, curr, prev):
         iterations=config.neumann_iterations,
         alpha=config.neumann_alpha,
     )
-    implicit_grad = torch.autograd.grad(in_grad, prev.trainable_parameters(), grad_outputs=v2)
+    implicit_grad = torch.autograd.grad(
+        in_grad, prev.trainable_parameters(), grad_outputs=v2
+    )
     implicit_grad = [neg_with_none(ig) for ig in implicit_grad]
 
     return implicit_grad

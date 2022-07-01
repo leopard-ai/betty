@@ -4,7 +4,11 @@ from .logger_wandb import WandBLogger
 from .logger_base import get_logger, LoggerBase
 
 
-logger_mapping = {"tensorboard": TensorBoardLogger, "wandb": WandBLogger, "none": LoggerBase}
+logger_mapping = {
+    "tensorboard": TensorBoardLogger,
+    "wandb": WandBLogger,
+    "none": LoggerBase,
+}
 
 
 def type_check(logger_type):
