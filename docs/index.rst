@@ -45,7 +45,7 @@ Getting Started
 ---------------
 
 - :doc:`Installation <quickstart/installation>`
-- :doc:`Tutorial <tutorial/basic/basic>`
+- :doc:`Tutorials <tutorial/basic/basic>`
 
 .. toctree::
    :caption: Get Started
@@ -56,7 +56,7 @@ Getting Started
    Major Concepts<quickstart/concept.rst>
 
 .. toctree::
-   :caption: Tutorial
+   :caption: Tutorials
    :maxdepth: 2
    :hidden:
 
