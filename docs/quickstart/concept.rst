@@ -17,7 +17,6 @@ sub-chapters:
   architecture of Betty and how it executes multilevel optimization.
 
 .. toctree::
-   :hidden:
    :maxdepth: 1
 
    Multilevel Optimization<concept_mlo.rst>

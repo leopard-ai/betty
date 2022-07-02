@@ -29,8 +29,8 @@ performed given :math:`\lambda, w,\text{ and } v`.
     def myhypergrad(vector, curr, prev):
         """
         vector: corresponds to v
-        curr: corresponds to the upper-level problem whose parameter is \lambda
-        prev: corresponds to the lower-level problem whose parameter is w
+        curr: corresponds to the lower-level problem whose parameter is w
+        prev: corresponds to the upper-level problem whose parameter is \lambda
         """
         ...
         return matrix_vecotr_multiplication_with_best_response_Jacobian
