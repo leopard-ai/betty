@@ -85,7 +85,7 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'pt_lightning_sphinx_theme'
+html_theme = "pt_lightning_sphinx_theme"
 html_theme_path = ["../../lightning_sphinx_theme"]
 html_title = "Betty"
 
