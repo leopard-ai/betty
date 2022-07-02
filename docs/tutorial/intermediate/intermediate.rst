@@ -8,7 +8,6 @@ Intermediate 1: :doc:`Custom hypergradient <intermediate_hypergradient>`
 Intermediate 2: :doc:`Distributed training <intermediate_distributed>` (Coming soon)
 
 .. toctree::
-   :hidden:
    :maxdepth: 1
 
    Custom Hypergradient<intermediate_hypergradient.rst>

@@ -14,7 +14,6 @@ Basic 3: :doc:`Enable logging <basic_logging>`
 Basic 4: :doc:`Reduce GPU memory footprint <basic_memory>`
 
 .. toctree::
-   :hidden:
    :maxdepth: 1
 
    Quick Start<basic_start.rst>

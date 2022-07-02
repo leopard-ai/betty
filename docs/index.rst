@@ -49,7 +49,8 @@ Getting Started
 
 .. toctree::
    :caption: Get Started
-   :maxdepth: 2
+   :maxdepth: 1
+   :titlesonly:
 
    Installation<quickstart/installation.rst>
    Major Concepts<quickstart/concept.rst>
@@ -73,10 +74,11 @@ Getting Started
 
 .. toctree::
    :caption: Examples
-   :maxdepth: 2
+   :maxdepth: 1
+   :titlesonly:
 
-   Neural Architecture Search<examples/neural_architecture_search.rst>
    Data Reweighting<examples/data_reweighting.rst>
+   Neural Architecture Search<examples/neural_architecture_search.rst>
 
 
 
