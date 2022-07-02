@@ -3,9 +3,8 @@ Installation
 
 Betty can be installed via `pip <https://pypi.org/project/pip/>`_. Betty's dependencies include:
 
-- Ubuntu 16.04 (or later) or MacOS
-- Python 3.7 - 3.10
-- PyTorch 1.5 - 1.10
+- Python 3.6 - 3.9
+- PyTorch 1.6 - 1.12
 
 Install with pip
 ~~~~~~~~~~~~~~~~
@@ -18,7 +17,7 @@ Verifying Installation
 ~~~~~~~~~~~~~~~~~~~~~~
 
 You can verify the installation by running
-`test.py <https://github.com/sangkeun00/betty/blob/main/examples/logistic_regression_hpo/test.py>`_.
+`test.py <https://github.com/leopard-ai/betty/blob/main/examples/logistic_regression_hpo/test.py>`_.
 
 .. code::
 
