@@ -1,0 +1,779 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-PQBQ3CV');
+  </script>
+  <!-- End Google Tag Manager -->
+
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Quick Start &mdash; Betty</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/tabs.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Validation" href="basic_validation.html" />
+    <link rel="prev" title="Basic" href="basic.html" />
+  <!-- Google Analytics -->
+  
+  <!-- End Google Analytics -->
+  
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/UCity/UCity-Light.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/UCity/UCity-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/UCity/UCity-Semibold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/Inconsolata/Inconsolata.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <script defer src="https://use.fontawesome.com/releases/v6.1.1/js/all.js" integrity="sha384-xBXmu0dk1bEoiwd71wOonQLyH+VpgR1XcDH3rtxrLww5ajNTuMvBdL5SOiFZnNdp" crossorigin="anonymous"></script>
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
+      <!--  <img class="call-to-action-img" src="../../_static/images/logo-lightning-icon.png"/> -->
+      </a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://leopard-ai.github.io/betty">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/leopard-ai/betty">GitHub</a>
+          </li>
+
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="pytorch-body">
+
+   
+
+    
+
+    <div class="table-of-contents-link-wrapper">
+      <span>Table of Contents</span>
+      <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+    </div>
+
+    <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+      <div class="pytorch-side-scroll">
+        <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          <div class="pytorch-left-menu-search">
+            
+
+            
+              
+              
+            
+
+            
+
+
+  
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+          </div>
+
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Get Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/concept.html">Major Concepts</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="basic.html">Basic</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_validation.html">Add Validation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_logging.html">Add Logging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_memory.html">Memory Optimization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../intermediate/intermediate.html">Intermediate</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../betty/betty.engine.html">betty.engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../betty/betty.problems.html">betty.problems</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../betty/betty.hypergradient.html">betty.hypergradient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../betty/betty.optim.html">betty.optim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../betty/betty.logging.html">betty.logging</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/data_reweighting.html">Data Reweighting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/neural_architecture_search.html">Neural Architecture Search</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <div class="pytorch-container">
+      <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+        <div class="pytorch-breadcrumbs-wrapper">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../../index.html">
+          
+            Docs
+          
+        </a> &gt;
+      </li>
+
+        
+          <li><a href="basic.html">Basic</a> &gt;</li>
+        
+      <li>Quick Start</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/tutorial/basic/basic_start.rst.txt" rel="nofollow"><img src="../../_static/images/view-page-source-icon.svg"></a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+        </div>
+
+        <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+          Shortcuts
+        </div>
+      </div>
+
+      <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+        <div class="pytorch-content-left">
+
+        
+          
+          <div class="rst-content">
+          
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+             <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+              
+  <section id="quick-start">
+<h1>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h1>
+<p>Throughout our tutorials, we will use <strong>Data Reweighting for Long-Tailed Image
+Classification</strong> as our running example.  The basic context is that we aim to mitigate
+a class imbalance problem (or long-tailed distribution problem) by re-assigning
+higher/lower weights to data from rare/common classes. In particular, <a class="reference external" href="https://arxiv.org/abs/1902.07379">Meta-Weight-Net
+(MWN)</a> formulates data reweighting as bilevel
+optimization as follows:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}w^*=\underset{w}{\mathrm{argmin}}\;\mathcal{L}_{reweight}(\theta^*(w))\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\;\;\,\text{Reweighting}\\
+\text{s.t. }\theta^*(w)=\underset{\theta}{\mathrm{argmin}}\;\frac{1}{N}\sum_{i=1}^n\mathcal{R}(L^i_{class}(\theta);w)\cdot L^i_{class}(\theta)\quad\quad\quad\text{Classification}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\theta\)</span> denotes the classifier network’s parameters, <span class="math notranslate nohighlight">\(L_{class}^i\)</span> is
+the classification loss (cross-entropy) for the <span class="math notranslate nohighlight">\(i\)</span>-th training sample,
+<span class="math notranslate nohighlight">\(\mathcal{L}_{reweight}\)</span> is the loss for the reweighting level (cross-entropy),
+and <span class="math notranslate nohighlight">\(w\)</span> denotes the parameters for MWN <span class="math notranslate nohighlight">\(\mathcal{R}\)</span>, which reweights each
+training sample given training loss <span class="math notranslate nohighlight">\(L^i_{class}\)</span>.</p>
+<p>Now that we have a problem formulation, we need to (1) define each level problem with
+the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class, and (2) define dependencies between problems with the <code class="docutils literal notranslate"><span class="pre">Engine</span></code>
+class.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<section id="basic-setup">
+<h2>Basic setup<a class="headerlink" href="#basic-setup" title="Permalink to this headline">¶</a></h2>
+<p>Before diving into MLO, we do basic setup such as importing dependencies and
+constructing the imbalanced (or long-tailed) dataset. Here, we set the data imbalance
+factor to 100, meaning that the most common class has 50 times more data than the least
+common class. This part is not directly relevant to MLO, so users can simply copy and
+paste the following code.</p>
+<details>
+<summary><a>Preparation code</a></summary><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># import dependencies</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+<span class="kn">import</span> <span class="nn">torch.optim</span> <span class="k">as</span> <span class="nn">optim</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">torchvision</span> <span class="kn">import</span> <span class="n">transforms</span>
+<span class="kn">from</span> <span class="nn">torchvision.datasets</span> <span class="kn">import</span> <span class="n">MNIST</span>
+
+
+<span class="n">device</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
+
+<span class="c1"># Construct imbalanced (or long-tailed) dataset</span>
+<span class="k">def</span> <span class="nf">build_dataset</span><span class="p">(</span><span class="n">reweight_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">imbalanced_factor</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="n">transform</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">((</span><span class="mf">0.1307</span><span class="p">,),</span> <span class="p">(</span><span class="mf">0.3081</span><span class="p">,))]</span>
+    <span class="p">)</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">MNIST</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s2">&quot;./data&quot;</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">)</span>
+
+    <span class="n">num_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">classes</span><span class="p">)</span>
+    <span class="n">num_meta</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">reweight_size</span> <span class="o">/</span> <span class="n">num_classes</span><span class="p">)</span>
+
+    <span class="n">index_to_meta</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">index_to_train</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">imbalanced_num_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">sample_num</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">targets</span><span class="p">)</span> <span class="o">-</span> <span class="n">reweight_size</span><span class="p">)</span> <span class="o">/</span> <span class="n">num_classes</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">class_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>
+        <span class="n">imbalanced_num</span> <span class="o">=</span> <span class="n">sample_num</span> <span class="o">/</span> <span class="p">(</span><span class="n">imbalanced_factor</span> <span class="o">**</span> <span class="p">(</span><span class="n">class_index</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_classes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">imbalanced_num_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">imbalanced_num</span><span class="p">))</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">imbalanced_num_list</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">class_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>
+        <span class="n">index_to_class</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">index</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">targets</span><span class="p">)</span> <span class="k">if</span> <span class="n">label</span> <span class="o">==</span> <span class="n">class_index</span>
+        <span class="p">]</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">index_to_class</span><span class="p">)</span>
+        <span class="n">index_to_meta</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">index_to_class</span><span class="p">[:</span><span class="n">num_meta</span><span class="p">])</span>
+        <span class="n">index_to_class_for_train</span> <span class="o">=</span> <span class="n">index_to_class</span><span class="p">[</span><span class="n">num_meta</span><span class="p">:]</span>
+
+        <span class="n">index_to_class_for_train</span> <span class="o">=</span> <span class="n">index_to_class_for_train</span><span class="p">[:</span> <span class="n">imbalanced_num_list</span><span class="p">[</span><span class="n">class_index</span><span class="p">]]</span>
+
+        <span class="n">index_to_train</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">index_to_class_for_train</span><span class="p">)</span>
+
+    <span class="n">reweight_dataset</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+    <span class="n">dataset</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">index_to_train</span><span class="p">]</span>
+    <span class="n">dataset</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">targets</span><span class="p">)[</span><span class="n">index_to_train</span><span class="p">])</span>
+    <span class="n">reweight_dataset</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">reweight_dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">index_to_meta</span><span class="p">]</span>
+    <span class="n">reweight_dataset</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">reweight_dataset</span><span class="o">.</span><span class="n">targets</span><span class="p">)[</span><span class="n">index_to_meta</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">reweight_dataset</span>
+
+<span class="n">classifier_dataset</span><span class="p">,</span> <span class="n">reweight_dataset</span> <span class="o">=</span> <span class="n">build_dataset</span><span class="p">(</span><span class="n">imbalanced_factor</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</details><div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="problem">
+<h2>Problem<a class="headerlink" href="#problem" title="Permalink to this headline">¶</a></h2>
+<p>In this example, we have a MLO program consisting of two problem levels: <em>upper</em> and
+<em>lower</em>. We respectively refer to these two problems as <strong>Reweight</strong> and <strong>Classifier</strong>,
+and create <code class="docutils literal notranslate"><span class="pre">Problem</span></code> classes for each of them.  As introduced in the <a class="reference internal" href="../../quickstart/concept_software.html"><span class="doc">Software
+Design</span></a> chapter, each problem is defined by (1)
+module, (2) optimizer, (3) data loader, (4) loss function, (5) training configuration,
+and (6) other optional components (e.g. learning rate scheduler). Everything except for
+(4) loss function can be provided through the class constructor, and (4) can be provided
+via the <code class="docutils literal notranslate"><span class="pre">training_step</span></code> method. In the following subsections, we provide a
+step-by-step guide for implementing each of these components in the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class,
+for both the lower-level and upper-level problems.</p>
+<section id="lower-level-problem-classifier">
+<h3>Lower-level Problem (Classifier)<a class="headerlink" href="#lower-level-problem-classifier" title="Permalink to this headline">¶</a></h3>
+<p>In our data reweighting example, the lower-level problem corresponds to the long-tailed
+MNIST image classification task. The data loader code is adopted from <a class="reference external" href="https://github.com/ShiYunyi/Meta-Weight-Net_Code-Optimization/blob/main/noisy_long_tail_CIFAR.py">here</a>.
+We can respectively define the module, optimizer, data loader, loss function, and
+training configuration as follows.</p>
+<p><strong>Module, Optimizer, Data Loader, (optional) Scheduler</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Module</span>
+<span class="n">classifier_module</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+    <span class="n">nn</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">784</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Optimizer</span>
+<span class="n">classifier_optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">classifier_module</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+
+<span class="c1"># Data Loader</span>
+<span class="n">classifier_dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
+    <span class="n">classifier_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">pin_memory</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="c1"># LR Scheduler</span>
+<span class="n">classifier_scheduler</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">MultiStepLR</span><span class="p">(</span>
+    <span class="n">classifier_optimizer</span><span class="p">,</span> <span class="n">milestones</span><span class="o">=</span><span class="p">[</span><span class="mi">1500</span><span class="p">,</span> <span class="mi">2500</span><span class="p">],</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.1</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Loss Function</strong></p>
+<p>Unlike other components, the loss function should be directly implemented in the
+<code class="docutils literal notranslate"><span class="pre">Problem</span></code> class via the <code class="docutils literal notranslate"><span class="pre">training_step</span></code> method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">betty.problems</span> <span class="kn">import</span> <span class="n">ImplicitProblem</span>
+
+<span class="k">class</span> <span class="nc">Classifier</span><span class="p">(</span><span class="n">ImplicitProblem</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+        <span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">batch</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="n">loss_vector</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">labels</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span> <span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Reweight</span>
+        <span class="n">loss_vector_reshape</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">loss_vector</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reweight</span><span class="p">(</span><span class="n">loss_vector_reshape</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">weight</span> <span class="o">*</span> <span class="n">loss_vector_reshape</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">loss</span>
+</pre></div>
+</div>
+<p>In this example, we aim to overcome a long-tailed distribution by reweighting each data
+sample (e.g. increasing weights for data from rare classes while decreasing weights for
+data from common classes). This is achieved by interacting with the upper-level
+<strong>Reweight</strong> problem. The Engine class will provide an access to the <strong>Reweight</strong>
+problem via its name for the <strong>Classifier</strong> problem (i.e. in the line <code class="code docutils literal notranslate"><span class="pre">weight</span> <span class="pre">=</span>
+<span class="pre">self.reweight(loss_vector_reshape.detach())</span></code>). Thus, users should be aware of names of
+other problems, with which the current problem interacts, when writing the loss
+function.</p>
+<p><strong>Training Configuration</strong></p>
+<p>Training configuration can be provided by a Python dataclass <code class="docutils literal notranslate"><span class="pre">Config</span></code>. Since
+<strong>Classifier</strong> is the lower-level problem, we only need to specify how many steps we
+want to unroll before updating the upper-level <strong>Reweight</strong> problem. We choose the
+simplest one-step unrolling for our example.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">betty.configs</span> <span class="kn">import</span> <span class="n">Config</span>
+
+<span class="n">classifier_config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="n">unroll_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Problem Instantiation</strong></p>
+<p>Now that we have all the components to define the <strong>Classifier</strong> problem, we can
+instantiate the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class.  We use ‘classifier’ as the <code class="docutils literal notranslate"><span class="pre">name</span></code> for this
+problem.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">classifier</span> <span class="o">=</span> <span class="n">Classifier</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;classifier&#39;</span><span class="p">,</span>
+    <span class="n">module</span><span class="o">=</span><span class="n">classifier_module</span><span class="p">,</span>
+    <span class="n">optimizer</span><span class="o">=</span><span class="n">classifier_optimizer</span><span class="p">,</span>
+    <span class="n">scheduler</span><span class="o">=</span><span class="n">classifier_scheduler</span><span class="p">,</span>
+    <span class="n">train_data_loader</span><span class="o">=</span><span class="n">classifier_dataloader</span><span class="p">,</span>
+    <span class="n">config</span><span class="o">=</span><span class="n">classifier_config</span><span class="p">,</span>
+    <span class="n">device</span><span class="o">=</span><span class="n">device</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="upper-level-problem-reweight">
+<h3>Upper-level Problem (Reweight)<a class="headerlink" href="#upper-level-problem-reweight" title="Permalink to this headline">¶</a></h3>
+<p>While the lower-level problem is a classification problem, the upper-level problem is a
+reweighting problem. Specifically, <a class="reference external" href="https://arxiv.org/abs/1902.07379">Meta-Weight-Net (MWN)</a> proposes to reweight each data sample using an MLP
+with a single hidden layer, which takes a loss value as an input and outputs an
+importance weight.</p>
+<p><strong>Module, Optimizer, Data Loader</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Module</span>
+<span class="n">reweight_module</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+    <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sigmoid</span><span class="p">()</span>
+<span class="p">)</span>
+
+<span class="c1"># Optimizer</span>
+<span class="n">reweight_optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">reweight_module</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+
+<span class="c1"># Data Loader</span>
+<span class="n">reweight_dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
+    <span class="n">reweight_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">pin_memory</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Loss Function</strong></p>
+<p>The upper-level reweight problem aims to optimize the loss value on the <em>balanced</em>
+validation dataset (i.e. <code class="code docutils literal notranslate"><span class="pre">reweight_dataloader</span></code>) with respect to the <em>optimal</em>
+parameters of the <strong>Classifier</strong> problem. As before, users can access the inner-level
+classifier problem via its name (i.e. <code class="code docutils literal notranslate"><span class="pre">self.classifier</span></code>).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Reweight</span><span class="p">(</span><span class="n">ImplicitProblem</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+        <span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">batch</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">labels</span><span class="o">.</span><span class="n">long</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Reweight Loss:&#39;</span><span class="p">,</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">loss</span>
+</pre></div>
+</div>
+<p><strong>Training Configuration</strong></p>
+<p>MWN parameters don’t affect the loss function of the <strong>Reweight</strong> problem directly, but
+only indirectly through the optimal parameters of the classifier problem. Thus, gradient
+for MWN should be calculated using hypergradients. In our example, we use <em>implicit
+differentiation with finite difference (a.k.a. DARTS)</em> to calculate gradients for MWN
+parameters. This can be easily specified with
+<code class="docutils literal notranslate"><span class="pre">Config</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">reweight_config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;darts&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Problem Instantiation</strong></p>
+<p>We can now instantiate the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class for the <strong>Reweight</strong> problem. We use
+‘reweight’ as the <code class="docutils literal notranslate"><span class="pre">name</span></code> for this problem.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">reweight</span> <span class="o">=</span> <span class="n">Reweight</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;reweight&#39;</span><span class="p">,</span>
+    <span class="n">module</span><span class="o">=</span><span class="n">reweight_module</span><span class="p">,</span>
+    <span class="n">optimizer</span><span class="o">=</span><span class="n">reweight_optimizer</span><span class="p">,</span>
+    <span class="n">train_data_loader</span><span class="o">=</span><span class="n">reweight_dataloader</span><span class="p">,</span>
+    <span class="n">config</span><span class="o">=</span><span class="n">reweight_config</span><span class="p">,</span>
+    <span class="n">device</span><span class="o">=</span><span class="n">device</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+<section id="engine">
+<h2>Engine<a class="headerlink" href="#engine" title="Permalink to this headline">¶</a></h2>
+<p>Recalling the <a class="reference internal" href="../../quickstart/concept_software.html"><span class="doc">Software Design</span></a> chapter,
+the <code class="docutils literal notranslate"><span class="pre">Engine</span></code> class handles problem dependencies and execution of multilevel
+optimization. Let’s again take a step-by-step dive into each of these components.</p>
+<p><strong>Problem Dependencies</strong></p>
+<p>The dependency between problems are split into two categories — upper-to-lower (<code class="docutils literal notranslate"><span class="pre">u2l</span></code>)
+and lower-to-upper(<code class="docutils literal notranslate"><span class="pre">l2u</span></code>) — both of which are defined using a Python dictionary. In
+our example, <code class="docutils literal notranslate"><span class="pre">reweight</span></code> is the upper-level problem and <code class="docutils literal notranslate"><span class="pre">classifier</span></code> is the
+lower-level problem.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">u2l</span> <span class="o">=</span> <span class="p">{</span><span class="n">reweight</span><span class="p">:</span> <span class="p">[</span><span class="n">classifier</span><span class="p">]}</span>
+<span class="n">l2u</span> <span class="o">=</span> <span class="p">{</span><span class="n">classifier</span><span class="p">:</span> <span class="p">[</span><span class="n">reweight</span><span class="p">]}</span>
+<span class="n">dependencies</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;l2u&#39;</span><span class="p">:</span> <span class="n">l2u</span><span class="p">,</span> <span class="s1">&#39;u2l&#39;</span><span class="p">:</span> <span class="n">u2l</span><span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Engine Instantiation</strong></p>
+<p>To instantiate the <code class="docutils literal notranslate"><span class="pre">Engine</span></code> class, we need to provide all involved problems as well as
+the Engine configuration. Since we already defined all problems, we can simply combine
+them in a Python list. In addition, we perform our multilevel optimization for 3,000
+iterations, which can be specified in <code class="docutils literal notranslate"><span class="pre">EngineConfig</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">betty.configs</span> <span class="kn">import</span> <span class="n">EngineConfig</span>
+<span class="kn">from</span> <span class="nn">betty.engine</span> <span class="kn">import</span> <span class="n">Engine</span>
+
+<span class="n">problems</span> <span class="o">=</span> <span class="p">[</span><span class="n">reweight</span><span class="p">,</span> <span class="n">classifier</span><span class="p">]</span>
+<span class="n">engine_config</span> <span class="o">=</span> <span class="n">EngineConfig</span><span class="p">(</span><span class="n">train_iters</span><span class="o">=</span><span class="mi">3000</span><span class="p">)</span>
+<span class="n">engine</span> <span class="o">=</span> <span class="n">Engine</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">engine_config</span><span class="p">,</span> <span class="n">problems</span><span class="o">=</span><span class="n">problems</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="n">dependencies</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Execution of Multilevel Optimization</strong></p>
+<p>Finally, multilevel optimization can be excuted by running <code class="docutils literal notranslate"><span class="pre">engine.run()</span></code>, which calls
+the <code class="docutils literal notranslate"><span class="pre">step</span></code> method of the lowermost problem (i.e. <strong>Classifier</strong>), which corresponds to a
+single step of gradient descent. After unrolling gradient descent for the lower-most
+problem for a pre-determined number of steps (<code class="docutils literal notranslate"><span class="pre">unroll_steps</span></code> attribute in
+<code class="docutils literal notranslate"><span class="pre">classifier_config</span></code>), the <code class="docutils literal notranslate"><span class="pre">step</span></code> method of <strong>Classifier</strong> will automatically call
+the <code class="docutils literal notranslate"><span class="pre">step</span></code> method of <strong>Reweight</strong> according to the provided dependencies.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">engine</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="results">
+<h2>Results<a class="headerlink" href="#results" title="Permalink to this headline">¶</a></h2>
+<p>Once the training is done, we perform the validation procedure <em>manually</em> as below:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">transform</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">((</span><span class="mf">0.1307</span><span class="p">,),</span> <span class="p">(</span><span class="mf">0.3081</span><span class="p">,))])</span>
+<span class="n">valid_dataset</span> <span class="o">=</span> <span class="n">MNIST</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s2">&quot;./data&quot;</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">)</span>
+<span class="n">valid_dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">valid_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">pin_memory</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">valid_dataloader</span><span class="p">:</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">target</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">classifier</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">correct</span> <span class="o">+=</span> <span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+    <span class="n">total</span> <span class="o">+=</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">acc</span> <span class="o">=</span> <span class="n">correct</span> <span class="o">/</span> <span class="n">total</span> <span class="o">*</span> <span class="mi">100</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Imbalanced Classification Accuracy:&quot;</span><span class="p">,</span> <span class="n">acc</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The full code of the above example can be found in this
+<a class="reference external" href="https://github.com/sangkeun00/betty/blob/main/tutorial/1_quick_start.py">link</a>.
+If everything runs correctly, you should see something like below on your screen:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mi">48</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Initializing</span> <span class="n">Multilevel</span> <span class="n">Optimization</span><span class="o">...</span>
+
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mi">51</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="o">***</span> <span class="n">Problem</span> <span class="n">Information</span> <span class="o">***</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mi">51</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Name</span><span class="p">:</span> <span class="n">reweight</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mi">51</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Uppers</span><span class="p">:</span> <span class="p">[]</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mi">51</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Lowers</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;classifier&#39;</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mi">51</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Paths</span><span class="p">:</span> <span class="p">[[</span><span class="s1">&#39;reweight&#39;</span><span class="p">,</span> <span class="s1">&#39;classifier&#39;</span><span class="p">,</span> <span class="s1">&#39;reweight&#39;</span><span class="p">]]</span>
+
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mi">51</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="o">***</span> <span class="n">Problem</span> <span class="n">Information</span> <span class="o">***</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mi">51</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Name</span><span class="p">:</span> <span class="n">classifier</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mi">51</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Uppers</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;reweight&#39;</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mi">51</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Lowers</span><span class="p">:</span> <span class="p">[]</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mi">51</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Paths</span><span class="p">:</span> <span class="p">[]</span>
+
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">01</span><span class="p">:</span><span class="mi">51</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Time</span> <span class="n">spent</span> <span class="n">on</span> <span class="n">initialization</span><span class="p">:</span> <span class="mf">3.124</span> <span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+<span class="n">Classification</span> <span class="n">Accuracy</span><span class="p">:</span> <span class="mf">95.41</span>
+</pre></div>
+</div>
+<p>Finally, we compare our data reweighting result with the baseline without reweighting
+in the below table:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"></th>
+<th class="head"><p>Test Accuracy</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Baseline</p></td>
+<td><p>91.82%</p></td>
+</tr>
+<tr class="row-odd"><td><p>Reweighting</p></td>
+<td><p>95.41%</p></td>
+</tr>
+</tbody>
+</table>
+<p>The above result shows that long-tailed image classification can clearly benefit from
+data reweighting!</p>
+<p>Happy Multilevel Optimization!</p>
+</section>
+</section>
+
+
+             </article>
+             
+            </div>
+            <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="basic_validation.html" class="btn btn-neutral float-right" title="Validation" accesskey="n" rel="next">Next <img src="../../_static/images/chevron-right-orange.svg" class="next-page"></a>
+      
+      
+        <a href="basic.html" class="btn btn-neutral" title="Basic" accesskey="p" rel="prev"><img src="../../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+      
+    </div>
+  
+
+  
+
+    <hr>
+
+  
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, sangkeun00.
+
+    </p>
+  </div>
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+      </div>
+     
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">Quick Start</a><ul>
+<li><a class="reference internal" href="#basic-setup">Basic setup</a></li>
+<li><a class="reference internal" href="#problem">Problem</a><ul>
+<li><a class="reference internal" href="#lower-level-problem-classifier">Lower-level Problem (Classifier)</a></li>
+<li><a class="reference internal" href="#upper-level-problem-reweight">Upper-level Problem (Reweight)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#engine">Engine</a></li>
+<li><a class="reference internal" href="#results">Results</a></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  
+
+
+  
+
+     
+       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+         <script src="../../_static/jquery.js"></script>
+         <script src="../../_static/underscore.js"></script>
+         <script src="../../_static/doctools.js"></script>
+         <script src="../../_static/tabs.js"></script>
+         <script src="../../_static/design-tabs.js"></script>
+         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+     
+
+  
+
+  <script type="text/javascript" src="../../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+    <div class="container">
+      <div class="row">
+      </div>
+    </div>
+  </div>
+
+  <div class="cookie-banner-wrapper">
+  <div class="container">
+    <p class="gdpr-notice">To analyze traffic and optimize your experience, we serve cookies on this site. By clicking or navigating, you agree to allow our usage of cookies. Read PyTorch Lightning's <a href="https://pytorchlightning.ai/privacy-policy">Privacy Policy</a>.</p>
+    <img class="close-button" src="../../_static/images/pytorch-x.svg">
+  </div>
+</div>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://leopard-ai.github.io/betty">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/leopard-ai/betty">Github</a>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function(e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PQBQ3CV"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+ </body>
+</html>

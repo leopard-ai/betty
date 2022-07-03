@@ -1,0 +1,542 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-PQBQ3CV');
+  </script>
+  <!-- End Google Tag Manager -->
+
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Multilevel Optimization &mdash; Betty</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Software Design" href="concept_software.html" />
+    <link rel="prev" title="Major Concepts" href="concept.html" />
+  <!-- Google Analytics -->
+  
+  <!-- End Google Analytics -->
+  
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Light.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Semibold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/Inconsolata/Inconsolata.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <script defer src="https://use.fontawesome.com/releases/v6.1.1/js/all.js" integrity="sha384-xBXmu0dk1bEoiwd71wOonQLyH+VpgR1XcDH3rtxrLww5ajNTuMvBdL5SOiFZnNdp" crossorigin="anonymous"></script>
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
+      <!--  <img class="call-to-action-img" src="../_static/images/logo-lightning-icon.png"/> -->
+      </a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://leopard-ai.github.io/betty">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/leopard-ai/betty">GitHub</a>
+          </li>
+
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="pytorch-body">
+
+   
+
+    
+
+    <div class="table-of-contents-link-wrapper">
+      <span>Table of Contents</span>
+      <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+    </div>
+
+    <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+      <div class="pytorch-side-scroll">
+        <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          <div class="pytorch-left-menu-search">
+            
+
+            
+              
+              
+            
+
+            
+
+
+  
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+          </div>
+
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Get Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="concept.html">Major Concepts</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Multilevel Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concept_software.html">Software Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concept_autodiff.html">Autodiff (Advanced)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concept_architecture.html">Architecture (Advanced)</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/basic/basic.html">Basic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/intermediate/intermediate.html">Intermediate</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.engine.html">betty.engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.problems.html">betty.problems</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.hypergradient.html">betty.hypergradient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.optim.html">betty.optim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.logging.html">betty.logging</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/data_reweighting.html">Data Reweighting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/neural_architecture_search.html">Neural Architecture Search</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <div class="pytorch-container">
+      <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+        <div class="pytorch-breadcrumbs-wrapper">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../index.html">
+          
+            Docs
+          
+        </a> &gt;
+      </li>
+
+        
+          <li><a href="concept.html">Major Concepts</a> &gt;</li>
+        
+      <li>Multilevel Optimization</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/quickstart/concept_mlo.rst.txt" rel="nofollow"><img src="../_static/images/view-page-source-icon.svg"></a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+        </div>
+
+        <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+          Shortcuts
+        </div>
+      </div>
+
+      <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+        <div class="pytorch-content-left">
+
+        
+          
+          <div class="rst-content">
+          
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+             <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+              
+  <section id="multilevel-optimization">
+<h1>Multilevel Optimization<a class="headerlink" href="#multilevel-optimization" title="Permalink to this headline">¶</a></h1>
+<p>To introduce multilevel optimization, we first define an important concept known as a
+<em>constrained problem</em>.</p>
+<p><strong>Definition 1.</strong> An optimization problem <span class="math notranslate nohighlight">\(P\)</span> is said to be <strong>constrained</strong> by
+<span class="math notranslate nohighlight">\(\lambda\)</span> when its cost function <span class="math notranslate nohighlight">\(\mathcal{C}\)</span> has <span class="math notranslate nohighlight">\(\lambda\)</span> as an
+argument in addition to the optimization parameter <span class="math notranslate nohighlight">\(\theta\)</span> — i.e.
+<span class="math notranslate nohighlight">\(P:\arg\min_{\theta}\mathcal{C}(\theta, \lambda,\cdots)\)</span>.</p>
+<p>Multilevel optimization (MLO) refers to a field of study that aims to solve a nested set
+of optimization problems defined on a sequence of so-called <em>levels</em>, which satisfy two
+main criteria: <strong>(A1)</strong> upper-level problems are constrained by the <em>optimal</em> parameters
+of lower-level problems while <strong>(A2)</strong> lower-level problems are constrained by the
+<em>nonoptimal</em> parameters of upper-level problems. Formally, an n-level MLO program can be
+written as:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{flalign*}
+    P_n:\quad&amp;&amp; &amp;\theta_n^* = \underset{\theta_n}{\mathrm{argmin}}\;\mathcal{C}_n(\theta_n, \mathcal{U}_n, \mathcal{L}_n; \mathcal{D}_n)&amp;&amp;\quad\quad\;\text{ $\rhd$ Level $n$}\\
+    &amp;&amp; &amp;\hspace{8mm}\ddots &amp;&amp;\\
+    P_k:\quad&amp;&amp; &amp; \hspace{9mm}\text{s.t.} \hspace{2mm} \theta_k^* = \underset{\theta_k}{\mathrm{argmin}}\; \mathcal{C}_k(\theta_k, \mathcal{U}_k, \mathcal{L}_k; \mathcal{D}_k)&amp;&amp;\quad\quad\;\text{ $\rhd$ Level $k \in \{2, \ldots, n-1\}$}\\
+    &amp;&amp; &amp;\hspace{23mm}\ddots &amp;&amp;\\
+    P_1:\quad&amp;&amp; &amp;\hspace{24mm}\text{s.t.}\hspace{2mm}\theta_1^* = \underset{\theta_1}{\mathrm{argmin}}\; \mathcal{C}_1(\theta_1, \mathcal{U}_1, \mathcal{L}_1; \mathcal{D}_k)&amp;&amp;\quad\quad\;\text{ $\rhd$ Level $1$}
+\end{flalign*}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(P_k\)</span> stands for the level k problem, <span class="math notranslate nohighlight">\(\theta_k\,/\,\theta_k^*\)</span> for
+corresponding nonoptimal / optimal parameters, and
+<span class="math notranslate nohighlight">\(\mathcal{U}_k\,/\,\mathcal{L}_k\)</span> for the sets of constraining parameters from
+upper / lower level problems. Here, <span class="math notranslate nohighlight">\(\mathcal{D}_k\)</span> is the training dataset, and
+<span class="math notranslate nohighlight">\(\mathcal{C}_k\)</span> indicates the cost function. Due to criteria <strong>(A1)</strong> &amp; <strong>(A2)</strong>,
+the constraining parameters from upper-level problems should be nonoptimal (i.e.
+<span class="math notranslate nohighlight">\(\mathcal{U}_k \subseteq \{\theta_{k+1}, \cdots, \theta_n\}\)</span>) while the
+constraining parameters from lower-level problems should be optimal (i.e.
+<span class="math notranslate nohighlight">\(\mathcal{L}_k \subseteq \{\theta_{1}^*, \cdots, \theta_{k-1}^*\}\)</span>).</p>
+<p>Although we denote only one optimization problem per level in the above formulation,
+each level could in fact have multiple problems. Therefore, we henceforth discard the
+concept of level, and rather assume that problems <span class="math notranslate nohighlight">\(\{P_1, P_2, \cdots, P_n\}\)</span> of a
+general MLO program are topologically sorted in a <em>reverse</em> order (i.e. <span class="math notranslate nohighlight">\(P_n\)</span> /
+<span class="math notranslate nohighlight">\(P_1\)</span> denote uppermost / lowermost problems).</p>
+<section id="application-examples">
+<h2>Application Examples<a class="headerlink" href="#application-examples" title="Permalink to this headline">¶</a></h2>
+<p>Multilevel optimization has found a wide range of applications in machine learning, including, but
+not limited to, meta learning [<a class="reference external" href="https://arxiv.org/abs/1703.03400">Finn et al. (MAML)</a>],
+hyperparameter optimization (HPO) [<a class="reference external" href="https://arxiv.org/pdf/1703.01785.pdf">Franceschi et al.</a>,
+<a class="reference external" href="https://arxiv.org/pdf/1703.01785.pdf">Lorraine et al.</a>], neural architecture search (NAS)
+[<a class="reference external" href="https://arxiv.org/abs/1806.09055">Liu et al. (DARTS)</a>], and reinforcement learning (RL)
+[<a class="reference external" href="https://proceedings.neurips.cc/paper/1999/file/6449f44a102fde848669bdd9eb6b76fa-Paper.pdf">Konda et al. (Actor-Critic)</a>].
+In particular, each of these problems can be formulated as bilevel optimization, the
+simplest case of multilevel optimization with a two-level hierarchy. To better
+understand the concept of multilevel optimization, we illustrate how each of these
+problems can be formulated under the above mathematical notation and framework.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 7%" />
+<col style="width: 6%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 12%" />
+<col style="width: 10%" />
+<col style="width: 6%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 8%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head" rowspan="2"></th>
+<th class="head" colspan="5"><p>Level 2 (Upper)</p></th>
+<th class="head" colspan="5"><p>Level 1 (Lower)</p></th>
+</tr>
+<tr class="row-even"><th class="head"><p><span class="math notranslate nohighlight">\(C_2\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\theta_2\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(U_2\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(L_2\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(D_2\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(C_1\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\theta_1\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(U_1\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(L_1\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(D_1\)</span></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>Meta Learning</p></td>
+<td><p>CE</p></td>
+<td><p>init_weight</p></td>
+<td><p><span class="math notranslate nohighlight">\(\emptyset\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\{\theta_1^*\}\)</span></p></td>
+<td><p>Omniglot_meta-train</p></td>
+<td><p>CE</p></td>
+<td><p>task-specific weight</p></td>
+<td><p><span class="math notranslate nohighlight">\(\{\theta_2\}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\emptyset\)</span></p></td>
+<td><p>Omniglot_train</p></td>
+</tr>
+<tr class="row-even"><td><p>HPO</p></td>
+<td><p>CE</p></td>
+<td><p>hyperparameter</p></td>
+<td><p><span class="math notranslate nohighlight">\(\emptyset\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\{\theta_1^*\}\)</span></p></td>
+<td><p>PTB_valid</p></td>
+<td><p>CE</p></td>
+<td><p>LSTM weights</p></td>
+<td><p><span class="math notranslate nohighlight">\(\{\theta_2\}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\emptyset\)</span></p></td>
+<td><p>PTB_train</p></td>
+</tr>
+<tr class="row-odd"><td><p>NAS</p></td>
+<td><p>CE</p></td>
+<td><p>architecture</p></td>
+<td><p><span class="math notranslate nohighlight">\(\emptyset\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\{\theta_1^*\}\)</span></p></td>
+<td><p>CIFAR_valid</p></td>
+<td><p>CE</p></td>
+<td><p>CNN weights</p></td>
+<td><p><span class="math notranslate nohighlight">\(\{\theta_2\}\)</span></p></td>
+<td><p><span class="math notranslate nohighlight">\(\emptyset\)</span></p></td>
+<td><p>CIFAR_train</p></td>
+</tr>
+</tbody>
+</table>
+<p>While a majority of existing work is built upon bilevel optimization, there have been recent efforts
+that go beyond this two-level hierarchy. For example,
+[<a class="reference external" href="https://arxiv.org/abs/2111.01754">Raghu et al.</a>] proposed trilevel optimization that combines
+hyperparameter optimization with two-level pretraining and finetuning. More generally, conducting
+joint optimization over machine learning pipelines consisting of multiple models and hyperparameter
+sets can be approached as deeper instances of MLO
+[<a class="reference external" href="https://arxiv.org/abs/1912.07768">Such et al.</a>,
+<a class="reference external" href="https://www.aaai.org/AAAI22Papers/AAAI-8716.GargB.pdf">Garg et al.</a>].</p>
+</section>
+</section>
+
+
+             </article>
+             
+            </div>
+            <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="concept_software.html" class="btn btn-neutral float-right" title="Software Design" accesskey="n" rel="next">Next <img src="../_static/images/chevron-right-orange.svg" class="next-page"></a>
+      
+      
+        <a href="concept.html" class="btn btn-neutral" title="Major Concepts" accesskey="p" rel="prev"><img src="../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+      
+    </div>
+  
+
+  
+
+    <hr>
+
+  
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, sangkeun00.
+
+    </p>
+  </div>
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+      </div>
+     
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">Multilevel Optimization</a><ul>
+<li><a class="reference internal" href="#application-examples">Application Examples</a></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  
+
+
+  
+
+     
+       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+         <script src="../_static/jquery.js"></script>
+         <script src="../_static/underscore.js"></script>
+         <script src="../_static/doctools.js"></script>
+         <script src="../_static/tabs.js"></script>
+         <script src="../_static/design-tabs.js"></script>
+         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+     
+
+  
+
+  <script type="text/javascript" src="../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+    <div class="container">
+      <div class="row">
+      </div>
+    </div>
+  </div>
+
+  <div class="cookie-banner-wrapper">
+  <div class="container">
+    <p class="gdpr-notice">To analyze traffic and optimize your experience, we serve cookies on this site. By clicking or navigating, you agree to allow our usage of cookies. Read PyTorch Lightning's <a href="https://pytorchlightning.ai/privacy-policy">Privacy Policy</a>.</p>
+    <img class="close-button" src="../_static/images/pytorch-x.svg">
+  </div>
+</div>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://leopard-ai.github.io/betty">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/leopard-ai/betty">Github</a>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function(e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PQBQ3CV"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+ </body>
+</html>

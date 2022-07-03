@@ -1,0 +1,533 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-PQBQ3CV');
+  </script>
+  <!-- End Google Tag Manager -->
+
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>betty.hypergradient &mdash; Betty</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="betty.optim" href="betty.optim.html" />
+    <link rel="prev" title="betty.problems" href="betty.problems.html" />
+  <!-- Google Analytics -->
+  
+  <!-- End Google Analytics -->
+  
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Light.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Semibold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/Inconsolata/Inconsolata.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <script defer src="https://use.fontawesome.com/releases/v6.1.1/js/all.js" integrity="sha384-xBXmu0dk1bEoiwd71wOonQLyH+VpgR1XcDH3rtxrLww5ajNTuMvBdL5SOiFZnNdp" crossorigin="anonymous"></script>
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
+      <!--  <img class="call-to-action-img" src="../_static/images/logo-lightning-icon.png"/> -->
+      </a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://leopard-ai.github.io/betty">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/leopard-ai/betty">GitHub</a>
+          </li>
+
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="pytorch-body">
+
+   
+
+    
+
+    <div class="table-of-contents-link-wrapper">
+      <span>Table of Contents</span>
+      <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+    </div>
+
+    <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+      <div class="pytorch-side-scroll">
+        <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          <div class="pytorch-left-menu-search">
+            
+
+            
+              
+              
+            
+
+            
+
+
+  
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+          </div>
+
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Get Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/concept.html">Major Concepts</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/basic/basic.html">Basic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/intermediate/intermediate.html">Intermediate</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Docs</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="betty.engine.html">betty.engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="betty.problems.html">betty.problems</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">betty.hypergradient</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-betty.hypergradient.darts">finite difference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-betty.hypergradient.neumann">neumann series</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-betty.hypergradient.cg">conjugate gradient</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-betty.hypergradient.reinforce">reinforce</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="betty.optim.html">betty.optim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="betty.logging.html">betty.logging</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/data_reweighting.html">Data Reweighting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/neural_architecture_search.html">Neural Architecture Search</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <div class="pytorch-container">
+      <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+        <div class="pytorch-breadcrumbs-wrapper">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../index.html">
+          
+            Docs
+          
+        </a> &gt;
+      </li>
+
+        
+      <li>betty.hypergradient</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/betty/betty.hypergradient.rst.txt" rel="nofollow"><img src="../_static/images/view-page-source-icon.svg"></a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+        </div>
+
+        <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+          Shortcuts
+        </div>
+      </div>
+
+      <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+        <div class="pytorch-content-left">
+
+        
+          
+          <div class="rst-content">
+          
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+             <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+              
+  <section id="betty-hypergradient">
+<h1>betty.hypergradient<a class="headerlink" href="#betty-hypergradient" title="Permalink to this headline">¶</a></h1>
+<p>Unlike traditional automatic differentiation techniques that calculate analytic Jacobian for each
+operation, multilevel optimization requires <em>approximating</em> best-response Jacobian for each level
+optimization problem. Below is the list of approximation techniques that are supported by Betty.</p>
+<section id="module-betty.hypergradient.darts">
+<span id="finite-difference"></span><h2>finite difference<a class="headerlink" href="#module-betty.hypergradient.darts" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="betty.hypergradient.darts.darts">
+<span class="sig-prename descclassname"><span class="pre">betty.hypergradient.darts.</span></span><span class="sig-name descname"><span class="pre">darts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/hypergradient/darts.html#darts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.hypergradient.darts.darts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Approximate the matrix-vector multiplication with the best response Jacobian by the
+finite difference method. More specifically, we modified the finite difference method proposed
+in <a class="reference external" href="https://arxiv.org/pdf/1806.09055.pdf">DARTS: Differentiable Architecture Search</a> by
+re-interpreting it from the implicit differentiation perspective. Empirically, this method
+achieves better memory efficiency, training wall time, and test accuracy that other methods.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vector</strong> (<em>Sequence of Tensor</em>) – Vector with which matrix-vector multiplication with best-response Jacobian (matrix) would
+be performed.</p></li>
+<li><p><strong>curr</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – A current level problem</p></li>
+<li><p><strong>prev</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – A directly lower-level problem to the current problem</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(Intermediate) gradient</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Sequence of Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-betty.hypergradient.neumann">
+<span id="neumann-series"></span><h2>neumann series<a class="headerlink" href="#module-betty.hypergradient.neumann" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="betty.hypergradient.neumann.neumann">
+<span class="sig-prename descclassname"><span class="pre">betty.hypergradient.neumann.</span></span><span class="sig-name descname"><span class="pre">neumann</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/hypergradient/neumann.html#neumann"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.hypergradient.neumann.neumann" title="Permalink to this definition">¶</a></dt>
+<dd><p>Approximate the matrix-vector multiplication with the best response Jacobian by the
+Neumann Series as proposed in
+<a class="reference external" href="https://arxiv.org/abs/1911.02590">Optimizing Millions of Hyperparameters by Implicit Differentiation</a> based on implicit function theorem (IFT). Users may
+specify learning rate (<code class="docutils literal notranslate"><span class="pre">neumann_alpha</span></code>) and unrolling steps (<code class="docutils literal notranslate"><span class="pre">neumann_iterations</span></code>) in
+<code class="docutils literal notranslate"><span class="pre">Config</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vector</strong> (<em>Sequence of Tensor</em>) – Vector with which matrix-vector multiplication with best-response Jacobian (matrix) would
+be performed.</p></li>
+<li><p><strong>curr</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – A current level problem</p></li>
+<li><p><strong>prev</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – A directly lower-level problem to the current problem</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(Intermediate) gradient</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Sequence of Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-betty.hypergradient.cg">
+<span id="conjugate-gradient"></span><h2>conjugate gradient<a class="headerlink" href="#module-betty.hypergradient.cg" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="betty.hypergradient.cg.cg">
+<span class="sig-prename descclassname"><span class="pre">betty.hypergradient.cg.</span></span><span class="sig-name descname"><span class="pre">cg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/hypergradient/cg.html#cg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.hypergradient.cg.cg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Approximate the matrix-vector multiplication with the best response Jacobian by the
+(PyTorch’s) default autograd method. Users may need to specify learning rate (<code class="docutils literal notranslate"><span class="pre">cg_alpha</span></code>) and
+conjugate gradient descent iterations (<code class="docutils literal notranslate"><span class="pre">cg_iterations</span></code>) in <code class="docutils literal notranslate"><span class="pre">Config</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vector</strong> (<em>Sequence of Tensor</em>) – Vector with which matrix-vector multiplication with best-response Jacobian (matrix) would
+be performed.</p></li>
+<li><p><strong>curr</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – A current level problem</p></li>
+<li><p><strong>prev</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – A directly lower-level problem to the current problem</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(Intermediate) gradient</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Sequence of Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-betty.hypergradient.reinforce">
+<span id="reinforce"></span><h2>reinforce<a class="headerlink" href="#module-betty.hypergradient.reinforce" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="betty.hypergradient.reinforce.reinforce">
+<span class="sig-prename descclassname"><span class="pre">betty.hypergradient.reinforce.</span></span><span class="sig-name descname"><span class="pre">reinforce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/hypergradient/reinforce.html#reinforce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.hypergradient.reinforce.reinforce" title="Permalink to this definition">¶</a></dt>
+<dd><p>Approximate the matrix-vector multiplication with the best response Jacobian by the
+REINFORCE method. The use of REINFORCE algorithm allows users to differentiate through
+optimization with non-differentiable processes such as sampling. This method has not been
+completely implemented yet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>vector</strong> (<em>Sequence of Tensor</em>) – Vector with which matrix-vector multiplication with best-response Jacobian (matrix) would
+be performed.</p></li>
+<li><p><strong>curr</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – A current level problem</p></li>
+<li><p><strong>prev</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – A directly lower-level problem to the current problem</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(Intermediate) gradient</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Sequence of Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+             </article>
+             
+            </div>
+            <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="betty.optim.html" class="btn btn-neutral float-right" title="betty.optim" accesskey="n" rel="next">Next <img src="../_static/images/chevron-right-orange.svg" class="next-page"></a>
+      
+      
+        <a href="betty.problems.html" class="btn btn-neutral" title="betty.problems" accesskey="p" rel="prev"><img src="../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+      
+    </div>
+  
+
+  
+
+    <hr>
+
+  
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, sangkeun00.
+
+    </p>
+  </div>
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+      </div>
+     
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">betty.hypergradient</a><ul>
+<li><a class="reference internal" href="#module-betty.hypergradient.darts">finite difference</a></li>
+<li><a class="reference internal" href="#module-betty.hypergradient.neumann">neumann series</a></li>
+<li><a class="reference internal" href="#module-betty.hypergradient.cg">conjugate gradient</a></li>
+<li><a class="reference internal" href="#module-betty.hypergradient.reinforce">reinforce</a></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  
+
+
+  
+
+     
+       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+         <script src="../_static/jquery.js"></script>
+         <script src="../_static/underscore.js"></script>
+         <script src="../_static/doctools.js"></script>
+         <script src="../_static/tabs.js"></script>
+         <script src="../_static/design-tabs.js"></script>
+     
+
+  
+
+  <script type="text/javascript" src="../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+    <div class="container">
+      <div class="row">
+      </div>
+    </div>
+  </div>
+
+  <div class="cookie-banner-wrapper">
+  <div class="container">
+    <p class="gdpr-notice">To analyze traffic and optimize your experience, we serve cookies on this site. By clicking or navigating, you agree to allow our usage of cookies. Read PyTorch Lightning's <a href="https://pytorchlightning.ai/privacy-policy">Privacy Policy</a>.</p>
+    <img class="close-button" src="../_static/images/pytorch-x.svg">
+  </div>
+</div>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://leopard-ai.github.io/betty">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/leopard-ai/betty">Github</a>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function(e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PQBQ3CV"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+ </body>
+</html>

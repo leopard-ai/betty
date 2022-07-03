@@ -1,0 +1,621 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-PQBQ3CV');
+  </script>
+  <!-- End Google Tag Manager -->
+
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Software Design &mdash; Betty</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Autodiff for Multilevel Optimization" href="concept_autodiff.html" />
+    <link rel="prev" title="Multilevel Optimization" href="concept_mlo.html" />
+  <!-- Google Analytics -->
+  
+  <!-- End Google Analytics -->
+  
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Light.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Semibold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/Inconsolata/Inconsolata.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <script defer src="https://use.fontawesome.com/releases/v6.1.1/js/all.js" integrity="sha384-xBXmu0dk1bEoiwd71wOonQLyH+VpgR1XcDH3rtxrLww5ajNTuMvBdL5SOiFZnNdp" crossorigin="anonymous"></script>
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
+      <!--  <img class="call-to-action-img" src="../_static/images/logo-lightning-icon.png"/> -->
+      </a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://leopard-ai.github.io/betty">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/leopard-ai/betty">GitHub</a>
+          </li>
+
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="pytorch-body">
+
+   
+
+    
+
+    <div class="table-of-contents-link-wrapper">
+      <span>Table of Contents</span>
+      <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+    </div>
+
+    <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+      <div class="pytorch-side-scroll">
+        <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          <div class="pytorch-left-menu-search">
+            
+
+            
+              
+              
+            
+
+            
+
+
+  
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+          </div>
+
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Get Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="concept.html">Major Concepts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="concept_mlo.html">Multilevel Optimization</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Software Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concept_autodiff.html">Autodiff (Advanced)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concept_architecture.html">Architecture (Advanced)</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/basic/basic.html">Basic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/intermediate/intermediate.html">Intermediate</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.engine.html">betty.engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.problems.html">betty.problems</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.hypergradient.html">betty.hypergradient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.optim.html">betty.optim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.logging.html">betty.logging</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/data_reweighting.html">Data Reweighting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/neural_architecture_search.html">Neural Architecture Search</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <div class="pytorch-container">
+      <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+        <div class="pytorch-breadcrumbs-wrapper">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../index.html">
+          
+            Docs
+          
+        </a> &gt;
+      </li>
+
+        
+          <li><a href="concept.html">Major Concepts</a> &gt;</li>
+        
+      <li>Software Design</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/quickstart/concept_software.rst.txt" rel="nofollow"><img src="../_static/images/view-page-source-icon.svg"></a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+        </div>
+
+        <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+          Shortcuts
+        </div>
+      </div>
+
+      <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+        <div class="pytorch-content-left">
+
+        
+          
+          <div class="rst-content">
+          
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+             <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+              
+  <section id="software-design">
+<h1>Software Design<a class="headerlink" href="#software-design" title="Permalink to this headline">¶</a></h1>
+<p>Betty allows for an easy-to-use, modular, and maintainable programming interface for
+multilevel optimization (MLO) by breaking down MLO into two high-level concepts — (1)
+optimization problems, and (2) problem dependencies — for which we design two abstract
+Python classes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Problem</span></code> class: an abstraction of optimization problems.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Engine</span></code> class: an abstraction of problem dependencies.</p></li>
+</ul>
+<p>In this chapter, we will introduce each of these concepts/classes in depth.</p>
+<section id="problem">
+<h2>Problem<a class="headerlink" href="#problem" title="Permalink to this headline">¶</a></h2>
+<p>Under our abstraction, each optimization problem <span class="math notranslate nohighlight">\(P\)</span> in MLO is defined by the (1)
+module, (2) the optimizer, (3) the data loader, (4) the sets of the upper and lower
+constraining problems, (5) the loss function, (6) the problem (or optimization)
+configuration, (7) the name, and (8) other optional components.  The example usage of
+the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class is shown below:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot; Setup of module, optimizer, and data loader &quot;&quot;&quot;</span>
+<span class="n">my_module</span><span class="p">,</span> <span class="n">my_optimizer</span><span class="p">,</span> <span class="n">my_data_loader</span> <span class="o">=</span> <span class="n">problem_setup</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">MyProblem</span><span class="p">(</span><span class="n">ImplicitProblem</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Users define the loss function here &quot;&quot;&quot;</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">other_probs</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+        <span class="n">acc</span> <span class="o">=</span> <span class="n">get_accuracy</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;loss&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="s1">&#39;acc&#39;</span><span class="p">:</span> <span class="n">acc</span><span class="p">}</span>
+
+<span class="sd">&quot;&quot;&quot; Optimization Configuration &quot;&quot;&quot;</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;darts&quot;</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">first_order</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">retain_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot; Problem Instantiation &quot;&quot;&quot;</span>
+<span class="n">prob</span> <span class="o">=</span> <span class="n">MyProblem</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;myproblem&#39;</span><span class="p">,</span>
+    <span class="n">module</span><span class="o">=</span><span class="n">my_module</span><span class="p">,</span>
+    <span class="n">optimizer</span><span class="o">=</span><span class="n">my_optimizer</span><span class="p">,</span>
+    <span class="n">train_data_loader</span><span class="o">=</span><span class="n">my_data_loader</span><span class="p">,</span>
+    <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+    <span class="n">device</span><span class="o">=</span><span class="n">device</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>To better understand the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class, we take a deeper dive into each component.</p>
+<section id="problem-type">
+<h3>(0) Problem type<a class="headerlink" href="#problem-type" title="Permalink to this headline">¶</a></h3>
+<p>Automatic differentiation for multilevel optimization can be roughly categorized into
+two types: iterative differentiation (ITD) and implicit differentiation (AID). While AID
+allows users to use native PyTorch modules and optimizers, ITD requires patching both
+modules and optimizers to follow a functional programming paradigm. Due to this
+difference, we provide separate classes <code class="docutils literal notranslate"><span class="pre">IterativeProblem</span></code> and <code class="docutils literal notranslate"><span class="pre">ImplicitProblem</span></code>
+respecitvely for ITD and AID. Empirically, we observe that AID often achieves better
+memory efficiency, training wall time, and final accuracy. Thus, we highly recommend
+using the <code class="docutils literal notranslate"><span class="pre">ImplicitProblem</span></code> class as a default setting.</p>
+</section>
+<section id="module">
+<h3>(1) Module<a class="headerlink" href="#module" title="Permalink to this headline">¶</a></h3>
+<p>The module defines the parameters to be learned in the current optimization problem, and
+corresponds to <span class="math notranslate nohighlight">\(\theta_k\)</span> in our mathematical formulation (<a class="reference internal" href="concept_mlo.html"><span class="doc">Chapter</span></a>). In practice, the module is usually defined using PyTorch’s
+<code class="docutils literal notranslate"><span class="pre">torch.nn.Module</span></code>, and is passed to the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class through the constructor.</p>
+</section>
+<section id="optimizer">
+<h3>(2) Optimizer<a class="headerlink" href="#optimizer" title="Permalink to this headline">¶</a></h3>
+<p>The optimizer updates parameters for the above module. In practice, the optimizer is
+most commonly defined using PyTorch’s <code class="docutils literal notranslate"><span class="pre">torch.optim.Optimizer</span></code>, and is also passed to
+the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class through the constructor.</p>
+</section>
+<section id="data-loader">
+<h3>(3) Data loader<a class="headerlink" href="#data-loader" title="Permalink to this headline">¶</a></h3>
+<p>The data loader defines the associated training data, denoted <span class="math notranslate nohighlight">\(\mathcal{D}_k\)</span> in
+our mathematical formulation. It is normally defined using PyTorch’s
+<code class="docutils literal notranslate"><span class="pre">torch.utils.data.DataLoader</span></code>, but it can be any Python <code class="docutils literal notranslate"><span class="pre">Iterator</span></code>. The data loader
+can also be provided through the class constructor.</p>
+</section>
+<section id="upper-lower-constraining-problem-sets">
+<h3>(4) Upper &amp; Lower Constraining Problem Sets<a class="headerlink" href="#upper-lower-constraining-problem-sets" title="Permalink to this headline">¶</a></h3>
+<p>While the upper &amp; lower constraining problem sets
+<span class="math notranslate nohighlight">\(\mathcal{U}_k\;\&amp;\;\mathcal{L}_k\)</span> are at the core of our mathematical
+formulation, we don’t allow users to directly specifiy them in the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class.
+Rather, we design Betty so that the constraining sets are provided directly from
+<code class="docutils literal notranslate"><span class="pre">Engine</span></code>, the class where all problem dependencies are handled. In doing so, users
+need to provide the hierarchical problem dependencies only once when they initialize
+<code class="docutils literal notranslate"><span class="pre">Engine</span></code>, and can avoid the potentially error-prone and cumbersome process of
+provisioning constraining problems manually every time they define new problems.</p>
+</section>
+<section id="loss-function">
+<h3>(5) Loss function<a class="headerlink" href="#loss-function" title="Permalink to this headline">¶</a></h3>
+<p>The loss function defines the optimization objective <span class="math notranslate nohighlight">\(\mathcal{C}_k\)</span> in our
+formulation.  Unlike previous components, the loss function is defined through the
+<code class="docutils literal notranslate"><span class="pre">training_step</span></code> method as shown above. In addition, the <code class="docutils literal notranslate"><span class="pre">training_step</span></code> method
+provides an option to define other metrics (e.g.  accuracy in image classification),
+which can be returned with the Python dictionary. When the return type is not a Python
+dictionary, the API will assume that the returned value is the loss by default.
+Furthermore, the returned dictionary/value of <code class="docutils literal notranslate"><span class="pre">training_step</span></code> will be automatically
+logged with our logger to a visualization tool (e.g. tensorboard) as well as the
+standard output stream (i.e. print in the terminal). Our <code class="docutils literal notranslate"><span class="pre">training_step</span></code> method is
+highly inspired by <a class="reference external" href="https://github.com/PyTorchLightning/pytorch-lightning">PyTorch Lightning’s</a> <code class="docutils literal notranslate"><span class="pre">training_step</span></code> method.</p>
+</section>
+<section id="optimization-configuration">
+<h3>(6) Optimization Configuration<a class="headerlink" href="#optimization-configuration" title="Permalink to this headline">¶</a></h3>
+<p>Unlike automatic differentiation in neural networks, autodiff in MLO requires
+approximating gradients with, for example, implicit differentiation. Since there can be
+different approximation methods and configurations, we allow users to specify all
+choices through the <code class="docutils literal notranslate"><span class="pre">Config</span></code> data class. In addition, <code class="docutils literal notranslate"><span class="pre">Config</span></code> allows users to
+specify other training details such as gradient accumulation steps, logging steps, and
+fp16 training options.  We provide the default value for each attribute in <code class="docutils literal notranslate"><span class="pre">Config</span></code>,
+so, in most cases, users will only need to specify 3-4 attributes based on their needs.</p>
+</section>
+<section id="name">
+<h3>(7) Name<a class="headerlink" href="#name" title="Permalink to this headline">¶</a></h3>
+<p>Users oftentimes need to access constraining problems
+<span class="math notranslate nohighlight">\(\mathcal{U}_k\;\&amp;\;\mathcal{L}_k\)</span> when defining the loss function in
+<code class="docutils literal notranslate"><span class="pre">training_step</span></code>. However, since constraining problems are directly provided by the
+<code class="docutils literal notranslate"><span class="pre">Engine</span></code> class, users lack the way to access constraining problems from the current
+problem. Thus, we design the <code class="docutils literal notranslate"><span class="pre">name</span></code> attribute, through which users can access other
+problems in the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> and the <code class="docutils literal notranslate"><span class="pre">Engine</span></code> classes. For example, when your MLO
+involves <code class="docutils literal notranslate"><span class="pre">Problem1(name='prob1',</span> <span class="pre">...)</span></code> and <code class="docutils literal notranslate"><span class="pre">Problem2(name='prob2',</span> <span class="pre">...)</span></code>, you can
+access <code class="docutils literal notranslate"><span class="pre">Problem2</span></code> from <code class="docutils literal notranslate"><span class="pre">Problem1</span></code> with <code class="docutils literal notranslate"><span class="pre">self.prob2</span></code>.</p>
+</section>
+<section id="other-optional-components">
+<h3>(8) Other Optional Components<a class="headerlink" href="#other-optional-components" title="Permalink to this headline">¶</a></h3>
+<p>While not considered essential components, learning rate schedulers or parameter
+callbacks (e.g. parameter clipping/clamping) can optionally be provided by users as
+well. Interested users can refer to the API documentation for these features.</p>
+</section>
+</section>
+<section id="engine">
+<h2>Engine<a class="headerlink" href="#engine" title="Permalink to this headline">¶</a></h2>
+<p>While <code class="docutils literal notranslate"><span class="pre">Problem</span></code> manages each optimization problem, <code class="docutils literal notranslate"><span class="pre">Engine</span></code> handles a dataflow graph
+based on the user-provided hierarchical problem dependencies. An example usage of the
+<code class="docutils literal notranslate"><span class="pre">Engine</span></code> class is provided below:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyEngine</span><span class="p">(</span><span class="n">Engine</span><span class="p">):</span>
+    <span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">validation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">val_loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prob1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prob2</span><span class="p">,</span> <span class="n">test_loader</span><span class="p">)</span>
+        <span class="n">val_acc</span> <span class="o">=</span> <span class="n">acc_fn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prob1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prob2</span><span class="p">,</span> <span class="n">test_loader</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;loss&#39;</span><span class="p">:</span> <span class="n">val_loss</span><span class="p">,</span> <span class="s1">&#39;acc&#39;</span><span class="p">:</span> <span class="n">val_acc</span><span class="p">}</span>
+
+<span class="n">p1</span> <span class="o">=</span> <span class="n">Problem1</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;prob1&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<span class="n">p2</span> <span class="o">=</span> <span class="n">Problem2</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;prob2&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<span class="n">dependencies</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;u2l&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">p1</span><span class="p">:</span> <span class="p">[</span><span class="n">p2</span><span class="p">]},</span> <span class="s2">&quot;l2u&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">p1</span><span class="p">:</span> <span class="p">[</span><span class="n">p2</span><span class="p">]}}</span>
+<span class="n">engine_config</span> <span class="o">=</span> <span class="n">EngineConfig</span><span class="p">(</span><span class="n">train_iters</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">valid_step</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">engine</span> <span class="o">=</span> <span class="n">MyEngine</span><span class="p">(</span><span class="n">problems</span><span class="o">=</span><span class="p">[</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">],</span> <span class="n">dependencies</span><span class="o">=</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">engine_config</span><span class="p">)</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Here, we take a deeper look into each component of <code class="docutils literal notranslate"><span class="pre">Engine</span></code>.</p>
+<section id="problems">
+<h3>(1) Problems<a class="headerlink" href="#problems" title="Permalink to this headline">¶</a></h3>
+<p>Users should provide all of the involved optimization problems through the <cite>problems</cite>
+argument.</p>
+</section>
+<section id="dependencies">
+<h3>(2) Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h3>
+<p>As discussed in <a class="reference internal" href="concept_mlo.html"><span class="doc">this section</span></a>, MLO has two types of dependencies
+between problems: upper-to-lower and lower-to-upper. We allow users to define two
+separate graphs, one for each type of edge, using a Python dictionary, in which
+keys/values respectively represent start/end nodes of the edge. When user-defined
+dependency graphs are provided, <code class="docutils literal notranslate"><span class="pre">Engine</span></code> compiles them and finds all paths required
+for automatic differentiation with a modified depth-first search algorithm.  Moreover,
+<code class="docutils literal notranslate"><span class="pre">Engine</span></code> determines constraining problem sets for each problem based on the dependency
+graphs, as mentioned above.</p>
+</section>
+<section id="validation">
+<h3>(3) Validation<a class="headerlink" href="#validation" title="Permalink to this headline">¶</a></h3>
+<p>We currently allow users to define one validation stage for the <em>whole</em> multilevel
+optimization program. This can be achieved by implementing the <code class="docutils literal notranslate"><span class="pre">validation</span></code> method in
+<code class="docutils literal notranslate"><span class="pre">Engine</span></code> as shown above. As in the <code class="docutils literal notranslate"><span class="pre">training_step</span></code> method of the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class,
+users can return whichever metrics they want to log with the Python dictionary.</p>
+</section>
+<section id="engine-configuration">
+<h3>(4) Engine Configuration<a class="headerlink" href="#engine-configuration" title="Permalink to this headline">¶</a></h3>
+<p>Users can specify several configurations for the whole multilevel optimization program,
+such as the total training iterations, the validation step, and the logger type.</p>
+</section>
+<section id="run">
+<h3>(5) Run<a class="headerlink" href="#run" title="Permalink to this headline">¶</a></h3>
+<p>Once all initialization steps are complete, users can run the MLO program by calling the
+Engine’s <code class="docutils literal notranslate"><span class="pre">run</span></code> method, which repeatedly calls <code class="docutils literal notranslate"><span class="pre">step</span></code> methods of lowermost problems.
+The <code class="docutils literal notranslate"><span class="pre">step</span></code> methods of upper-level problems will be automatically called from the
+<code class="docutils literal notranslate"><span class="pre">step</span></code> methods of lower-level problems following lower-to-upper edges.</p>
+<p>To summarize, Betty provides a PyTorch-like programming interface for defining multiple
+optimization problems, which can scale up to large MLO programs with complex
+dependencies, as well as a modular interface for a variety of best-response Jacobian
+algorithms, without requiring mathematical and programming proficiency.</p>
+</section>
+</section>
+</section>
+
+
+             </article>
+             
+            </div>
+            <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="concept_autodiff.html" class="btn btn-neutral float-right" title="Autodiff for Multilevel Optimization" accesskey="n" rel="next">Next <img src="../_static/images/chevron-right-orange.svg" class="next-page"></a>
+      
+      
+        <a href="concept_mlo.html" class="btn btn-neutral" title="Multilevel Optimization" accesskey="p" rel="prev"><img src="../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+      
+    </div>
+  
+
+  
+
+    <hr>
+
+  
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, sangkeun00.
+
+    </p>
+  </div>
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+      </div>
+     
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">Software Design</a><ul>
+<li><a class="reference internal" href="#problem">Problem</a><ul>
+<li><a class="reference internal" href="#problem-type">(0) Problem type</a></li>
+<li><a class="reference internal" href="#module">(1) Module</a></li>
+<li><a class="reference internal" href="#optimizer">(2) Optimizer</a></li>
+<li><a class="reference internal" href="#data-loader">(3) Data loader</a></li>
+<li><a class="reference internal" href="#upper-lower-constraining-problem-sets">(4) Upper &amp; Lower Constraining Problem Sets</a></li>
+<li><a class="reference internal" href="#loss-function">(5) Loss function</a></li>
+<li><a class="reference internal" href="#optimization-configuration">(6) Optimization Configuration</a></li>
+<li><a class="reference internal" href="#name">(7) Name</a></li>
+<li><a class="reference internal" href="#other-optional-components">(8) Other Optional Components</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#engine">Engine</a><ul>
+<li><a class="reference internal" href="#problems">(1) Problems</a></li>
+<li><a class="reference internal" href="#dependencies">(2) Dependencies</a></li>
+<li><a class="reference internal" href="#validation">(3) Validation</a></li>
+<li><a class="reference internal" href="#engine-configuration">(4) Engine Configuration</a></li>
+<li><a class="reference internal" href="#run">(5) Run</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  
+
+
+  
+
+     
+       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+         <script src="../_static/jquery.js"></script>
+         <script src="../_static/underscore.js"></script>
+         <script src="../_static/doctools.js"></script>
+         <script src="../_static/tabs.js"></script>
+         <script src="../_static/design-tabs.js"></script>
+         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+     
+
+  
+
+  <script type="text/javascript" src="../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+    <div class="container">
+      <div class="row">
+      </div>
+    </div>
+  </div>
+
+  <div class="cookie-banner-wrapper">
+  <div class="container">
+    <p class="gdpr-notice">To analyze traffic and optimize your experience, we serve cookies on this site. By clicking or navigating, you agree to allow our usage of cookies. Read PyTorch Lightning's <a href="https://pytorchlightning.ai/privacy-policy">Privacy Policy</a>.</p>
+    <img class="close-button" src="../_static/images/pytorch-x.svg">
+  </div>
+</div>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://leopard-ai.github.io/betty">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/leopard-ai/betty">Github</a>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function(e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PQBQ3CV"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+ </body>
+</html>

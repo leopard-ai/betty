@@ -1,0 +1,725 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-PQBQ3CV');
+  </script>
+  <!-- End Google Tag Manager -->
+
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Data Reweighting &mdash; Betty</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Neural Architecture Search" href="neural_architecture_search.html" />
+    <link rel="prev" title="betty.logging package" href="../betty/betty.logging.html" />
+  <!-- Google Analytics -->
+  
+  <!-- End Google Analytics -->
+  
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Light.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Semibold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/Inconsolata/Inconsolata.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <script defer src="https://use.fontawesome.com/releases/v6.1.1/js/all.js" integrity="sha384-xBXmu0dk1bEoiwd71wOonQLyH+VpgR1XcDH3rtxrLww5ajNTuMvBdL5SOiFZnNdp" crossorigin="anonymous"></script>
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
+      <!--  <img class="call-to-action-img" src="../_static/images/logo-lightning-icon.png"/> -->
+      </a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://leopard-ai.github.io/betty">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/leopard-ai/betty">GitHub</a>
+          </li>
+
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="pytorch-body">
+
+   
+
+    
+
+    <div class="table-of-contents-link-wrapper">
+      <span>Table of Contents</span>
+      <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+    </div>
+
+    <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+      <div class="pytorch-side-scroll">
+        <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          <div class="pytorch-left-menu-search">
+            
+
+            
+              
+              
+            
+
+            
+
+
+  
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+          </div>
+
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Get Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/concept.html">Major Concepts</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/basic/basic.html">Basic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/intermediate/intermediate.html">Intermediate</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.engine.html">betty.engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.problems.html">betty.problems</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.hypergradient.html">betty.hypergradient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.optim.html">betty.optim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.logging.html">betty.logging</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Reweighting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="neural_architecture_search.html">Neural Architecture Search</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <div class="pytorch-container">
+      <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+        <div class="pytorch-breadcrumbs-wrapper">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../index.html">
+          
+            Docs
+          
+        </a> &gt;
+      </li>
+
+        
+      <li>Data Reweighting</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/examples/data_reweighting.rst.txt" rel="nofollow"><img src="../_static/images/view-page-source-icon.svg"></a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+        </div>
+
+        <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+          Shortcuts
+        </div>
+      </div>
+
+      <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+        <div class="pytorch-content-left">
+
+        
+          
+          <div class="rst-content">
+          
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+             <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+              
+  <section id="data-reweighting">
+<h1>Data Reweighting<a class="headerlink" href="#data-reweighting" title="Permalink to this headline">¶</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>Here we re-implement the data reweighting algorithm from
+<a class="reference external" href="https://arxiv.org/abs/1902.07379">Meta-Weight-Net: Learning an Explicit Mapping For Sample Weighting</a>,
+which is a two level MLO program. The first level or lower level
+problem is the classification problem and the second level or upper level
+problem is the meta learning problem.  These levels will be followed by a
+validation stage at the end.</p>
+<p><strong>Classification Problem:</strong> Here we train the weights <span class="math notranslate nohighlight">\(\textbf{w}\)</span> of the
+classifier by minimizing the loss calculated on the training data set while imposing
+some meta weight on each sample loss. Let the <span class="math notranslate nohighlight">\(i^{th}\)</span> sample loss be
+<span class="math notranslate nohighlight">\(L_{i}^{train}(\textbf{w}) = l(y_i, y_{predicted})\)</span> and the <span class="math notranslate nohighlight">\(i^{th}\)</span>
+meta weight be <span class="math notranslate nohighlight">\(\mathcal{V}(L_{i}^{train}(\textbf{w}), \Theta)\)</span> then the
+objective for this problem will be,</p>
+<div class="math notranslate nohighlight">
+\[\textbf{w}^{*}(\Theta) = \mathrm{argmin} \mathcal{L}^{train}(\textbf{w} ; \Theta) = \frac{1}{N} \sum_{i=1}^{N}\mathcal{V}(L_{i}^{train}(\textbf{w}), \Theta)L_{i}^{train}(\textbf{w})\]</div>
+<p>The model of the classifier is specified to be ResNet32 and we will be using
+the SGD algorithm for the optimization.</p>
+<p><strong>Meta Learning Problem:</strong> Here we train the parameters <span class="math notranslate nohighlight">\(\Theta\)</span> of the
+meta weight net by minimizing the loss calculated on the meta training data set.
+Let the <span class="math notranslate nohighlight">\(i^{th}\)</span> sample loss on the meta data be
+<span class="math notranslate nohighlight">\(L_{i}^{meta}(\textbf{w}) = l(y^{(meta)}_i, y^{(meta)}_{predicted})\)</span> then
+the objective of this problem will be,</p>
+<div class="math notranslate nohighlight">
+\[\Theta^{*} = \mathrm{argmin} \mathcal{L}^{meta}(\textbf{w}^{*}(\Theta)) = \frac{1}{M} \sum_{i=1}^{M}L_{i}^{meta}(\textbf{w}^{*}(\Theta))\]</div>
+<p>The model of the meta weight net is chosen to be an MLP and we will be using the Adam
+algorithm for the optimization. For complete and detailed formulation of the loss
+functions see <a class="reference external" href="https://arxiv.org/abs/1902.07379">here</a>.</p>
+<p>Note that for calculating the loss of first level we need the forward pass of the second
+level and for calculating the loss of second level we need the forward pass of the first
+level. Hence we define the following dependencies. The first level depends on the second
+level through a <code class="docutils literal notranslate"><span class="pre">'u2l'</span></code> (upper to lower) dependency and the second level depends on the
+first level through a <code class="docutils literal notranslate"><span class="pre">'l2u'</span></code> (lower to upper) dependency.</p>
+</section>
+<section id="course-of-action">
+<h2>Course of Action<a class="headerlink" href="#course-of-action" title="Permalink to this headline">¶</a></h2>
+<p>In order to implement the data reweighting algorithm we will go through the following pipeline,</p>
+<ol class="arabic simple">
+<li><p><strong>Preparing Data:</strong> Prepare the data that will be used for training.</p></li>
+<li><p><strong>Designing Models:</strong> Design models that will be used in the two levels.</p></li>
+<li><p><strong>Using betty:</strong> Finally use Betty to implement the two level MLO program.</p></li>
+</ol>
+</section>
+<section id="preparing-data">
+<h2>Preparing Data<a class="headerlink" href="#preparing-data" title="Permalink to this headline">¶</a></h2>
+<p>Here we prepare the data that will be used for training the models in the different
+levels of the algorithm. We will require three different data sets. The first is
+<code class="docutils literal notranslate"><span class="pre">train_dataloader</span></code> which will be used in the first level. The second is
+<code class="docutils literal notranslate"><span class="pre">meta_dataloader</span></code> which will be used in the second level. Finally we will have a
+<code class="docutils literal notranslate"><span class="pre">test_dataloader</span></code> which will be used in the validation stage. These data sets can
+be prepared as given
+<a class="reference external" href="https://github.com/sangkeun00/betty/blob/main/examples/learning_to_reweight/data.py">here</a>.</p>
+</section>
+<section id="designing-models">
+<h2>Designing Models<a class="headerlink" href="#designing-models" title="Permalink to this headline">¶</a></h2>
+<p>Here we design the models used in the levels. We will have to prepare one model
+each for our two levels. The first level has the <code class="docutils literal notranslate"><span class="pre">ResNet32</span></code> model and the second
+level has the <code class="docutils literal notranslate"><span class="pre">MLP</span></code> model. Both of these models can be designed as given
+<a class="reference external" href="https://github.com/sangkeun00/betty/blob/main/examples/learning_to_reweight/model.py">here</a>.</p>
+</section>
+<section id="using-betty">
+<h2>Using Betty<a class="headerlink" href="#using-betty" title="Permalink to this headline">¶</a></h2>
+<p>Now we will train our models using the data reweighting algorithm with the help
+of Betty. We first import the required libraries. The code blocks used
+below can be found
+<a class="reference external" href="https://github.com/sangkeun00/betty/blob/main/examples/learning_to_reweight/main.py">here</a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+<span class="kn">import</span> <span class="nn">torch.optim</span> <span class="k">as</span> <span class="nn">optim</span>
+
+<span class="kn">from</span> <span class="nn">model</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">data</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="kn">from</span> <span class="nn">betty.engine</span> <span class="kn">import</span> <span class="n">Engine</span>
+<span class="kn">from</span> <span class="nn">betty.problems</span> <span class="kn">import</span> <span class="n">ImplicitProblem</span>
+<span class="kn">from</span> <span class="nn">betty.configs</span> <span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">EngineConfig</span>
+</pre></div>
+</div>
+<p>Now we simply need to do two things to implement our algorithm:</p>
+<ol class="arabic simple">
+<li><p>Define each level’s optimization problem using the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class.</p></li>
+<li><p>Define the hierarchical problem structure using the <code class="docutils literal notranslate"><span class="pre">Engine</span></code> class.</p></li>
+</ol>
+<section id="defining-problem">
+<h3>Defining <code class="docutils literal notranslate"><span class="pre">Problem</span></code><a class="headerlink" href="#defining-problem" title="Permalink to this headline">¶</a></h3>
+<p>Each level problem can be defined with seven components: (1) module, (2) optimizer,
+(3) data loader, (4) loss function, (5) problem configuration, (6) name, and
+(7) other optional components (e.g. learning rate scheduler). The loss function
+(4) can be defined via the <code class="docutils literal notranslate"><span class="pre">training_step</span></code> method, while all other components can
+be provided through the class constructor.</p>
+<p><strong>First Level:</strong> The first level is characterized by the follwing code. The comments
+along with the code assist the understanding.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#all problem classes are supposed to be a subclass of ImplicitProblem</span>
+<span class="c1">#the Inner problem class specifies the classifier problem</span>
+<span class="k">class</span> <span class="nc">Inner</span><span class="p">(</span><span class="n">ImplicitProblem</span><span class="p">):</span>
+
+   <span class="c1">#this method defines the forward pass of the classifier with x as an input</span>
+   <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+       <span class="c1">#the module attribute of a problem class contains its model</span>
+       <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+   <span class="c1">#this method defines the loss function of our problem</span>
+   <span class="c1">#it takes a batch (subset) of (inputs, labels) from the training data set of the problem as input</span>
+   <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+       <span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">batch</span>
+
+       <span class="c1">#we calculate the predicted labels from the forward pass of the classifier</span>
+       <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+
+       <span class="c1">#we calculate the cross entropy loss of our classifier probelem and reshape it as required</span>
+       <span class="n">loss_vector</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">labels</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span> <span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
+       <span class="n">loss_vector_reshape</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">loss_vector</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+       <span class="c1">#we calculate the weight that is supposed to be imposed on every sample loss</span>
+       <span class="c1">#we do so by using the forward pass of the second level problem</span>
+       <span class="c1">#we can access the forward pass of other problems by using the &#39;name&#39; attribute</span>
+       <span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">loss_vector_reshape</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span>
+
+       <span class="c1">#we calculte the final loss as the mean of the product of the weights and indvidual</span>
+       <span class="c1">#sample losses</span>
+       <span class="n">loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">weight</span> <span class="o">*</span> <span class="n">loss_vector_reshape</span><span class="p">)</span>
+
+       <span class="k">return</span> <span class="n">loss</span>
+
+   <span class="c1">#this method sets the training data of the problem</span>
+   <span class="k">def</span> <span class="nf">configure_train_data_loader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+       <span class="k">return</span> <span class="n">train_dataloader</span>
+
+   <span class="c1">#this method sets the module of the problem to the required model</span>
+   <span class="k">def</span> <span class="nf">configure_module</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+       <span class="k">return</span> <span class="n">ResNet32</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">dataset</span> <span class="o">==</span> <span class="s2">&quot;cifar10&quot;</span> <span class="ow">and</span> <span class="mi">10</span> <span class="ow">or</span> <span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+   <span class="c1">#this method sets the optimizer of the problem</span>
+   <span class="c1">#we have used the SGD algorithm for optimization here</span>
+   <span class="k">def</span> <span class="nf">configure_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+       <span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span>
+           <span class="n">lr</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">lr</span><span class="p">,</span>
+           <span class="n">momentum</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">momentum</span><span class="p">,</span>
+           <span class="n">dampening</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">dampening</span><span class="p">,</span>
+           <span class="n">weight_decay</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">weight_decay</span><span class="p">,</span>
+           <span class="n">nesterov</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">nesterov</span><span class="p">,</span>
+       <span class="p">)</span>
+       <span class="k">return</span> <span class="n">optimizer</span>
+
+   <span class="c1">#this method sets the scheduler sepecifications of the problem (optional)</span>
+   <span class="k">def</span> <span class="nf">configure_scheduler</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+       <span class="n">scheduler</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">MultiStepLR</span><span class="p">(</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">milestones</span><span class="o">=</span><span class="p">[</span><span class="mi">5000</span><span class="p">,</span> <span class="mi">7500</span><span class="p">,</span> <span class="mi">9000</span><span class="p">],</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.1</span>
+       <span class="p">)</span>
+       <span class="k">return</span> <span class="n">scheduler</span>
+</pre></div>
+</div>
+<p><strong>Second Level:</strong> The first level is characterized by the follwing code. The comments
+along with the code assist the understanding.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#all problem classes are supposed to be a subclass of ImplicitProblem</span>
+<span class="c1">#the Outer problem class specifies the meta learning problem</span>
+<span class="k">class</span> <span class="nc">Outer</span><span class="p">(</span><span class="n">ImplicitProblem</span><span class="p">):</span>
+
+   <span class="c1">#this method defines the forward pass of the meta learning problem with x as an input</span>
+   <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+       <span class="c1">#the module attribute of a problem class contains its model</span>
+       <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+   <span class="c1">#this method defines the loss function of our problem</span>
+   <span class="c1">#it takes a batch (subset) of (inputs, labels) from the meta data set of the problem as input</span>
+   <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+       <span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">batch</span>
+
+       <span class="c1">#we calculate the predicted labels from the forward pass of the classifier</span>
+       <span class="c1">#we do so by using the forward pass of the second level problem</span>
+       <span class="c1">#we can access the forward pass of other problems by using the &#39;name&#39; attribute</span>
+       <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+
+       <span class="c1">#we calculte the final loss as the mean of the product of the weights and</span>
+       <span class="c1">#indvidual sample losses</span>
+       <span class="n">loss</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">labels</span><span class="o">.</span><span class="n">long</span><span class="p">())</span>
+
+       <span class="c1">#we calculate the accuracy of the predictions made</span>
+       <span class="n">acc</span> <span class="o">=</span> <span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">labels</span><span class="o">.</span><span class="n">long</span><span class="p">())</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">*</span> <span class="mi">100</span>
+
+       <span class="c1">#we return the loss and the accuracy in form of a dictionary</span>
+       <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;loss&quot;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="s2">&quot;acc&quot;</span><span class="p">:</span> <span class="n">acc</span><span class="p">}</span>
+
+   <span class="c1">#this method sets the training data of the problem</span>
+   <span class="k">def</span> <span class="nf">configure_train_data_loader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+       <span class="k">return</span> <span class="n">meta_dataloader</span>
+
+   <span class="c1">#this method sets the module of the problem to the required model</span>
+   <span class="k">def</span> <span class="nf">configure_module</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+       <span class="n">meta_net</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
+           <span class="n">hidden_size</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">meta_net_hidden_size</span><span class="p">,</span> <span class="n">num_layers</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">meta_net_num_layers</span>
+       <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+       <span class="k">return</span> <span class="n">meta_net</span>
+
+   <span class="c1">#this method sets the optimizer of the problem</span>
+   <span class="c1">#we have used the Adam algorithm for optimization here</span>
+   <span class="k">def</span> <span class="nf">configure_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+       <span class="n">meta_optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">meta_lr</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">meta_weight_decay</span>
+       <span class="p">)</span>
+       <span class="k">return</span> <span class="n">meta_optimizer</span>
+</pre></div>
+</div>
+<p><strong>Instantiation:</strong> here we instantiate our porblem classes and make their respective
+objects which call their constructors.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#we difine the configurations of both the problems using the Config library</span>
+<span class="c1">#configuration of a prooblem contains important specifications related to the problem</span>
+<span class="n">outer_config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;darts&quot;</span><span class="p">,</span> <span class="n">fp16</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">fp16</span><span class="p">,</span> <span class="n">log_step</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">inner_config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;darts&quot;</span><span class="p">,</span> <span class="n">fp16</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">fp16</span><span class="p">,</span> <span class="n">unroll_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1">#we instantiate the Inner and Outer problems and set their &#39;name&#39;, &#39;config&#39;,</span>
+<span class="c1">#&#39;device&#39; attributes</span>
+<span class="n">outer</span> <span class="o">=</span> <span class="n">Outer</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;outer&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">outer_config</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+<span class="n">inner</span> <span class="o">=</span> <span class="n">Inner</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;inner&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">inner_config</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>With this our problems are characterized and instansiated. Now we move on to set
+our <code class="docutils literal notranslate"><span class="pre">Engine</span></code> class.</p>
+</section>
+<section id="defining-engine">
+<h3>Defining <code class="docutils literal notranslate"><span class="pre">Engine</span></code><a class="headerlink" href="#defining-engine" title="Permalink to this headline">¶</a></h3>
+<p>The Engine class handles the hierarchical dependencies between problems. In MLO, there
+are two types of dependencies: upper-to-lower <code class="docutils literal notranslate"><span class="pre">'u2l'</span></code> and lower-to-upper <code class="docutils literal notranslate"><span class="pre">'l2u'</span></code>.
+Both types of dependencies can be defined with Python dictionary, where the key is the
+starting node and the value is the list of destination nodes.</p>
+<p>Since Engine manages the whole MLO program, you can also perform a global validation stage
+within it. All involved problems of the MLO program can again be accessed with their
+‘name’ attribute.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#initiate best accuracy</span>
+<span class="n">best_acc</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+<span class="c1">#when we have to define a validation level then we make a subclass of Engine to do so</span>
+<span class="c1">#if a validation level is not required we do not need this class</span>
+<span class="k">class</span> <span class="nc">ReweightingEngine</span><span class="p">(</span><span class="n">Engine</span><span class="p">):</span>
+    <span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">()</span>
+
+    <span class="c1">#defines the validation level</span>
+    <span class="k">def</span> <span class="nf">validation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1">#initiate correct number of predictions and total predictions</span>
+        <span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">global</span> <span class="n">best_acc</span>
+
+        <span class="c1">#go thorugh the testing data set for validation</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">test_dataloader</span><span class="p">:</span>
+
+            <span class="c1">#move the inputs and labels to the desired device</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">device</span><span class="p">),</span> <span class="n">target</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+            <span class="c1">#calculate the predicted labels without gradient tracking</span>
+            <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+            <span class="c1">#update correct if the prediction is correct</span>
+            <span class="n">correct</span> <span class="o">+=</span> <span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+            <span class="c1">#update total</span>
+            <span class="n">total</span> <span class="o">+=</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1">#calculate accuracy</span>
+        <span class="n">acc</span> <span class="o">=</span> <span class="n">correct</span> <span class="o">/</span> <span class="n">total</span> <span class="o">*</span> <span class="mi">100</span>
+
+        <span class="c1">#update best accuracy if the new accuracy is greater than the previous accuracy</span>
+        <span class="k">if</span> <span class="n">best_acc</span> <span class="o">&lt;</span> <span class="n">acc</span><span class="p">:</span>
+            <span class="n">best_acc</span> <span class="o">=</span> <span class="n">acc</span>
+
+        <span class="c1">#return accuracy and best accuracy as a dictionary</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;acc&quot;</span><span class="p">:</span> <span class="n">acc</span><span class="p">,</span> <span class="s2">&quot;best_acc&quot;</span><span class="p">:</span> <span class="n">best_acc</span><span class="p">}</span>
+
+<span class="c1">#setup engine configuration using EngineConfig Library</span>
+<span class="n">engine_config</span> <span class="o">=</span> <span class="n">EngineConfig</span><span class="p">(</span><span class="n">train_iters</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">valid_step</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">distributed</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">distributed</span><span class="p">,</span> <span class="n">roll_back</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">rollback</span><span class="p">)</span>
+
+<span class="c1">#specify all the problems in a list</span>
+<span class="n">problems</span> <span class="o">=</span> <span class="p">[</span><span class="n">outer</span><span class="p">,</span> <span class="n">inner</span><span class="p">]</span>
+
+<span class="c1">#set dependencies as dictionaries</span>
+<span class="c1">#level 1(inner) accesses level 2(outer)</span>
+<span class="n">u2l</span> <span class="o">=</span> <span class="p">{</span><span class="n">outer</span><span class="p">:</span> <span class="p">[</span><span class="n">inner</span><span class="p">]}</span>
+
+<span class="c1">#level 2(outer) accesses level 1(inner)</span>
+<span class="n">l2u</span> <span class="o">=</span> <span class="p">{</span><span class="n">inner</span><span class="p">:</span> <span class="p">[</span><span class="n">outer</span><span class="p">]}</span>
+
+<span class="c1">#set up a dictiontionary to list out dependencies</span>
+<span class="n">dependencies</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;l2u&quot;</span><span class="p">:</span> <span class="n">l2u</span><span class="p">,</span> <span class="s2">&quot;u2l&quot;</span><span class="p">:</span> <span class="n">u2l</span><span class="p">}</span>
+
+<span class="c1">#instantiate engine and set the &#39;config&#39;, &#39;problems&#39;, &#39;dependencies&#39; attributes</span>
+<span class="n">engine</span> <span class="o">=</span> <span class="n">ReweightingEngine</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">engine_config</span><span class="p">,</span> <span class="n">problems</span><span class="o">=</span><span class="n">problems</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="n">dependencies</span><span class="p">)</span>
+
+<span class="c1">#run the engine</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;IF </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">imbalanced_factor</span><span class="si">}</span><span class="s2"> || Best Acc.: </span><span class="si">{</span><span class="n">best_acc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>With this the dependencies are defined and <code class="docutils literal notranslate"><span class="pre">.run()</span></code> method of <code class="docutils literal notranslate"><span class="pre">Eninge</span></code> class
+will start the program.</p>
+</section>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this headline">¶</a></h2>
+<p>Once we define all optimization problems and the hierarchical dependencies between the
+problems with, respectively, the Problem class and the Engine class, all complicated
+internal mechanism of MLO such as gradient calculation and optimization execution order
+are handled by Betty.</p>
+</section>
+</section>
+
+
+             </article>
+             
+            </div>
+            <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="neural_architecture_search.html" class="btn btn-neutral float-right" title="Neural Architecture Search" accesskey="n" rel="next">Next <img src="../_static/images/chevron-right-orange.svg" class="next-page"></a>
+      
+      
+        <a href="../betty/betty.logging.html" class="btn btn-neutral" title="betty.logging package" accesskey="p" rel="prev"><img src="../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+      
+    </div>
+  
+
+  
+
+    <hr>
+
+  
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, sangkeun00.
+
+    </p>
+  </div>
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+      </div>
+     
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">Data Reweighting</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#course-of-action">Course of Action</a></li>
+<li><a class="reference internal" href="#preparing-data">Preparing Data</a></li>
+<li><a class="reference internal" href="#designing-models">Designing Models</a></li>
+<li><a class="reference internal" href="#using-betty">Using Betty</a><ul>
+<li><a class="reference internal" href="#defining-problem">Defining <code class="docutils literal notranslate"><span class="pre">Problem</span></code></a></li>
+<li><a class="reference internal" href="#defining-engine">Defining <code class="docutils literal notranslate"><span class="pre">Engine</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#conclusion">Conclusion</a></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  
+
+
+  
+
+     
+       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+         <script src="../_static/jquery.js"></script>
+         <script src="../_static/underscore.js"></script>
+         <script src="../_static/doctools.js"></script>
+         <script src="../_static/tabs.js"></script>
+         <script src="../_static/design-tabs.js"></script>
+         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+     
+
+  
+
+  <script type="text/javascript" src="../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+    <div class="container">
+      <div class="row">
+      </div>
+    </div>
+  </div>
+
+  <div class="cookie-banner-wrapper">
+  <div class="container">
+    <p class="gdpr-notice">To analyze traffic and optimize your experience, we serve cookies on this site. By clicking or navigating, you agree to allow our usage of cookies. Read PyTorch Lightning's <a href="https://pytorchlightning.ai/privacy-policy">Privacy Policy</a>.</p>
+    <img class="close-button" src="../_static/images/pytorch-x.svg">
+  </div>
+</div>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://leopard-ai.github.io/betty">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/leopard-ai/betty">Github</a>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function(e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PQBQ3CV"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+ </body>
+</html>

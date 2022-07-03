@@ -1,0 +1,554 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-PQBQ3CV');
+  </script>
+  <!-- End Google Tag Manager -->
+
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Autodiff for Multilevel Optimization &mdash; Betty</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Architecture" href="concept_architecture.html" />
+    <link rel="prev" title="Software Design" href="concept_software.html" />
+  <!-- Google Analytics -->
+  
+  <!-- End Google Analytics -->
+  
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Light.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Semibold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/Inconsolata/Inconsolata.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <script defer src="https://use.fontawesome.com/releases/v6.1.1/js/all.js" integrity="sha384-xBXmu0dk1bEoiwd71wOonQLyH+VpgR1XcDH3rtxrLww5ajNTuMvBdL5SOiFZnNdp" crossorigin="anonymous"></script>
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
+      <!--  <img class="call-to-action-img" src="../_static/images/logo-lightning-icon.png"/> -->
+      </a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://leopard-ai.github.io/betty">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/leopard-ai/betty">GitHub</a>
+          </li>
+
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="pytorch-body">
+
+   
+
+    
+
+    <div class="table-of-contents-link-wrapper">
+      <span>Table of Contents</span>
+      <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+    </div>
+
+    <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+      <div class="pytorch-side-scroll">
+        <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          <div class="pytorch-left-menu-search">
+            
+
+            
+              
+              
+            
+
+            
+
+
+  
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+          </div>
+
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Get Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="concept.html">Major Concepts</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="concept_mlo.html">Multilevel Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concept_software.html">Software Design</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Autodiff (Advanced)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="concept_architecture.html">Architecture (Advanced)</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/basic/basic.html">Basic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/intermediate/intermediate.html">Intermediate</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.engine.html">betty.engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.problems.html">betty.problems</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.hypergradient.html">betty.hypergradient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.optim.html">betty.optim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.logging.html">betty.logging</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/data_reweighting.html">Data Reweighting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/neural_architecture_search.html">Neural Architecture Search</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <div class="pytorch-container">
+      <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+        <div class="pytorch-breadcrumbs-wrapper">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../index.html">
+          
+            Docs
+          
+        </a> &gt;
+      </li>
+
+        
+          <li><a href="concept.html">Major Concepts</a> &gt;</li>
+        
+      <li>Autodiff for Multilevel Optimization</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/quickstart/concept_autodiff.rst.txt" rel="nofollow"><img src="../_static/images/view-page-source-icon.svg"></a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+        </div>
+
+        <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+          Shortcuts
+        </div>
+      </div>
+
+      <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+        <div class="pytorch-content-left">
+
+        
+          
+          <div class="rst-content">
+          
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+             <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+              
+  <section id="autodiff-for-multilevel-optimization">
+<h1>Autodiff for Multilevel Optimization<a class="headerlink" href="#autodiff-for-multilevel-optimization" title="Permalink to this headline">¶</a></h1>
+<p>In this paper, we focus in particular on <em>gradient-based</em> multilevel optimization, rather than
+zeroth-order methods like Bayesian optimization, in order to efficiently scale to high-dimensional
+problems. Essentially, gradient-based multilevel optimization calculates gradients of the cost
+function <span class="math notranslate nohighlight">\(\mathcal{C}_k(\theta_k, \mathcal{U}_k, \mathcal{L}_k)\)</span> with respect to the
+corresponding parameter <span class="math notranslate nohighlight">\(\theta_k\)</span>, with which gradient descent is performed to solve for
+optimal parameters <span class="math notranslate nohighlight">\(\theta_k^*\)</span> for every problem <span class="math notranslate nohighlight">\(P_k\)</span>. Since optimal parameters from
+lower level problems (i.e. <span class="math notranslate nohighlight">\(\theta_l^*\in\mathcal{L}_k\)</span>) can be functions of
+<span class="math notranslate nohighlight">\(\theta_k$\)</span>, <span class="math notranslate nohighlight">\(\frac{d\mathcal{C}_k}{d\theta_k}\)</span> can be expanded using the chain rule
+as follows:</p>
+<div class="math notranslate nohighlight">
+\[\begin{flalign}
+    &amp;&amp;\frac{d\mathcal{C}_k}{d\theta_k} =
+    \textcolor{brown}{\underbrace{\frac{\partial\mathcal{C}_k}{\partial\theta_k}}_\text{direct gradient}} +
+    \sum_{\theta_l^*\in\mathcal{L}_k}\textcolor{blue}{\underbrace{\frac{d\theta_l^*}{d\theta_k}}_\text{best-response Jacobian}}
+    \times\textcolor{brown}{\underbrace{\frac{\partial\mathcal{C}_k}{\partial\theta_l^*}}_\text{direct gradient}}&amp;&amp;\text{(1)}
+\end{flalign}\]</div>
+<p>While calculating direct gradients is straightforward with existing automatic differentiation
+frameworks such as PyTorch, a major difficulty in gradient-based MLO lies in best-response Jacobian
+(i.e. <span class="math notranslate nohighlight">\(\frac{d\theta_l^*}{d\theta_k}\)</span>), which will be discussed in depth in the following
+subsections. Once gradient calculation is enabled, gradient-based optimization is executed from
+lower-level problems to upper-level problems in a topologically reverse order, reflecting the
+underlying hierarchy.</p>
+<section id="dataflow-graph-for-multilevel-optimization">
+<h2>Dataflow Graph for Multilevel Optimization<a class="headerlink" href="#dataflow-graph-for-multilevel-optimization" title="Permalink to this headline">¶</a></h2>
+<p>One may observe that the best-response Jacobian term in Equation (1) is expressed with a
+<em>total derivative</em> instead of a partial derivative. This is because <span class="math notranslate nohighlight">\(\theta_k\)</span> can affect
+<span class="math notranslate nohighlight">\(\theta_l^*\)</span> not only through a direct interaction, but also through multiple indirect
+interactions via other lower-level optimal parameters. For example, consider the four-problem MLO
+program illustrated in Figure 1. Here, the parameter of Problem 4 (<span class="math notranslate nohighlight">\(\theta_{p_4}\)</span>)
+affects the optimal parameter of Problem 3 (<span class="math notranslate nohighlight">\(\theta_{p_3}^*\)</span>) in two different ways:
+(1) <span class="math notranslate nohighlight">\(\theta_{p_4} \rightarrow \theta_{p_3}^*\)</span> and
+(2) <span class="math notranslate nohighlight">\(\theta_{p_4} \rightarrow \theta_{p_1}^* \rightarrow \theta_{p_3}^*\)</span>. In general, we can
+expand the best-response Jacobian <span class="math notranslate nohighlight">\(\frac{d\theta_l^*}{d\theta_k}\)</span> in Equation (1) by applying
+the chain rule for all paths from <span class="math notranslate nohighlight">\(\theta_k\)</span> to <span class="math notranslate nohighlight">\(\theta_l^*\)</span> as:</p>
+<div class="math notranslate nohighlight">
+\[\begin{flalign}
+    &amp;&amp;\frac{d\mathcal{C}_k}{d\theta_k} =
+    \frac{\partial\mathcal{C}_k}{\partial\theta_k} +
+    \sum_{\theta_l^*\in\mathcal{L}_k}\sum_{q\in\mathcal{Q}_{k,l}}\Bigg(\textcolor{red}{\underbrace{\frac{\partial\theta_{q(1)}^*}{\partial\theta_k}}_\text{upper-to-lower}}\times
+    \Bigg(\prod_{i=1}^{\text{len}(q)-1}\textcolor{green}{\underbrace{\frac{\partial\theta_{q(i+1)}^*}{\partial\theta_{q(i)}^*}}_\text{lower-to-upper}}\Bigg)\times\frac{\partial\mathcal{C}_k}{\partial\theta_l^*}\Bigg)&amp;&amp;\text{(2)}
+\end{flalign}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathcal{Q}_{k, l}\)</span> is a set of paths from <span class="math notranslate nohighlight">\(\theta_k\)</span> to <span class="math notranslate nohighlight">\(\theta_l^*\)</span>,
+and <span class="math notranslate nohighlight">\(q(i)\)</span> refers to the index of the <span class="math notranslate nohighlight">\(i\)</span>-th problem in the path <span class="math notranslate nohighlight">\(q\)</span> with the
+last point being <span class="math notranslate nohighlight">\(\theta_l^*\)</span>. Replacing a total derivative term in Equation (1) with
+a product of partial derivative terms using the chain rule allows us to ignore indirect
+interactions between problems, and only deal with direct interactions.</p>
+<figure class="align-center" id="id3">
+<a class="reference internal image-reference" href="../_images/dataflow.png"><img alt="../_images/dataflow.png" src="../_images/dataflow.png" style="width: 220.05px; height: 243.0px;" /></a>
+<figcaption>
+<p><span class="caption-text">Figure 1. A dataflow graph example of multilevel optimization</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>To formalize the path finding problem, we develop a novel dataflow graph for MLO. Unlike
+traditional dataflow graphs with no predefined hierarchy among nodes, a dataflow graph for
+multilevel optimization has two different types of directed edges: <em>lower-to-upper</em> and
+<em>upper-to-lower</em>. Each of these directed edges is respectively depicted with
+<span class="math notranslate nohighlight">\(\textcolor{green}{\text{green}}\)</span> and <span class="math notranslate nohighlight">\(\textcolor{red}{\text{red}}\)</span> arrows in Figure 1.
+Essentially, a lower-to-upper edge represents the directed dependency between two optimal
+parameters (i.e. <span class="math notranslate nohighlight">\(\theta_i^* \rightarrow \theta_j^*$ with $i&lt;j\)</span>), while an upper-to-lower
+edge represents the directed dependency between nonoptimal and optimal parameters
+(i.e. <span class="math notranslate nohighlight">\(\theta_i \rightarrow \theta_j^*\)</span> with <span class="math notranslate nohighlight">\(i&gt;j\)</span>). Since we need to find paths from
+the nonoptimal parameter <span class="math notranslate nohighlight">\(\theta_k\)</span> to the optimal parameter <span class="math notranslate nohighlight">\(\theta_l^*\)</span>, the first
+directed edge must be an upper-to-lower edge <span class="math notranslate nohighlight">\(\textcolor{red}{\text{(red)}}\)</span>, which connects
+<span class="math notranslate nohighlight">\(\theta_k\)</span> to some lower-level optimal parameter. Once it reaches the optimal parameter, it
+can only move through optimal parameters via lower-to-upper edges
+<span class="math notranslate nohighlight">\(\textcolor{mygreen}{\text{(green)}}\)</span> in the dataflow graph. Therefore, every valid path
+from <span class="math notranslate nohighlight">\(\theta_k\)</span> to <span class="math notranslate nohighlight">\(\theta_l^*\)</span> will start with an upper-to-lower edge, and then reach
+the destination only via lower-to-upper edges. The best-response Jacobian term for each edge in
+the dataflow graph is also marked with the corresponding color in Equation (2). We implement the
+above path finding mechanism with a modified depth-first search algorithm in Betty.</p>
+</section>
+<section id="gradient-calculation-with-best-response-jacobian">
+<h2>Gradient Calculation with Best-Response Jacobian<a class="headerlink" href="#gradient-calculation-with-best-response-jacobian" title="Permalink to this headline">¶</a></h2>
+<p>Automatic differentiation for MLO can be realized by calculating Equation (2) for each problem
+<span class="math notranslate nohighlight">\(P_k\)</span> (<span class="math notranslate nohighlight">\(k=1,\cdots,n\)</span>). However, a naive calculation of Equation (2) could be
+computationally onerous as it involves multiple matrix multiplications with best-response Jacobians,
+of which the computational complexity is <span class="math notranslate nohighlight">\(\mathcal{O}(n^3)\)</span>. To alleviate this issue, we
+observe that the rightmost term in Equation (2) is a vector, which allows us to reduce the
+computational complexity of Equation (2) to <span class="math notranslate nohighlight">\(\mathcal{O}(n^2)\)</span> by iteratively performing
+matrix-vector multiplication from right to left (or, equivalently, reverse-traversing a path
+<span class="math notranslate nohighlight">\(q\)</span> in the dataflow graph). As such, matrix-vector multiplication between the best-response
+Jacobian and a vector serves as a base operation of efficient automatic differentiation for MLO.
+Mathematically, this problem can be simply written as follows:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{flalign}
+    &amp;&amp;\text{Calculate}\,:\quad&amp;\frac{\partial w^*(\lambda)}{\partial \lambda}\times v &amp;&amp;\quad\quad\quad\text{(3)}\\
+    &amp;&amp;\text{Given}\,:\quad&amp;w^*(\lambda) = \underset{w}{\mathrm{argmin}}\;\mathcal{C}(w, \lambda) &amp;&amp;\quad\quad\quad\text{(4)}
+\end{flalign}\end{split}\]</div>
+<p>Two major challenges in the above problems are: (1) approximating the solution of the optimization
+problem (i.e. <span class="math notranslate nohighlight">\(w^*(\lambda)\)</span>), and (2) differentiating through the (approximated) solution.</p>
+<p>In practice, an approximation of <span class="math notranslate nohighlight">\(w^*(\lambda)\)</span> is typically achieved by unrolling a small
+number of gradient steps, which can significantly reduce the computational cost. While we could
+potentially obtain a better approximation of <span class="math notranslate nohighlight">\(w^*(\lambda)\)</span> by running gradient steps until
+convergence, this procedure alone can take a few days (or even weeks) when the underlying
+optimization problem is large-scale (e.g. ImageNet or BERT).</p>
+<p>Once <span class="math notranslate nohighlight">\(w^*(\lambda)\)</span> is approximated, matrix-vector multiplication between the best-response
+Jacobian <span class="math notranslate nohighlight">\(\frac{dw^*(\lambda)}{d\lambda}\)</span> and a vector <span class="math notranslate nohighlight">\(v\)</span> is popularly obtained by
+either iterative differentiation (ITD) or approximate implicit differentiation (AID). This problem
+has been extensively studied in bilevel optimization literature
+[<a class="reference external" href="https://arxiv.org/abs/2006.16218">Grazzi et al.</a>,
+<a class="reference external" href="https://arxiv.org/abs/1703.01785">Franceschi et al.</a>,
+<a class="reference external" href="https://arxiv.org/abs/1806.09055">Liu et al.</a>,
+<a class="reference external" href="https://arxiv.org/abs/1911.02590">Lorraine et al.</a>,
+<a class="reference external" href="https://arxiv.org/abs/1502.03492">Maclaurin et al.</a>],
+and we direct interested readers to the original papers,</p>
+<p>Here, we provide several insights about each algorithm here. Roughly speaking, ITD differentiates
+through the optimization <em>path</em> of Equation (4), whereas AID only depends on the (approximated)
+solution <span class="math notranslate nohighlight">\(w^*(\lambda)\)</span>. Due to this difference, AID is oftentimes considered to be more
+memory efficient than ITD. The same observation has also been made based on a theoretical
+analysis in <a class="reference external" href="https://arxiv.org/abs/2010.07962">Ji et al.</a>. Moreover, a dependency to the
+optimization path requires ITD to track the intermediate states of the parameter during
+optimization, but existing frameworks like PyTorch override such intermediate states through the
+use of stateful modules and in-place operations in the optimizer. Hence, ITD requires patching
+modules and optimizers to support intermediate state tracking as well.</p>
+<p>Overall, AID provides two important benefits compared to ITD: it can allow better memory
+efficiency, and use native modules/optimizers of existing frameworks. Thus, in Betty we also
+primarily direct our focus on AID algorithms while also providing an implementation of ITD for
+completeness. Currently available best-response Jacobian calculation algorithms in Betty include
+(1) ITD with reverse-mode automatic differentiation [<a class="reference external" href="https://arxiv.org/abs/1703.03400">Finn et al.</a>],
+(2) AID with Neumann series [<a class="reference external" href="https://arxiv.org/abs/1911.02590">Lorraine et al.</a>],
+(3) AID with conjugate gradient [<a class="reference external" href="https://arxiv.org/abs/1909.04630">Rajeswaran et al.</a>], and
+(4) AID with finite difference [<a class="reference external" href="https://arxiv.org/abs/1806.09055">Liu et al.</a>].
+Users can choose whichever algorithm is most-appropriate for each problem in their MLO program,
+and the chosen algorithm is used to perform the matrix-vector multiplication with best-response
+Jacobians in Equation (2) for the corresponding problem based on the dataflow graph,
+accomplishing automatic differentiation for MLO. By default, Betty uses (4) AID with finite
+difference (i.e. <code class="docutils literal notranslate"><span class="pre">darts</span></code>), as we empirically observe that <code class="docutils literal notranslate"><span class="pre">darts</span></code> achieves the best memory
+efficiency, training wall time, and final accuracy across a wide range of tasks.</p>
+<p>In general, the above automatic differentiation technique for multilevel optimization has a lot in
+common with reverse-mode automatic differentiation (i.e. backpropagation) in neural networks. In
+particular, both techniques achieve gradient calculation by iteratively multiplying Jacobian
+matrices while reverse-traversing dataflow graphs. However, the dataflow graph of MLO has two
+different types of edges, due to its unique constraint criteria, unlike that of neural networks
+with a single edge type. Furthermore, Jacobian matrices in MLO are generally approximated with ITD
+or AID while those in neural networks can be analytically calculated.</p>
+</section>
+</section>
+
+
+             </article>
+             
+            </div>
+            <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="concept_architecture.html" class="btn btn-neutral float-right" title="Architecture" accesskey="n" rel="next">Next <img src="../_static/images/chevron-right-orange.svg" class="next-page"></a>
+      
+      
+        <a href="concept_software.html" class="btn btn-neutral" title="Software Design" accesskey="p" rel="prev"><img src="../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+      
+    </div>
+  
+
+  
+
+    <hr>
+
+  
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, sangkeun00.
+
+    </p>
+  </div>
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+      </div>
+     
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">Autodiff for Multilevel Optimization</a><ul>
+<li><a class="reference internal" href="#dataflow-graph-for-multilevel-optimization">Dataflow Graph for Multilevel Optimization</a></li>
+<li><a class="reference internal" href="#gradient-calculation-with-best-response-jacobian">Gradient Calculation with Best-Response Jacobian</a></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  
+
+
+  
+
+     
+       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+         <script src="../_static/jquery.js"></script>
+         <script src="../_static/underscore.js"></script>
+         <script src="../_static/doctools.js"></script>
+         <script src="../_static/tabs.js"></script>
+         <script src="../_static/design-tabs.js"></script>
+         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+     
+
+  
+
+  <script type="text/javascript" src="../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+    <div class="container">
+      <div class="row">
+      </div>
+    </div>
+  </div>
+
+  <div class="cookie-banner-wrapper">
+  <div class="container">
+    <p class="gdpr-notice">To analyze traffic and optimize your experience, we serve cookies on this site. By clicking or navigating, you agree to allow our usage of cookies. Read PyTorch Lightning's <a href="https://pytorchlightning.ai/privacy-policy">Privacy Policy</a>.</p>
+    <img class="close-button" src="../_static/images/pytorch-x.svg">
+  </div>
+</div>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://leopard-ai.github.io/betty">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/leopard-ai/betty">Github</a>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function(e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PQBQ3CV"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+ </body>
+</html>

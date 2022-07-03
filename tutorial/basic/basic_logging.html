@@ -1,0 +1,517 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-PQBQ3CV');
+  </script>
+  <!-- End Google Tag Manager -->
+
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Logging &mdash; Betty</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/tabs.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Memory Optimization" href="basic_memory.html" />
+    <link rel="prev" title="Validation" href="basic_validation.html" />
+  <!-- Google Analytics -->
+  
+  <!-- End Google Analytics -->
+  
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/UCity/UCity-Light.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/UCity/UCity-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/UCity/UCity-Semibold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../../_static/fonts/Inconsolata/Inconsolata.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <script defer src="https://use.fontawesome.com/releases/v6.1.1/js/all.js" integrity="sha384-xBXmu0dk1bEoiwd71wOonQLyH+VpgR1XcDH3rtxrLww5ajNTuMvBdL5SOiFZnNdp" crossorigin="anonymous"></script>
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
+      <!--  <img class="call-to-action-img" src="../../_static/images/logo-lightning-icon.png"/> -->
+      </a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://leopard-ai.github.io/betty">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/leopard-ai/betty">GitHub</a>
+          </li>
+
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="pytorch-body">
+
+   
+
+    
+
+    <div class="table-of-contents-link-wrapper">
+      <span>Table of Contents</span>
+      <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+    </div>
+
+    <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+      <div class="pytorch-side-scroll">
+        <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          <div class="pytorch-left-menu-search">
+            
+
+            
+              
+              
+            
+
+            
+
+
+  
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+          </div>
+
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Get Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart/concept.html">Major Concepts</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="basic.html">Basic</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="basic_start.html">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_validation.html">Add Validation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Add Logging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_memory.html">Memory Optimization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../intermediate/intermediate.html">Intermediate</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../betty/betty.engine.html">betty.engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../betty/betty.problems.html">betty.problems</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../betty/betty.hypergradient.html">betty.hypergradient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../betty/betty.optim.html">betty.optim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../betty/betty.logging.html">betty.logging</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/data_reweighting.html">Data Reweighting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/neural_architecture_search.html">Neural Architecture Search</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <div class="pytorch-container">
+      <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+        <div class="pytorch-breadcrumbs-wrapper">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../../index.html">
+          
+            Docs
+          
+        </a> &gt;
+      </li>
+
+        
+          <li><a href="basic.html">Basic</a> &gt;</li>
+        
+      <li>Logging</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/tutorial/basic/basic_logging.rst.txt" rel="nofollow"><img src="../../_static/images/view-page-source-icon.svg"></a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+        </div>
+
+        <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+          Shortcuts
+        </div>
+      </div>
+
+      <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+        <div class="pytorch-content-left">
+
+        
+          
+          <div class="rst-content">
+          
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+             <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+              
+  <section id="logging">
+<h1>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h1>
+<p>Monitoring metrics (e.g. training loss) is essential in ML development.  Betty provides
+an easy-to-use interface for flexibly logging whichever metrics are of interest to
+users, for both training and validation procedures. Specifically, users can enable
+logging by returning a Python dictionary in <code class="code docutils literal notranslate"><span class="pre">training_step</span></code> of the <code class="docutils literal notranslate"><span class="pre">Problem</span></code>
+class and <code class="code docutils literal notranslate"><span class="pre">validation</span></code> of the <code class="docutils literal notranslate"><span class="pre">Engine</span></code> class, respectively, for training and
+validation procedures. In our data reweighting example from <a class="reference internal" href="basic_start.html"><span class="doc">Quick Start</span></a>, this can
+be implemented as:</p>
+<p><strong>Training (Problem)</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Reweight</span><span class="p">(</span><span class="n">ImplicitProblem</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+        <span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">batch</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">labels</span><span class="o">.</span><span class="n">long</span><span class="p">())</span>
+        <span class="n">acc</span> <span class="o">=</span> <span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">labels</span><span class="o">.</span><span class="n">long</span><span class="p">())</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">*</span> <span class="mi">100</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;loss&quot;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="s2">&quot;acc&quot;</span><span class="p">:</span> <span class="n">acc</span><span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Validation (Engine)</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ReweightingEngine</span><span class="p">(</span><span class="n">Engine</span><span class="p">):</span>
+   <span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">()</span>
+   <span class="k">def</span> <span class="nf">validation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+       <span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span>
+       <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+       <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">best_acc</span><span class="p">):</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">best_acc</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+       <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">test_dataloader</span><span class="p">:</span>
+           <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+           <span class="n">correct</span> <span class="o">+=</span> <span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+           <span class="n">total</span> <span class="o">+=</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+       <span class="n">acc</span> <span class="o">=</span> <span class="n">correct</span> <span class="o">/</span> <span class="n">total</span> <span class="o">*</span> <span class="mi">100</span>
+       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_acc</span> <span class="o">&lt;</span> <span class="n">acc</span><span class="p">:</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">best_acc</span> <span class="o">=</span> <span class="n">acc</span>
+
+       <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;acc&quot;</span><span class="p">:</span> <span class="n">acc</span><span class="p">,</span> <span class="s2">&quot;best_acc&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_acc</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Finally, users can specify how often they want to log these metrics in <code class="docutils literal notranslate"><span class="pre">Config</span></code> and
+<code class="docutils literal notranslate"><span class="pre">EngineConfig</span></code>, respectively, for training (<code class="docutils literal notranslate"><span class="pre">Problem</span></code>) and validation (<code class="docutils literal notranslate"><span class="pre">Engine</span></code>).
+If users don’t specify the log step in configurations, logging will be automatically
+disabled.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Training (Problem)</span>
+<span class="n">reweight_config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;darts&quot;</span><span class="p">,</span> <span class="n">log_step</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+<span class="c1"># Validation (Engine)</span>
+<span class="n">engine_config</span> <span class="o">=</span> <span class="n">EngineConfig</span><span class="p">(</span><span class="n">train_iters</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="n">valid_step</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When logging is enabled, users should see the following output upon executing
+<code class="docutils literal notranslate"><span class="pre">engine.run()</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">21</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Initializing</span> <span class="n">Multilevel</span> <span class="n">Optimization</span><span class="o">...</span>
+
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">24</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="o">***</span> <span class="n">Problem</span> <span class="n">Information</span> <span class="o">***</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">24</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Name</span><span class="p">:</span> <span class="n">reweight</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">24</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Uppers</span><span class="p">:</span> <span class="p">[]</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">24</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Lowers</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;classifier&#39;</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">24</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Paths</span><span class="p">:</span> <span class="p">[[</span><span class="s1">&#39;reweight&#39;</span><span class="p">,</span> <span class="s1">&#39;classifier&#39;</span><span class="p">,</span> <span class="s1">&#39;reweight&#39;</span><span class="p">]]</span>
+
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">24</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="o">***</span> <span class="n">Problem</span> <span class="n">Information</span> <span class="o">***</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">24</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Name</span><span class="p">:</span> <span class="n">classifier</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">24</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Uppers</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;reweight&#39;</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">24</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Lowers</span><span class="p">:</span> <span class="p">[]</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">24</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Paths</span><span class="p">:</span> <span class="p">[]</span>
+
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">24</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="n">Time</span> <span class="n">spent</span> <span class="n">on</span> <span class="n">initialization</span><span class="p">:</span> <span class="mf">3.126</span> <span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">27</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="p">[</span><span class="n">Problem</span> <span class="s2">&quot;reweight&quot;</span><span class="p">]</span> <span class="p">[</span><span class="n">Global</span> <span class="n">Step</span> <span class="mi">100</span><span class="p">]</span> <span class="p">[</span><span class="n">Local</span> <span class="n">Step</span> <span class="mi">100</span><span class="p">]</span> <span class="n">loss</span><span class="p">:</span> <span class="mf">0.9833700656890869</span> <span class="o">||</span> <span class="n">acc</span><span class="p">:</span> <span class="mf">72.99999594688416</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">27</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="p">[</span><span class="n">Validation</span><span class="p">]</span> <span class="p">[</span><span class="n">Global</span> <span class="n">Step</span> <span class="mi">100</span><span class="p">]</span> <span class="n">acc</span><span class="p">:</span> <span class="mf">72.39999999999999</span> <span class="o">||</span> <span class="n">best_acc</span><span class="p">:</span> <span class="mf">72.39999999999999</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">30</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="p">[</span><span class="n">Problem</span> <span class="s2">&quot;reweight&quot;</span><span class="p">]</span> <span class="p">[</span><span class="n">Global</span> <span class="n">Step</span> <span class="mi">200</span><span class="p">]</span> <span class="p">[</span><span class="n">Local</span> <span class="n">Step</span> <span class="mi">200</span><span class="p">]</span> <span class="n">loss</span><span class="p">:</span> <span class="mf">0.5147801637649536</span> <span class="o">||</span> <span class="n">acc</span><span class="p">:</span> <span class="mf">88.99999856948853</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">30</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="p">[</span><span class="n">Validation</span><span class="p">]</span> <span class="p">[</span><span class="n">Global</span> <span class="n">Step</span> <span class="mi">200</span><span class="p">]</span> <span class="n">acc</span><span class="p">:</span> <span class="mf">85.22</span> <span class="o">||</span> <span class="n">best_acc</span><span class="p">:</span> <span class="mf">85.22</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">32</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="p">[</span><span class="n">Problem</span> <span class="s2">&quot;reweight&quot;</span><span class="p">]</span> <span class="p">[</span><span class="n">Global</span> <span class="n">Step</span> <span class="mi">300</span><span class="p">]</span> <span class="p">[</span><span class="n">Local</span> <span class="n">Step</span> <span class="mi">300</span><span class="p">]</span> <span class="n">loss</span><span class="p">:</span> <span class="mf">0.4090099036693573</span> <span class="o">||</span> <span class="n">acc</span><span class="p">:</span> <span class="mf">87.99999952316284</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">33</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="p">[</span><span class="n">Validation</span><span class="p">]</span> <span class="p">[</span><span class="n">Global</span> <span class="n">Step</span> <span class="mi">300</span><span class="p">]</span> <span class="n">acc</span><span class="p">:</span> <span class="mf">89.31</span> <span class="o">||</span> <span class="n">best_acc</span><span class="p">:</span> <span class="mf">89.31</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">35</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="p">[</span><span class="n">Problem</span> <span class="s2">&quot;reweight&quot;</span><span class="p">]</span> <span class="p">[</span><span class="n">Global</span> <span class="n">Step</span> <span class="mi">400</span><span class="p">]</span> <span class="p">[</span><span class="n">Local</span> <span class="n">Step</span> <span class="mi">400</span><span class="p">]</span> <span class="n">loss</span><span class="p">:</span> <span class="mf">0.6072959899902344</span> <span class="o">||</span> <span class="n">acc</span><span class="p">:</span> <span class="mf">89.99999761581421</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">36</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="p">[</span><span class="n">Validation</span><span class="p">]</span> <span class="p">[</span><span class="n">Global</span> <span class="n">Step</span> <span class="mi">400</span><span class="p">]</span> <span class="n">acc</span><span class="p">:</span> <span class="mf">90.88000000000001</span> <span class="o">||</span> <span class="n">best_acc</span><span class="p">:</span> <span class="mf">90.88000000000001</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">38</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="p">[</span><span class="n">Problem</span> <span class="s2">&quot;reweight&quot;</span><span class="p">]</span> <span class="p">[</span><span class="n">Global</span> <span class="n">Step</span> <span class="mi">500</span><span class="p">]</span> <span class="p">[</span><span class="n">Local</span> <span class="n">Step</span> <span class="mi">500</span><span class="p">]</span> <span class="n">loss</span><span class="p">:</span> <span class="mf">0.32159245014190674</span> <span class="o">||</span> <span class="n">acc</span><span class="p">:</span> <span class="mf">93.00000071525574</span>
+<span class="p">[</span><span class="mi">2022</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">20</span> <span class="mi">13</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">39</span><span class="p">]</span> <span class="p">[</span><span class="n">INFO</span><span class="p">]</span> <span class="p">[</span><span class="n">Validation</span><span class="p">]</span> <span class="p">[</span><span class="n">Global</span> <span class="n">Step</span> <span class="mi">500</span><span class="p">]</span> <span class="n">acc</span><span class="p">:</span> <span class="mf">90.41</span> <span class="o">||</span> <span class="n">best_acc</span><span class="p">:</span> <span class="mf">90.88000000000001</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<section id="visualization">
+<h2>Visualization<a class="headerlink" href="#visualization" title="Permalink to this headline">¶</a></h2>
+<p>In addition to logging in the terminal, we allow users to visualize metrics
+with visualization tools such as
+<a class="reference external" href="https://pytorch.org/docs/stable/tensorboard.html">TensorBoard</a>. Users only
+need to specify the type of the visualization tool they want in <code class="docutils literal notranslate"><span class="pre">EngineConfig</span></code>
+as:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">EngineConfig</span><span class="p">(</span><span class="n">train_iters</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">valid_step</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">logger_type</span><span class="o">=</span><span class="s1">&#39;tensorboard&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For example, with the <code class="docutils literal notranslate"><span class="pre">tensorboard</span></code> option, visualization results will be saved
+in <code class="docutils literal notranslate"><span class="pre">./betty_tensorboard</span></code> and can be opened with</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tensorboard</span> <span class="o">--</span><span class="n">logdir</span><span class="o">=</span><span class="n">betty_tensorboard</span>
+</pre></div>
+</div>
+<p>Currently, we only support
+<a class="reference external" href="https://pytorch.org/docs/stable/tensorboard.html">TensorBoard</a> and
+<a class="reference external" href="https://github.com/wandb/client">Weights &amp; Biases</a> for visualizaiton tools.</p>
+</section>
+</section>
+
+
+             </article>
+             
+            </div>
+            <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="basic_memory.html" class="btn btn-neutral float-right" title="Memory Optimization" accesskey="n" rel="next">Next <img src="../../_static/images/chevron-right-orange.svg" class="next-page"></a>
+      
+      
+        <a href="basic_validation.html" class="btn btn-neutral" title="Validation" accesskey="p" rel="prev"><img src="../../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+      
+    </div>
+  
+
+  
+
+    <hr>
+
+  
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, sangkeun00.
+
+    </p>
+  </div>
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+      </div>
+     
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">Logging</a><ul>
+<li><a class="reference internal" href="#visualization">Visualization</a></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  
+
+
+  
+
+     
+       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+         <script src="../../_static/jquery.js"></script>
+         <script src="../../_static/underscore.js"></script>
+         <script src="../../_static/doctools.js"></script>
+         <script src="../../_static/tabs.js"></script>
+         <script src="../../_static/design-tabs.js"></script>
+     
+
+  
+
+  <script type="text/javascript" src="../../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+    <div class="container">
+      <div class="row">
+      </div>
+    </div>
+  </div>
+
+  <div class="cookie-banner-wrapper">
+  <div class="container">
+    <p class="gdpr-notice">To analyze traffic and optimize your experience, we serve cookies on this site. By clicking or navigating, you agree to allow our usage of cookies. Read PyTorch Lightning's <a href="https://pytorchlightning.ai/privacy-policy">Privacy Policy</a>.</p>
+    <img class="close-button" src="../../_static/images/pytorch-x.svg">
+  </div>
+</div>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://leopard-ai.github.io/betty">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/leopard-ai/betty">Github</a>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function(e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PQBQ3CV"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+ </body>
+</html>

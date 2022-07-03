@@ -1,0 +1,825 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-PQBQ3CV');
+  </script>
+  <!-- End Google Tag Manager -->
+
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>betty.problems &mdash; Betty</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="betty.hypergradient" href="betty.hypergradient.html" />
+    <link rel="prev" title="betty.engine" href="betty.engine.html" />
+  <!-- Google Analytics -->
+  
+  <!-- End Google Analytics -->
+  
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Light.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Semibold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/Inconsolata/Inconsolata.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <script defer src="https://use.fontawesome.com/releases/v6.1.1/js/all.js" integrity="sha384-xBXmu0dk1bEoiwd71wOonQLyH+VpgR1XcDH3rtxrLww5ajNTuMvBdL5SOiFZnNdp" crossorigin="anonymous"></script>
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
+      <!--  <img class="call-to-action-img" src="../_static/images/logo-lightning-icon.png"/> -->
+      </a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://leopard-ai.github.io/betty">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/leopard-ai/betty">GitHub</a>
+          </li>
+
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="pytorch-body">
+
+   
+
+    
+
+    <div class="table-of-contents-link-wrapper">
+      <span>Table of Contents</span>
+      <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+    </div>
+
+    <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+      <div class="pytorch-side-scroll">
+        <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          <div class="pytorch-left-menu-search">
+            
+
+            
+              
+              
+            
+
+            
+
+
+  
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+          </div>
+
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Get Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/concept.html">Major Concepts</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/basic/basic.html">Basic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/intermediate/intermediate.html">Intermediate</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Docs</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="betty.engine.html">betty.engine</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">betty.problems</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-betty.problems.problem">Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#implicit-problem">Implicit Problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#iterative-problem">Iterative Problem</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="betty.hypergradient.html">betty.hypergradient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="betty.optim.html">betty.optim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="betty.logging.html">betty.logging</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/data_reweighting.html">Data Reweighting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/neural_architecture_search.html">Neural Architecture Search</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <div class="pytorch-container">
+      <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+        <div class="pytorch-breadcrumbs-wrapper">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../index.html">
+          
+            Docs
+          
+        </a> &gt;
+      </li>
+
+        
+      <li>betty.problems</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/betty/betty.problems.rst.txt" rel="nofollow"><img src="../_static/images/view-page-source-icon.svg"></a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+        </div>
+
+        <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+          Shortcuts
+        </div>
+      </div>
+
+      <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+        <div class="pytorch-content-left">
+
+        
+          
+          <div class="rst-content">
+          
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+             <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+              
+  <section id="betty-problems">
+<h1>betty.problems<a class="headerlink" href="#betty-problems" title="Permalink to this headline">¶</a></h1>
+<section id="module-betty.problems.problem">
+<span id="problem"></span><h2>Problem<a class="headerlink" href="#module-betty.problems.problem" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">betty.problems.problem.</span></span><span class="sig-name descname"><span class="pre">Problem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_data_loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the base class for an optimization problem in multilevel optimization.
+Specifically, each problem is defined by the parameter (or module), the sets of the upper
+and lower constraining problems, the dataset, the loss function, the optimizer, and other
+optimization configurations (e.g. best-response Jacobian calculation algorithm, number of
+unrolling steps, etc.).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.add_child">
+<span class="sig-name descname"><span class="pre">add_child</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">problem</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.add_child"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.add_child" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add <code class="docutils literal notranslate"><span class="pre">problem</span></code> to the lower-level problem list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>problem</strong> (<a class="reference internal" href="#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – lower-level problem in the dependency graph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.add_env">
+<span class="sig-name descname"><span class="pre">add_env</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.add_env"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.add_env" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add environment to the current problem.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>logger</strong> – logger defined by users in <code class="docutils literal notranslate"><span class="pre">Engine</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.add_logger">
+<span class="sig-name descname"><span class="pre">add_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.add_logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.add_logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add logger to the current problem.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>logger</strong> – logger defined by users in <code class="docutils literal notranslate"><span class="pre">Engine</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.add_parent">
+<span class="sig-name descname"><span class="pre">add_parent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">problem</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.add_parent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.add_parent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add <code class="docutils literal notranslate"><span class="pre">problem</span></code> to the upper-level problem list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>problem</strong> (<a class="reference internal" href="#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – upper-level problem in the dependency graph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.add_paths">
+<span class="sig-name descname"><span class="pre">add_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">paths</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.add_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.add_paths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add new hypergradient backpropagation paths.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.backward">
+<span class="sig-name descname"><span class="pre">backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retain_graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_unused</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.backward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.backward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the gradient of <code class="docutils literal notranslate"><span class="pre">loss</span></code> with respect to <code class="docutils literal notranslate"><span class="pre">params</span></code> based on a user-defined
+<code class="docutils literal notranslate"><span class="pre">config</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>loss</strong> (<em>Tensor</em>) – Outputs of the differentiated function.</p></li>
+<li><p><strong>params</strong> (<em>Sequence of Tensor</em>) – Inputs with respect to which the gradient will be returned.</p></li>
+<li><p><strong>paths</strong> (<em>List of list of Problem</em>) – Paths on which the gradient will be calculated.</p></li>
+<li><p><strong>create_graph</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, graph of the derivative will be constructed, allowing to compute higher order
+derivative products. Default: <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>retain_graph</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">False</span></code>, the graph used to compute the grad will be freed. Note that in nearly all
+cases setting this option to <code class="docutils literal notranslate"><span class="pre">True</span></code> is not needed and often can be worked around in a much
+more efficient way. Defaults to the value of <code class="docutils literal notranslate"><span class="pre">create_graph</span></code>.</p></li>
+<li><p><strong>allow_unused</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">False</span></code>, specifying inputs that were not used when computing outputs (and therefore
+their grad is always zero) is an error. Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.cache_states">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cache_states</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.cache_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.cache_states" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cache params, buffers, optimizer states when <code class="docutils literal notranslate"><span class="pre">config.roll_back</span></code> is set to <code class="docutils literal notranslate"><span class="pre">True</span></code> in
+<code class="docutils literal notranslate"><span class="pre">step</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.check_ready">
+<span class="sig-name descname"><span class="pre">check_ready</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.check_ready"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.check_ready" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if unrolling processes of lower level problems in the hierarchical dependency
+graph are all ready/done. <code class="docutils literal notranslate"><span class="pre">step</span></code> function is only excuted when this method returns
+<code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.children">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">children</span></span><a class="headerlink" href="#betty.problems.problem.Problem.children" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return lower-level problems for the current problem.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.clear_dependencies">
+<span class="sig-name descname"><span class="pre">clear_dependencies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.clear_dependencies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.clear_dependencies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear the dependencies of the current problem.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.config">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#betty.problems.problem.Problem.config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the configuration for the current problem.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.count">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">count</span></span><a class="headerlink" href="#betty.problems.problem.Problem.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the local step for the current problem.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>local step</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.eval">
+<span class="sig-name descname"><span class="pre">eval</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.eval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.eval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the current problem to the evaluation mode.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Users define how forward (or call) function is defined for the problem here.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.get_batch">
+<span class="sig-name descname"><span class="pre">get_batch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.get_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.get_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load training batch from the user-provided data loader</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>New training batch</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.get_loss">
+<span class="sig-name descname"><span class="pre">get_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.get_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.get_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate loss and log metrics for the current batch based on the user-defined loss
+function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>loss and log metrics (e.g. classification accuracy)</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine_config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">initialize</span></code> patches/sets up module, optimizer, data loader, etc. after compiling a
+user-provided configuration (e.g., fp16 training, iterative differentiation)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.is_implemented">
+<span class="sig-name descname"><span class="pre">is_implemented</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.is_implemented"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.is_implemented" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if <code class="docutils literal notranslate"><span class="pre">fn_name</span></code> method is implemented in the class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.leaf">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">leaf</span></span><a class="headerlink" href="#betty.problems.problem.Problem.leaf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return whether the current problem is leaf or not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>leaf</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.load_state_dict">
+<span class="sig-name descname"><span class="pre">load_state_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.load_state_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.load_state_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.log">
+<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stats</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_step</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log (training) stats to the <code class="docutils literal notranslate"><span class="pre">self.logger</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stats</strong> (<em>Any</em>) – log metrics such as loss and classification accuracy.</p></li>
+<li><p><strong>step</strong> (<em>int</em>) – global/local step associated with the <code class="docutils literal notranslate"><span class="pre">stats</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#betty.problems.problem.Problem.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>[summary]
+Return the user-defined name of the module.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.one_step_descent">
+<span class="sig-name descname"><span class="pre">one_step_descent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.one_step_descent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.one_step_descent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.optimizer_step">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">optimizer_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.optimizer_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.optimizer_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update weights as in PyTorch’s native <code class="docutils literal notranslate"><span class="pre">optim.step()</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.parameters">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all parameters for the current problem.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.parents">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parents</span></span><a class="headerlink" href="#betty.problems.problem.Problem.parents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return upper-level problems for the current problem.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.paths">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">paths</span></span><a class="headerlink" href="#betty.problems.problem.Problem.paths" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return hypergradient calculation paths for the current problem.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.recover_states">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">recover_states</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.recover_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.recover_states" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recover params, buffers, optimizer states when <code class="docutils literal notranslate"><span class="pre">config.roll_back</span></code> is set to <code class="docutils literal notranslate"><span class="pre">True</span></code> in
+<code class="docutils literal notranslate"><span class="pre">step</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.set_grads">
+<span class="sig-name descname"><span class="pre">set_grads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grads</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.set_grads"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.set_grads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set gradients for trainable parameters. <code class="docutils literal notranslate"><span class="pre">params.grad</span> <span class="pre">=</span> <span class="pre">grads</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<em>Sequence of Tensor</em>) – Trainable parameters</p></li>
+<li><p><strong>grads</strong> (<em>Sequence of Tensor</em>) – Calculated gradient</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.set_problem_attr">
+<span class="sig-name descname"><span class="pre">set_problem_attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">problem</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.set_problem_attr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.set_problem_attr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set class attributes for upper-/lower-level problems based on their names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>problem</strong> (<a class="reference internal" href="#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – lower- or upper-level problem in the dependency graph</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>name of <code class="docutils literal notranslate"><span class="pre">problem</span></code></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.state_dict">
+<span class="sig-name descname"><span class="pre">state_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.state_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.state_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">global_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.step" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">step</span></code> method abstracts a one-step gradient descent update with four sub-steps:
+1) data loading, 2) cost calculation, 3) gradient calculation, and 4) parameter update.
+It also calls upper-level problems’ step methods after unrolling gradient steps based on
+the hierarchical dependency graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>global_step</strong> (<em>int</em><em>, </em><em>optional</em>) – global step of the whole multilevel optimization. Defaults to None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.step_after_roll_back">
+<span class="sig-name descname"><span class="pre">step_after_roll_back</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.step_after_roll_back"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.step_after_roll_back" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.step_normal">
+<span class="sig-name descname"><span class="pre">step_normal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">global_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.step_normal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.step_normal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.train">
+<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the current problem to the training mode.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.trainable_parameters">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trainable_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.trainable_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.trainable_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define all <em>trainable</em> parameters for the current problem.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.training_step">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">training_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.training_step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.training_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Users define the loss function of the problem here.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.training_step_exec">
+<span class="sig-name descname"><span class="pre">training_step_exec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.training_step_exec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.training_step_exec" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.zero_grad">
+<span class="sig-name descname"><span class="pre">zero_grad</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.zero_grad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.zero_grad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set gradients for trainable parameters for the current problem to 0.
+Similar with PyTorch’s <code class="docutils literal notranslate"><span class="pre">optim.zero_grad()</span></code> or <code class="docutils literal notranslate"><span class="pre">module.zero_grad()</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="implicit-problem">
+<h2>Implicit Problem<a class="headerlink" href="#implicit-problem" title="Permalink to this headline">¶</a></h2>
+<p>Implicit problem is used when best-response Jacobian for the current problem is calculated with
+(approximate) implicit differentiation (AID). AID doesn’t require patching module/optimizer, and
+usually achieve memory &amp; compute efficiency especially when the large unrolling step is used. We
+recommend users to use <code class="docutils literal notranslate"><span class="pre">ImplicitProblem</span></code> as a default class to define problems in MLO.</p>
+<span class="target" id="module-betty.problems.implicit_problem"></span><dl class="py class">
+<dt class="sig sig-object py" id="betty.problems.implicit_problem.ImplicitProblem">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">betty.problems.implicit_problem.</span></span><span class="sig-name descname"><span class="pre">ImplicitProblem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_data_loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/implicit_problem.html#ImplicitProblem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.implicit_problem.ImplicitProblem" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">ImplicitProblem</span></code> is sublassed from <code class="docutils literal notranslate"><span class="pre">Problem</span></code>.</p>
+</dd></dl>
+
+</section>
+<section id="iterative-problem">
+<h2>Iterative Problem<a class="headerlink" href="#iterative-problem" title="Permalink to this headline">¶</a></h2>
+<p>Iterative Problem is used when best-response Jacobian for the current problem is calculated with
+iterative differentiation (ITD). ITD requires patching module/optimizer to track intermediate
+parameter states for the gradient flow. We discourage users to use this class, because
+memory/computation efficiency of ITD is oftentimes worse than AID. In addition, users may need to
+be familiar with functional programming style due to the use of stateless modules.</p>
+<span class="target" id="module-betty.problems.iterative_problem"></span><dl class="py class">
+<dt class="sig sig-object py" id="betty.problems.iterative_problem.IterativeProblem">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">betty.problems.iterative_problem.</span></span><span class="sig-name descname"><span class="pre">IterativeProblem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_data_loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/iterative_problem.html#IterativeProblem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.iterative_problem.IterativeProblem" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">IterativeProblem</span></code> is sublassed from <code class="docutils literal notranslate"><span class="pre">Problem</span></code>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.iterative_problem.IterativeProblem.patch_modules">
+<span class="sig-name descname"><span class="pre">patch_modules</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/iterative_problem.html#IterativeProblem.patch_modules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.iterative_problem.IterativeProblem.patch_modules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Patch PyTorch’s native stateful module into the stateless module so as to support
+functional forward that takes params as its input.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.iterative_problem.IterativeProblem.patch_optimizer">
+<span class="sig-name descname"><span class="pre">patch_optimizer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/iterative_problem.html#IterativeProblem.patch_optimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.iterative_problem.IterativeProblem.patch_optimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Patch PyTorch’s native optimizer by replacing all involved in-place operations to allow
+gradient flow through the parameter update process.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.iterative_problem.IterativeProblem.patch_scheduler">
+<span class="sig-name descname"><span class="pre">patch_scheduler</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/iterative_problem.html#IterativeProblem.patch_scheduler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.iterative_problem.IterativeProblem.patch_scheduler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Patch scheduler to be compatible with the patched optimizer</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+             </article>
+             
+            </div>
+            <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="betty.hypergradient.html" class="btn btn-neutral float-right" title="betty.hypergradient" accesskey="n" rel="next">Next <img src="../_static/images/chevron-right-orange.svg" class="next-page"></a>
+      
+      
+        <a href="betty.engine.html" class="btn btn-neutral" title="betty.engine" accesskey="p" rel="prev"><img src="../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+      
+    </div>
+  
+
+  
+
+    <hr>
+
+  
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, sangkeun00.
+
+    </p>
+  </div>
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+      </div>
+     
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">betty.problems</a><ul>
+<li><a class="reference internal" href="#module-betty.problems.problem">Problem</a></li>
+<li><a class="reference internal" href="#implicit-problem">Implicit Problem</a></li>
+<li><a class="reference internal" href="#iterative-problem">Iterative Problem</a></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  
+
+
+  
+
+     
+       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+         <script src="../_static/jquery.js"></script>
+         <script src="../_static/underscore.js"></script>
+         <script src="../_static/doctools.js"></script>
+         <script src="../_static/tabs.js"></script>
+         <script src="../_static/design-tabs.js"></script>
+     
+
+  
+
+  <script type="text/javascript" src="../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+    <div class="container">
+      <div class="row">
+      </div>
+    </div>
+  </div>
+
+  <div class="cookie-banner-wrapper">
+  <div class="container">
+    <p class="gdpr-notice">To analyze traffic and optimize your experience, we serve cookies on this site. By clicking or navigating, you agree to allow our usage of cookies. Read PyTorch Lightning's <a href="https://pytorchlightning.ai/privacy-policy">Privacy Policy</a>.</p>
+    <img class="close-button" src="../_static/images/pytorch-x.svg">
+  </div>
+</div>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://leopard-ai.github.io/betty">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/leopard-ai/betty">Github</a>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function(e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PQBQ3CV"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+ </body>
+</html>

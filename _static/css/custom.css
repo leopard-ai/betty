@@ -1,0 +1,37 @@
+h1 {
+  font-size: 2em;
+}
+
+h2 {
+  font-size: 1.25em;
+}
+
+h3 {
+  font-size: 1.1em;
+}
+
+
+h4 {
+  font-size: 1.em
+}
+
+h5 {
+  font-size: 0.6em
+}
+
+.theme-toggle-container {
+  display: none
+}
+
+.toggle .header {
+  display: block;
+  clear: both;
+}
+
+.toggle .header:after {
+  content: " ▶";
+}
+
+.toggle .header.open:after {
+  content: " ▼";
+}
