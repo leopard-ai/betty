@@ -41,7 +41,6 @@ release = ""
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinx.ext.autodoc",
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",

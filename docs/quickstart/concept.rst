@@ -18,6 +18,7 @@ sub-chapters:
 
 .. toctree::
    :maxdepth: 1
+   :hidden:
 
    Multilevel Optimization<concept_mlo.rst>
    Software Design<concept_software.rst>

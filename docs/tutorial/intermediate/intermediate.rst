@@ -9,6 +9,7 @@ Intermediate 2: :doc:`Distributed training <intermediate_distributed>` (Coming s
 
 .. toctree::
    :maxdepth: 1
+   :hidden:
 
    Custom Hypergradient<intermediate_hypergradient.rst>
    Distributed Training (Soon)<intermediate_distributed.rst>

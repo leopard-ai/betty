@@ -15,6 +15,7 @@ Basic 4: :doc:`Reduce GPU memory footprint <basic_memory>`
 
 .. toctree::
    :maxdepth: 1
+   :hidden:
 
    Quick Start<basic_start.rst>
    Add Validation<basic_validation.rst>
