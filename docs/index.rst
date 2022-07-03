@@ -29,13 +29,13 @@ Applications
 ------------
 Betty can be used for implementing a wide range of MLO applications including
 hyperparameter optimization, neural architecture serach, data reweighting, etc. We
-provide several implementation examples for:
+provide several reference implementation examples for:
 
-- `Hyperparameter Optimization <examples/logistic_regression_hpo/>`_
-- `Neural Architecture Search <examples/neural_architecture_search/>`_
-- `Data Reweighting <examples/learning_to_reweight/>`_
-- `Domain Adaptation for Pretraining & Finetuning <examples/learning_by_ignoring/>`_
-- `(Implicit) Model-Agnostic Meta-Learning <examples/maml/>`_ (Under development)
+- `Hyperparameter Optimization <https://github.com/leopard-ai/betty/tree/main/examples/logistic_regression_hpo>`_
+- `Neural Architecture Search <https://github.com/leopard-ai/betty/tree/main/examples/neural_architecture_search>`_
+- `Data Reweighting <https://github.com/leopard-ai/betty/tree/main/examples/learning_to_reweight>`_
+- `Domain Adaptation for Pretraining & Finetuning <https://github.com/leopard-ai/betty/tree/main/examples/learning_by_ignoring>`_
+- `(Implicit) Model-Agnostic Meta-Learning <https://github.com/leopard-ai/betty/tree/main/examples/implicit_maml>`_
  
 While each of above examples traditionally have distinct implementation styles, Betty
 allows for common code structures and autodiff routines to be used in all examples. We
