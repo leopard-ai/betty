@@ -117,6 +117,6 @@ u2l = {parent: [child]}
 l2u = {child: [parent]}
 dependencies = {"l2u": l2u, "u2l": u2l}
 
-engine = Engine(config=None, problems=problems, dependencies=dependencies)
+engine = Engine(config=engine_config, problems=problems, dependencies=dependencies)
 engine.run()
 print("*** Hello (Betty) World ***")
