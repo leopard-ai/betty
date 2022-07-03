@@ -48,14 +48,15 @@ Getting Started
 - :doc:`Tutorials <tutorial/basic/basic>`
 
 .. toctree::
+   :hidden:
    :caption: Get Started
    :maxdepth: 1
-   :titlesonly:
 
    Installation<quickstart/installation.rst>
    Major Concepts<quickstart/concept.rst>
 
 .. toctree::
+   :hidden:
    :caption: Tutorials
    :maxdepth: 2
 
@@ -63,6 +64,7 @@ Getting Started
    Intermediate<tutorial/intermediate/intermediate.rst>
 
 .. toctree::
+   :hidden:
    :caption: API Docs
    :maxdepth: 2
 
@@ -73,9 +75,9 @@ Getting Started
    betty.logging<betty/betty.logging.rst>
 
 .. toctree::
+   :hidden:
    :caption: Examples
    :maxdepth: 1
-   :titlesonly:
 
    Data Reweighting<examples/data_reweighting.rst>
    Neural Architecture Search<examples/neural_architecture_search.rst>
