@@ -5,7 +5,7 @@ import torch
 import torch.nn.functional as F
 
 from betty.engine import Engine
-from betty.configs import Config
+from betty.configs import Config, EngineConfig
 from betty.problems import ImplicitProblem
 
 device = "cpu"
@@ -107,6 +107,7 @@ class Child(ImplicitProblem):
 
 parent_config = Config(log_step=10, first_order=True, retain_graph=True)
 child_config = Config(type="cg", cg_iterations=3, cg_alpha=0.1, unroll_steps=100)
+engine_config = EngineConfig(train_iters=5000)
 
 parent = Parent(name="outer", config=parent_config, device=device)
 child = Child(name="inner", config=child_config, device=device)
@@ -118,3 +119,4 @@ dependencies = {"l2u": l2u, "u2l": u2l}
 
 engine = Engine(config=None, problems=problems, dependencies=dependencies)
 engine.run()
+print("*** Hello (Betty) World ***")
