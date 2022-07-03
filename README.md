@@ -3,8 +3,8 @@
 </h3>
 <p align="center">
   An automatic differentiation library for multilevel optimization and generalized meta-learning<br>
-  <a href="https://www.google.com/">Docs</a> |
-  <a href="https://www.google.com/">Tutorials</a> |
+  <a href="https://leopard-ai.github.io/betty/">Docs</a> |
+  <a href="https://leopard-ai.github.io/betty/tutorial/basic/basic.html">Tutorials</a> |
   <a href="https://github.com/leopard-ai/betty/tree/main/examples">Examples</a> |
   <a href="https://www.google.com/"">Paper</a> |
   <a href="https://www.casl-project.ai/">CASL Project</a>
