@@ -1,8 +1,0 @@
-__pycache__
-data
-*.t7
-betty_tensorboard
-_build
-*.sw*
-*.DS_Store
-betty.egg-info

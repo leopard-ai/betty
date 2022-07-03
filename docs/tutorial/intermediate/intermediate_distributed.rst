@@ -1,4 +1,0 @@
-Distributed Training
-====================
-
-Coming soon!
