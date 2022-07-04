@@ -1,6 +1,8 @@
-<h3 align="center">
-  Betty
-</h3>
+<p align="center">
+  <a href="https://leopard-ai.github.io/betty/">
+    <img src="docs/_static/imgs/logo.svg" alt="" width="33%" align="top">
+  </a>
+</p>
 <p align="center">
   An automatic differentiation library for multilevel optimization and generalized meta-learning<br>
   <a href="https://leopard-ai.github.io/betty/">Docs</a> |
