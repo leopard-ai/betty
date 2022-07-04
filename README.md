@@ -8,7 +8,7 @@
   <a href="https://leopard-ai.github.io/betty/">Docs</a> |
   <a href="https://leopard-ai.github.io/betty/tutorial/basic/basic.html">Tutorials</a> |
   <a href="https://github.com/leopard-ai/betty/tree/main/examples">Examples</a> |
-  <a href="https://www.google.com/"">Paper</a> |
+  <a href="https://www.google.com/">Paper</a> |
   <a href="https://www.casl-project.ai/">CASL Project</a>
 </p>
 
@@ -27,7 +27,7 @@ architecture search, data reweighting, adversarial learning, and reinforcement l
 </p>
 
 ## Benefits
-Implementing multilevel optimization/meta-learning is notoriously complicated. For
+Implementing multilevel optimization and meta-learning is notoriously complicated. For
 example, it requires approximating gradients using iterative/implicit differentiation,
 and writing nested for-loops to handle hierarchical dependencies between multiple
 levels.
@@ -169,7 +169,8 @@ Once we define all optimization problems and the hierarchical dependencies betwe
 with, respectively, the `Problem` class and the `Engine` class, all complicated internal
 mechanisms of MLO such as gradient calculation and optimization execution order will be
 handled by Betty. For more details and advanced features, users can check out our
-[Documentation](https://www.google.com) and [Tutorials](https://www.google.com).
+[Documentation](https://leopard-ai.github.io/betty/) and
+[Tutorials](https://leopard-ai.github.io/betty/tutorial/basic/basic.html).
 
 Happy multilevel optimization programming!
 
@@ -205,7 +206,7 @@ If you use Betty in your research, please cite our arxiv paper with the followin
 
 ## Contributing
 We welcome contributions from the community! Please see our [contributing
-guidelines](CONTRIBUTING.md) for details on how to contributed to Betty.
+guidelines](CONTRIBUTING.md) for details on how to contribute to Betty.
 
 ## License
 Betty is licensed under the [Apache 2.0 License](LICENSE).
