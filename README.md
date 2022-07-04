@@ -20,6 +20,10 @@ generalized meta-learning that provides a unified programming interface for a nu
 MLO applications including meta-learning, hyperparameter optimization, neural
 architecture search, data reweighting, adversarial learning, and reinforcement learning.
 
+<p align="center">
+    <img src="docs/_static/imgs/mlo.png" alt="" width="100%" align="top">
+</p>
+
 ## Benefits
 Implementing multilevel optimization/meta-learning is notoriously complicated. For
 example, it requires approximating gradients using iterative/implicit differentiation,
