@@ -191,7 +191,7 @@ which will again affect the **Reweight** loss function. Thus, best-response Jaco
 for the optimization process of **Classifier** problem should be calculated. In this
 tutorial, we adopt *implicit differentiation with finite difference (a.k.a. DARTS)*
 as a best-response Jacobian calculation algorithm. Furthermore, since **Classifier**
-is the lower-level problem, we only need to specify how many steps we want to unroll
+is the lower-level problem, we need to specify how many steps we want to unroll
 before updating the upper-level **Reweight** problem. We choose the simplest
 one-step unrolling for our example. All of these can be easily specified with
 ``Config``.
