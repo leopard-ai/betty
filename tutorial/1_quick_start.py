@@ -130,7 +130,7 @@ class Classifier(ImplicitProblem):
         return torch.mean(weight * loss_reshape)
 
 
-classifier_config = Config(type='darts', unroll_steps=1)
+classifier_config = Config(type="darts", unroll_steps=1)
 classifier = Classifier(
     name="classifier",
     module=classifier_module,

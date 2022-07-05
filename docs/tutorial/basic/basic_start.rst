@@ -194,7 +194,7 @@ as a best-response Jacobian calculation algorithm. Furthermore, since **Classifi
 is the lower-level problem, we only need to specify how many steps we want to unroll
 before updating the upper-level **Reweight** problem. We choose the simplest
 one-step unrolling for our example. All of these can be easily specified with
-``Config''.
+``Config``.
 
 .. code:: python
 
