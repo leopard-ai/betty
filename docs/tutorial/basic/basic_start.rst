@@ -186,16 +186,21 @@ function.
 
 **Training Configuration**
 
-Training configuration can be provided by a Python dataclass ``Config``. Since
-**Classifier** is the lower-level problem, we only need to specify how many steps we
-want to unroll before updating the upper-level **Reweight** problem. We choose the
-simplest one-step unrolling for our example.
+The **Reweight** parameter affects optimization of the **Classifier** parameter,
+which will again affect the **Reweight** loss function. Thus, best-response Jacobian
+for the optimization process of **Classifier** problem should be calculated. In this
+tutorial, we adopt *implicit differentiation with finite difference (a.k.a. DARTS)*
+as a best-response Jacobian calculation algorithm. Furthermore, since **Classifier**
+is the lower-level problem, we only need to specify how many steps we want to unroll
+before updating the upper-level **Reweight** problem. We choose the simplest
+one-step unrolling for our example. All of these can be easily specified with
+``Config''.
 
 .. code:: python
 
     from betty.configs import Config
 
-    classifier_config = Config(unroll_steps=1)
+    classifier_config = Config(type='darts', unroll_steps=1)
 
 **Problem Instantiation**
 
@@ -264,16 +269,13 @@ classifier problem via its name (i.e. :code:`self.classifier`).
 
 **Training Configuration**
 
-MWN parameters don't affect the loss function of the **Reweight** problem directly, but
-only indirectly through the optimal parameters of the classifier problem. Thus, gradient
-for MWN should be calculated using hypergradients. In our example, we use *implicit
-differentiation with finite difference (a.k.a. DARTS)* to calculate gradients for MWN
-parameters. This can be easily specified with
-``Config``.
+Since the **Reweight** problem is the uppermost problem, there is no need for
+calculating best-response Jacobian. Thus, we don't need to specify any training
+configurations for the **Reweight** problem.
 
 .. code:: python
 
-    reweight_config = Config(type='darts')
+    reweight_config = Config()
 
 **Problem Instantiation**
 

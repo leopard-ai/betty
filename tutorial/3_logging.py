@@ -96,7 +96,7 @@ class Reweight(ImplicitProblem):
         return {"loss": loss, "acc": acc}
 
 
-reweight_config = Config(type="darts", log_step=100)
+reweight_config = Config(log_step=100)
 reweight = Reweight(
     name="reweight",
     module=reweight_module,
@@ -132,7 +132,7 @@ class Classifier(ImplicitProblem):
         return torch.mean(weight * loss_reshape)
 
 
-classifier_config = Config(unroll_steps=1)
+classifier_config = Config(type='darts', unroll_steps=1)
 classifier = Classifier(
     name="classifier",
     module=classifier_module,
