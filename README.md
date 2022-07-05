@@ -8,7 +8,7 @@
   <a href="https://leopard-ai.github.io/betty/">Docs</a> |
   <a href="https://leopard-ai.github.io/betty/tutorial/basic/basic.html">Tutorials</a> |
   <a href="https://github.com/leopard-ai/betty/tree/main/examples">Examples</a> |
-  <a href="https://www.google.com/">Paper</a> |
+  <a href="https://github.com/leopard-ai/betty">Paper</a> |
   <a href="https://www.casl-project.ai/">CASL Project</a>
 </p>
 
@@ -203,7 +203,7 @@ If you use Betty in your research, please cite our arxiv paper with the followin
   title="Betty: An Automatic Differentiation Library for Multilevel Optimization",
   author="Choe, Sang Keun and Neiswanger, Willie and Xie, Pengtao and Xing, Eric",
   year=2022,
-  url="http://arxiv.org/abs/2008.12284"
+  url="http://arxiv.org/abs/2222.11111"
 }
 ```
 
