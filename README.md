@@ -4,7 +4,7 @@
   </a>
 </p>
 <p align="center">
-  An automatic differentiation library for multilevel optimization and generalized meta-learning<br>
+  An automatic differentiation library for generalized meta-learning and multilevel optimization<br>
   <a href="https://leopard-ai.github.io/betty/">Docs</a> |
   <a href="https://leopard-ai.github.io/betty/tutorial/basic/basic.html">Tutorials</a> |
   <a href="https://github.com/leopard-ai/betty/tree/main/examples">Examples</a> |
@@ -17,30 +17,31 @@ pip install betty
 ```
 
 ## Introduction
-Betty is a [PyTorch](https://pytorch.org) library for multilevel optimization (MLO) and
-generalized meta-learning that provides a unified programming interface for a number of
-MLO applications including meta-learning, hyperparameter optimization, neural
-architecture search, data reweighting, adversarial learning, and reinforcement learning.
+Betty is a [PyTorch](https://pytorch.org) library for generalized meta-learning (GML)
+and multilevel optimization (MLO) that provides a unified programming interface for a
+number of GML/MLO applications including meta-learning, hyperparameter optimization,
+neural architecture search, data reweighting, adversarial learning, and reinforcement
+learning.
 
 <p align="center">
     <img src="docs/_static/imgs/mlo.png" alt="" width="100%" align="top">
 </p>
 
 ## Benefits
-Implementing multilevel optimization and meta-learning is notoriously complicated. For
-example, it requires approximating gradients using iterative/implicit differentiation,
-and writing nested for-loops to handle hierarchical dependencies between multiple
-levels.
+Implementing generalized meta-learning and multilevel optimization is notoriously
+complicated. For example, it requires approximating gradients using
+iterative/implicit differentiation, and writing nested for-loops to handle
+hierarchical dependencies between multiple levels.
 
 Betty aims to abstract away low-level implementation details behind its API, while
 allowing users to write only high-level declarative code. Now, users simply need to do
-two things to implement any MLO program:
+two things to implement any GML/MLO program:
 
 1. Define each level's optimization problem using the [Problem](#problem) class.
 2. Define the hierarchical problem structure using the [Engine](#engine) class.
 
 ## Applications
-We provide reference implementations of several MLO applications, including:
+We provide reference implementations of several GML/MLO applications, including:
 - [Hyperparameter Optimization](examples/logistic_regression_hpo/)
 - [Neural Architecture Search](examples/neural_architecture_search/)
 - [Data Reweighting](examples/learning_to_reweight/)
@@ -88,8 +89,9 @@ cls_prob = Classifier(name='classifier',
 ```
 
 #### Interactions between problems
-In MLO, each problem will often need to access modules from other problems to define its
-loss function. This can be achieved by using the `name` attribute as follows:
+In GML/MLO, each problem will often need to access modules from other problems to
+define its loss function. This can be achieved by using the `name` attribute as
+follows:
 
 ```python
 class HPO(ImplicitProblem):
@@ -119,10 +121,10 @@ cls_prob = Classifier(name='classifier', module=...)
 ```
 ### Engine
 #### Basics
-The `Engine` class handles the hierarchical dependencies between problems. In MLO, there
-are two types of dependencies: upper-to-lower (`u2l`) and lower-to-upper (`l2u`). Both
-types of dependencies can be defined with a Python dictionary, where the key is the
-starting node and the value is the list of destination nodes.
+The `Engine` class handles the hierarchical dependencies between problems. In GML/MLO,
+there are two types of dependencies: upper-to-lower (`u2l`) and lower-to-upper (`l2u`).
+Both types of dependencies can be defined with a Python dictionary, where the key is
+the starting node and the value is the list of destination nodes.
 
 ```python
 from betty import Engine
@@ -146,8 +148,9 @@ engine = Engine(problems=problems, dependencies=dependencies, config=engine_conf
 engine.run()
 ```
 
-Since `Engine` manages the whole MLO program, you can also perform a global validation stage within
-it. All problems that comprise the MLO program can again be accessed with their names.
+Since `Engine` manages the whole GML/MLO program, you can also perform a global validation
+stage within it. All problems that comprise the GML/MLO program can again be accessed with
+their names.
 ```python
 class HPOEngine(Engine):
     # set up global validation
@@ -167,8 +170,8 @@ engine.run()
 
 Once we define all optimization problems and the hierarchical dependencies between them
 with, respectively, the `Problem` class and the `Engine` class, all complicated internal
-mechanisms of MLO such as gradient calculation and optimization execution order will be
-handled by Betty. For more details and advanced features, users can check out our
+mechanisms of GML/MLO such as gradient calculation and optimization execution order will
+be handled by Betty. For more details and advanced features, users can check out our
 [Documentation](https://leopard-ai.github.io/betty/) and
 [Tutorials](https://leopard-ai.github.io/betty/tutorial/basic/basic.html).
 
