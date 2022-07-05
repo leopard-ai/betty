@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://leopard-ai.github.io/betty/">
-    <img src="docs/_static/imgs/logo.svg" alt="" width="33%" align="top">
+    <img src="docs/_static/imgs/logo.svg" alt="" width="36%" align="top">
   </a>
 </p>
 <p align="center">
@@ -22,10 +22,6 @@ and multilevel optimization (MLO) that provides a unified programming interface 
 number of GML/MLO applications including meta-learning, hyperparameter optimization,
 neural architecture search, data reweighting, adversarial learning, and reinforcement
 learning.
-
-<p align="center">
-    <img src="docs/_static/imgs/mlo.png" alt="" width="100%" align="top">
-</p>
 
 ## Benefits
 Implementing generalized meta-learning and multilevel optimization is notoriously
@@ -51,6 +47,10 @@ We provide reference implementations of several GML/MLO applications, including:
 While each of above examples traditionally has a distinct implementation style, one
 should notice that our implementations share the same code structure thanks to Betty.
 More examples are on the way!
+
+<p align="center">
+    <img src="docs/_static/imgs/mlo.png" alt="" width="100%" align="top">
+</p>
 
 ## Quick Start
 ### Problem
