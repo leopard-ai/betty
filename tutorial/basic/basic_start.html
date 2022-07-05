@@ -411,13 +411,18 @@ problem via its name for the <strong>Classifier</strong> problem (i.e. in the li
 other problems, with which the current problem interacts, when writing the loss
 function.</p>
 <p><strong>Training Configuration</strong></p>
-<p>Training configuration can be provided by a Python dataclass <code class="docutils literal notranslate"><span class="pre">Config</span></code>. Since
-<strong>Classifier</strong> is the lower-level problem, we only need to specify how many steps we
-want to unroll before updating the upper-level <strong>Reweight</strong> problem. We choose the
-simplest one-step unrolling for our example.</p>
+<p>The <strong>Reweight</strong> parameter affects optimization of the <strong>Classifier</strong> parameter,
+which will again affect the <strong>Reweight</strong> loss function. Thus, best-response Jacobian
+for the optimization process of <strong>Classifier</strong> problem should be calculated. In this
+tutorial, we adopt <em>implicit differentiation with finite difference (a.k.a. DARTS)</em>
+as a best-response Jacobian calculation algorithm. Furthermore, since <strong>Classifier</strong>
+is the lower-level problem, we only need to specify how many steps we want to unroll
+before updating the upper-level <strong>Reweight</strong> problem. We choose the simplest
+one-step unrolling for our example. All of these can be easily specified with
+<code class="docutils literal notranslate"><span class="pre">Config</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">betty.configs</span> <span class="kn">import</span> <span class="n">Config</span>
 
-<span class="n">classifier_config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="n">unroll_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">classifier_config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;darts&#39;</span><span class="p">,</span> <span class="n">unroll_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><strong>Problem Instantiation</strong></p>
@@ -476,13 +481,10 @@ classifier problem via its name (i.e. <code class="code docutils literal notrans
 </pre></div>
 </div>
 <p><strong>Training Configuration</strong></p>
-<p>MWN parameters don’t affect the loss function of the <strong>Reweight</strong> problem directly, but
-only indirectly through the optimal parameters of the classifier problem. Thus, gradient
-for MWN should be calculated using hypergradients. In our example, we use <em>implicit
-differentiation with finite difference (a.k.a. DARTS)</em> to calculate gradients for MWN
-parameters. This can be easily specified with
-<code class="docutils literal notranslate"><span class="pre">Config</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">reweight_config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;darts&#39;</span><span class="p">)</span>
+<p>Since the <strong>Reweight</strong> problem is the uppermost problem, there is no need for
+calculating best-response Jacobian. Thus, we don’t need to specify any training
+configurations for the <strong>Reweight</strong> problem.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">reweight_config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">()</span>
 </pre></div>
 </div>
 <p><strong>Problem Instantiation</strong></p>
