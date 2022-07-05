@@ -13,8 +13,8 @@ Install with pip
 
   pip install betty-ml
 
-To use ``ItereativeProblem``, you need to install ``functorch``.
-``functorch`` also requires users to use PyTorch 1.11.
+To use ``IterativeProblem``, you need to additionally install ``functorch``. However,
+``functorch`` requires users to use PyTorch 1.11.
 
 .. code::
 
