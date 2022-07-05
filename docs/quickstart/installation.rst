@@ -11,7 +11,22 @@ Install with pip
 
 .. code::
 
-  pip install betty
+  pip install betty-ml
+
+To use ``ItereativeProblem``, you need to install ``functorch``.
+``functorch`` also requires users to use PyTorch 1.11.
+
+.. code::
+
+  pip install functorch
+
+To install Betty and develop locally:
+
+.. code::
+
+  git clone https://github.com/leopard-ai/betty.git
+  cd betty
+  pip install -e .
 
 Verifying Installation
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -43,7 +58,11 @@ If the installation was successful, you should see the following output:
 
   [YYYY-mm-dd HH:MM:SS] [INFO] Time spent on initialization: 0.001 (s)
 
-  [YYYY-mm-dd HH:MM:SS] [INFO] [Problem "outer"] [Global Step 100] [Local Step 10] loss: 0.5861933827400208
+  [YYYY-mm-dd HH:MM:SS] [INFO] [Problem "outer"] [Global Step 1000] [Local Step 10] loss: 0.3682613968849182
+  [YYYY-mm-dd HH:MM:SS] [INFO] [Problem "outer"] [Global Step 2000] [Local Step 20] loss: 0.30229413509368896
+  [YYYY-mm-dd HH:MM:SS] [INFO] [Problem "outer"] [Global Step 3000] [Local Step 30] loss: 0.29078295826911926
+  [YYYY-mm-dd HH:MM:SS] [INFO] [Problem "outer"] [Global Step 4000] [Local Step 40] loss: 0.29050588607788086
+  [YYYY-mm-dd HH:MM:SS] [INFO] [Problem "outer"] [Global Step 5000] [Local Step 50] loss: 0.29037463665008545
   *** Hello (Betty) World ***
 
 Hello (Betty) World!
