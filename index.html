@@ -248,30 +248,39 @@
 <h1>Betty Documentation<a class="headerlink" href="#betty-documentation" title="Permalink to this headline">¶</a></h1>
 <section id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
-<p>Betty is a <a class="reference external" href="https://pytorch.org">PyTorch</a> library for multilevel optimization (MLO)
-and generalized meta-learning that provides a unified programming interface for a number
-of MLO applications including meta-learning, hyperparameter optimization, neural
-architecture search, data reweighting, adversarial learning, and reinforcement learning.</p>
+<p>Betty is a <a class="reference external" href="https://pytorch.org">PyTorch</a> library for generalized-meta learning (GML)
+and multilevel optimization (MLO) that provides a unified programming interface for a
+number of GML/MLO applications including meta-learning, hyperparameter optimization,
+neural architecture search, data reweighting, adversarial learning, and reinforcement
+learning.</p>
+<p>Below is the figure that illustrates the concept of GML/MLO.</p>
+<figure class="align-center" id="id1">
+<img alt="_images/mlo.png" src="_images/mlo.png" />
+<figcaption>
+<p><span class="caption-text">Figure. Visual illustration of the concept of GML/MLO.</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</figcaption>
+</figure>
 </section>
 <section id="benefits">
 <h2>Benefits<a class="headerlink" href="#benefits" title="Permalink to this headline">¶</a></h2>
-<p>Implementing multilevel optimization is notoriously complicated. For example, it
-requires approximating gradients using iterative/implicit differentiation, and writing
-nested for-loops to handle hierarchical dependencies between multiple levels.</p>
+<p>Implementing generalized meta-learning and multilevel optimization is notoriously
+complicated. For example, it requires approximating gradients using
+iterative/implicit differentiation, and writing nested for-loops to handle
+hierarchical dependencies between multiple levels.</p>
 <p>Betty aims to abstract away low-level implementation details behind its API, while
 allowing users to write only high-level declarative code. Now, users simply need to do
-two things to implement any MLO program:</p>
+two things to implement any GML/MLO program:</p>
 <ol class="arabic simple">
 <li><p>Define each level’s optimization problem using the <strong>Problem</strong> class.</p></li>
 <li><p>Define the hierarchical problem structure using the <strong>Engine</strong> class.</p></li>
 </ol>
 <p>From here, Betty performs automatic differentiation for the MLO program,
 choosing from a set of provided gradient approximation methods, in order to carry out
-robust, high-performance MLO.</p>
+robust, high-performance GML/MLO.</p>
 </section>
 <section id="applications">
 <h2>Applications<a class="headerlink" href="#applications" title="Permalink to this headline">¶</a></h2>
-<p>Betty can be used for implementing a wide range of MLO applications including
+<p>Betty can be used for implementing a wide range of GML/MLO applications including
 hyperparameter optimization, neural architecture serach, data reweighting, etc. We
 provide several reference implementation examples for:</p>
 <ul class="simple">
@@ -283,7 +292,7 @@ provide several reference implementation examples for:</p>
 </ul>
 <p>While each of above examples traditionally have distinct implementation styles, Betty
 allows for common code structures and autodiff routines to be used in all examples. We
-plan to implement more MLO applications in the future.</p>
+plan to implement more GML/MLO applications in the future.</p>
 </section>
 <section id="getting-started">
 <h2>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
