@@ -13,7 +13,7 @@
 </p>
 
 ```bash
-pip install betty
+pip install betty-ml
 ```
 
 ## Introduction
