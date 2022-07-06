@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://leopard-ai.github.io/betty/">
-    <img src="docs/_static/imgs/logo.svg" alt="" width="36%" align="top">
+    <img src="https://raw.githubusercontent.com/leopard-ai/betty/main/docs/_static/imgs/logo.svg" alt="" width="36%" align="top">
   </a>
 </p>
 <p align="center">
@@ -14,9 +14,9 @@
 
 <div align="center">
 
-  <a href="">![Version](https://img.shields.io/pypi/v/betty-ml)</a>
-  <a href="">![Testing](https://img.shields.io/github/workflow/status/leopard-ai/betty/test)</a>
-  <a href="">![License](https://img.shields.io/github/license/leopard-ai/betty)</a>
+  <a href="https://pypi.org/project/betty-ml/">![Version](https://img.shields.io/pypi/v/betty-ml)</a>
+  <a href="https://github.com/leopard-ai/betty/tree/main/test">![Testing](https://img.shields.io/github/workflow/status/leopard-ai/betty/test)</a>
+  <a href="https://github.com/leopard-ai/betty/blob/main/LICENSE">![License](https://img.shields.io/github/license/leopard-ai/betty)</a>
   
 </div>
 
@@ -57,7 +57,7 @@ should notice that our implementations share the same code structure thanks to B
 More examples are on the way!
 
 <p align="center">
-    <img src="docs/_static/imgs/mlo.png" alt="" width="100%" align="top">
+    <img src="https://raw.githubusercontent.com/leopard-ai/betty/main/docs/_static/imgs/mlo.png" alt="" width="100%" align="top">
 </p>
 
 ## Quick Start
@@ -193,7 +193,6 @@ Happy multilevel optimization programming!
   - Conjugate Gradient ([Meta-Learning with Implicit Gradients](https://proceedings.neurips.cc/paper/2019/file/072b030ba126b2f4b2374f342be9ed44-Paper.pdf))
 - Iterative Differentiation
   - Reverse-mode Automatic Differentiation ([Model-Agnostic Meta-Learning (MAML)](https://arxiv.org/abs/1703.03400))
-
 
 ### Training
 - Gradient accumulation
