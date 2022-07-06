@@ -12,6 +12,14 @@
   <a href="https://www.casl-project.ai/">CASL Project</a>
 </p>
 
+<div align="center">
+
+  <a href="">![Version](https://img.shields.io/pypi/v/betty-ml)</a>
+  <a href="">![Testing](https://img.shields.io/github/workflow/status/leopard-ai/betty/test)</a>
+  <a href="">![License](https://img.shields.io/github/license/leopard-ai/betty)</a>
+  
+</div>
+
 ```bash
 pip install betty-ml
 ```
