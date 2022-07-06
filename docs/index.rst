@@ -9,13 +9,6 @@ number of GML/MLO applications including meta-learning, hyperparameter optimizat
 neural architecture search, data reweighting, adversarial learning, and reinforcement
 learning.
 
-Below is the figure that illustrates the concept of GML/MLO.
-
-.. figure:: _static/imgs/mlo.png
-    :align: center
-
-    Figure. Visual illustration of the concept of GML/MLO.
-
 Benefits
 --------
 Implementing generalized meta-learning and multilevel optimization is notoriously
@@ -55,6 +48,13 @@ Getting Started
 
 - :doc:`Installation <quickstart/installation>`
 - :doc:`Tutorials <tutorial/basic/basic>`
+
+Below is a figure that illustrates the main concepts of GML/MLO.
+
+.. figure:: _static/imgs/mlo.png
+    :align: center
+
+    Figure 1. Visual illustration of the main concepts of GML/MLO.
 
 .. toctree::
    :hidden:
