@@ -34,7 +34,7 @@ learning.
 ## Benefits
 - Easy-to-use and unified programming interface for GML/MLO
 - Various system suppports for large-scale GML/MLO (e.g., distributed training)
-- Flexibly support complicated GML/MLO beyond two levels
+- Flexible supports for complicated GML/MLO beyond two levels
 
 Implementing generalized meta-learning and multilevel optimization is notoriously
 complicated. For example, it requires approximating gradients using
