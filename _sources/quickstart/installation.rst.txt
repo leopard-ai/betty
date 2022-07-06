@@ -31,7 +31,13 @@ To install Betty and develop locally:
 Verifying Installation
 ~~~~~~~~~~~~~~~~~~~~~~
 
-You can verify the installation by running
+You can verify the installation by running the following:
+
+.. code::
+
+  python -c "from betty import test_install"
+
+Additionally, you can verify the developer installation by running
 `test.py <https://github.com/leopard-ai/betty/blob/main/examples/logistic_regression_hpo/test.py>`_.
 
 .. code::
