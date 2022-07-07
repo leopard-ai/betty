@@ -32,9 +32,9 @@ neural architecture search, data reweighting, adversarial learning, and reinforc
 learning.
 
 ## Benefits
-- Easy-to-use and unified programming interface for GML/MLO
-- Various system suppports for large-scale GML/MLO (e.g., distributed training)
-- Flexible supports for complicated GML/MLO beyond two levels
+- Easy-to-use and unified programming interface for GML/MLO.
+- Various system support for large-scale GML/MLO (e.g., distributed training).
+- Flexible support for complex GML/MLO applications beyond two levels.
 
 Implementing generalized meta-learning and multilevel optimization is notoriously
 complicated. For example, it requires approximating gradients using
