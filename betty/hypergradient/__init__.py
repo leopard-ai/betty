@@ -4,14 +4,13 @@ from .darts import darts
 from .cg import cg
 from .neumann import neumann
 from .reinforce import reinforce
-from .grad_utils import grad_from_backward
 
 
 jvp_fn_mapping = {"darts": darts, "neumann": neumann, "cg": cg, "reinforce": reinforce}
 
 
 def get_grads(loss, path, retain_graph):
-    jvp = grad_from_backward(
+    jvp = torch.autograd.grad(
         loss, path[1].trainable_parameters(), retain_graph=retain_graph
     )
     for i in range(1, len(path) - 1):

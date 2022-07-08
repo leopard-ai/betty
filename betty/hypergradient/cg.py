@@ -3,7 +3,6 @@ import warnings
 import torch
 
 from betty.utils import neg_with_none, to_vec
-from betty.hypergradient.grad_utils import grad_from_backward
 
 
 def cg(vector, curr, prev):
@@ -28,7 +27,7 @@ def cg(vector, curr, prev):
     in_loss = curr.training_step_exec(curr.cur_batch)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        in_grad = grad_from_backward(
+        in_grad = torch.autograd.grad(
             in_loss, curr.trainable_parameters(), create_graph=True
         )
 
