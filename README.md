@@ -8,7 +8,7 @@
   <a href="https://leopard-ai.github.io/betty/">Docs</a> |
   <a href="https://leopard-ai.github.io/betty/tutorial/basic/basic.html">Tutorials</a> |
   <a href="https://github.com/leopard-ai/betty/tree/main/examples">Examples</a> |
-  <a href="https://tinyurl.com/bettyautodiffmlo">Paper</a> |
+  <a href="https://arxiv.org/abs/2207.02849">Paper</a> |
   <a href="https://www.casl-project.ai/">CASL Project</a>
 </p>
 
@@ -210,6 +210,17 @@ Happy multilevel optimization programming!
 ## Contributing
 We welcome contributions from the community! Please see our [contributing
 guidelines](CONTRIBUTING.md) for details on how to contribute to Betty.
+
+## Citation
+If you use Betty in your research, please cite our paper with the following Bibtex entry.
+```
+@article{choe2022betty,
+  title={Betty: An Automatic Differentiation Library for Multilevel Optimization},
+  author={Choe, Sang Keun and Neiswanger, Willie and Xie, Pengtao and Xing, Eric},
+  journal={arXiv preprint arXiv:2207.02849},
+  year={2022}
+}
+```
 
 ## License
 Betty is licensed under the [Apache 2.0 License](LICENSE).
