@@ -54,7 +54,7 @@ We provide reference implementations of several GML/MLO applications, including:
 - [Neural Architecture Search](examples/neural_architecture_search/)
 - [Data Reweighting](examples/learning_to_reweight/)
 - [Domain Adaptation for Pretraining & Finetuning](examples/learning_by_ignoring/)
-- [(Implicit) Model-Agnostic Meta-Learning](examples/maml/)
+- [(Implicit) Model-Agnostic Meta-Learning](examples/implicit_maml)
 
 While each of above examples traditionally has a distinct implementation style, one
 should notice that our implementations share the same code structure thanks to Betty.
