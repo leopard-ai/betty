@@ -19,16 +19,16 @@ parser.add_argument("--fp16", action="store_true")
 parser.add_argument("--distributed", action="store_true")
 parser.add_argument("--rollback", action="store_true")
 parser.add_argument("--seed", type=int, default=0)
-parser.add_argument("--meta_net_hidden_size", type=int, default=100)
-parser.add_argument("--meta_net_num_layers", type=int, default=1)
+parser.add_argument("--meta_net_hidden_size", type=int, default=200)
+parser.add_argument("--meta_net_num_layers", type=int, default=2)
 
 parser.add_argument("--lr", type=float, default=0.1)
 parser.add_argument("--momentum", type=float, default=0.9)
 parser.add_argument("--dampening", type=float, default=0.0)
 parser.add_argument("--nesterov", type=bool, default=False)
 parser.add_argument("--weight_decay", type=float, default=5e-4)
-parser.add_argument("--meta_lr", type=float, default=1e-5)
-parser.add_argument("--meta_weight_decay", type=float, default=0.0)
+parser.add_argument("--meta_lr", type=float, default=1e-4)
+parser.add_argument("--meta_weight_decay", type=float, default=1e-4)
 
 parser.add_argument("--dataset", type=str, default="cifar10")
 parser.add_argument("--num_meta", type=int, default=1000)
@@ -62,9 +62,6 @@ set_seed(args.seed)
 
 
 class Outer(ImplicitProblem):
-    def forward(self, x):
-        return self.module(x)
-
     def training_step(self, batch):
         inputs, labels = batch
         inputs, labels = inputs.to(args.device), labels.to(args.device)
@@ -78,10 +75,9 @@ class Outer(ImplicitProblem):
         return meta_dataloader
 
     def configure_module(self):
-        meta_net = MLP(
-            hidden_size=args.meta_net_hidden_size, num_layers=args.meta_net_num_layers
-        ).to(device=args.device)
-        return meta_net
+        return ResNet32MWN(args.dataset == "cifar10" and 10 or 100).to(
+            device=args.device
+        )
 
     def configure_optimizer(self):
         meta_optimizer = optim.Adam(
@@ -91,18 +87,21 @@ class Outer(ImplicitProblem):
         )
         return meta_optimizer
 
+    def configure_scheduler(self):
+        scheduler = optim.lr_scheduler.MultiStepLR(
+            self.optimizer, milestones=[6000, 8000], gamma=0.1
+        )
+        return scheduler
+
 
 class Inner(ImplicitProblem):
-    def forward(self, x):
-        return self.module(x)
-
     def training_step(self, batch):
         inputs, labels = batch
         inputs, labels = inputs.to(args.device), labels.to(args.device)
         outputs = self.forward(inputs)
         loss_vector = F.cross_entropy(outputs, labels.long(), reduction="none")
         loss_vector_reshape = torch.reshape(loss_vector, (-1, 1))
-        weight = self.outer(loss_vector_reshape.detach())
+        weight = self.outer(inputs, labels)
         loss = torch.mean(weight * loss_vector_reshape)
 
         return loss
@@ -126,7 +125,7 @@ class Inner(ImplicitProblem):
 
     def configure_scheduler(self):
         scheduler = optim.lr_scheduler.MultiStepLR(
-            self.optimizer, milestones=[5000, 7500, 9000], gamma=0.1
+            self.optimizer, milestones=[5000, 7500], gamma=0.1
         )
         return scheduler
 
