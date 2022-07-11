@@ -155,15 +155,13 @@ class HiddenLayer(nn.Module):
 class MLP(nn.Module):
     def __init__(self, hidden_size=500, num_layers=1):
         super(MLP, self).__init__()
-        self.bn = nn.BatchNorm1d(128)
-        self.first_hidden_layer = HiddenLayer(128, hidden_size)
+        self.first_hidden_layer = HiddenLayer(1, hidden_size)
         self.rest_hidden_layers = nn.Sequential(
             *[HiddenLayer(hidden_size, hidden_size) for _ in range(num_layers - 1)]
         )
         self.output_layer = nn.Linear(hidden_size, 1)
 
     def forward(self, x):
-        x = functional.relu(self.bn(x))
         x = self.first_hidden_layer(x)
         x = self.rest_hidden_layers(x)
         x = self.output_layer(x)
