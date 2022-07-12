@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://leopard-ai.github.io/betty/">
-    <img src="https://raw.githubusercontent.com/leopard-ai/betty/main/docs/_static/imgs/logo.svg" alt="" width="36%" align="top">
+    <img src="https://raw.githubusercontent.com/leopard-ai/betty/main/docs/_static/imgs/logo.svg" alt="" width="40%" align="top">
   </a>
 </p>
 <p align="center">
@@ -27,9 +27,9 @@ pip install betty-ml
 ## Introduction
 Betty is a [PyTorch](https://pytorch.org) library for generalized meta-learning (GML)
 and multilevel optimization (MLO) that provides a unified programming interface for a
-number of GML/MLO applications including meta-learning, hyperparameter optimization,
-neural architecture search, data reweighting, adversarial learning, and reinforcement
-learning.
+number of GML/MLO applications including **meta-learning**, **hyperparameter
+optimization**, **neural architecture search**, **data reweighting**, **adversarial
+learning**, and **reinforcement learning**.
 
 ## Benefits
 - Easy-to-use and unified programming interface for GML/MLO.
@@ -56,9 +56,9 @@ We provide reference implementations of several GML/MLO applications, including:
 - [Domain Adaptation for Pretraining & Finetuning](examples/learning_by_ignoring/)
 - [(Implicit) Model-Agnostic Meta-Learning](examples/implicit_maml)
 
-While each of above examples traditionally has a distinct implementation style, one
-should notice that our implementations share the same code structure thanks to Betty.
-More examples are on the way!
+While each of the above examples traditionally has a distinct implementation style, note
+that our implementations share the same code structure thanks to Betty. More examples
+are on the way!
 
 <p align="center">
     <img src="https://raw.githubusercontent.com/leopard-ai/betty/main/docs/_static/imgs/mlo.png" alt="" width="100%" align="top">
@@ -201,7 +201,7 @@ Happy multilevel optimization programming!
 ### Training
 - Gradient accumulation
 - FP16 training
-- non-distributed data-parallel
+- Non-distributed data-parallel
 
 ### Logging
 - [(PyTorch) TensorBoard](https://pytorch.org/docs/stable/tensorboard.html)
@@ -212,7 +212,8 @@ We welcome contributions from the community! Please see our [contributing
 guidelines](CONTRIBUTING.md) for details on how to contribute to Betty.
 
 ## Citation
-If you use Betty in your research, please cite our paper with the following Bibtex entry.
+If you use Betty in your research, please cite [our
+paper](https://arxiv.org/abs/2207.02849) with the following Bibtex entry.
 ```
 @article{choe2022betty,
   title={Betty: An Automatic Differentiation Library for Multilevel Optimization},
