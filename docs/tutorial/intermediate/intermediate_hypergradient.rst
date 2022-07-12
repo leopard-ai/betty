@@ -43,4 +43,4 @@ they can add their algorithm as follows:
     from .new_hypergrad import myhypergrad
 
     jvp_fn_mapping = {"darts": darts, "neumann": neumann, "cg": cg, "reinforce": reinforce}
-    jvp_fn_mapping['myhypergrad_name'] = myhypergrad
+    jvp_fn_mapping["myhypergrad_name"] = myhypergrad
