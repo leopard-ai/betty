@@ -84,7 +84,7 @@
 <div class="container-fluid header-holder tutorials-header" id="header-holder">
   <div class="container">
     <div class="header-container">
-      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty">
       <!--  <img class="call-to-action-img" src="../../_static/images/logo-lightning-icon.png"/> -->
       </a>
 
@@ -253,22 +253,22 @@
               
   <section id="hypergradient">
 <h1>Hypergradient<a class="headerlink" href="#hypergradient" title="Permalink to this headline">¶</a></h1>
-<p>For researchers studying a novel hypergradient calculation method, we allow
-a modular interface to implement their own algorithm without changing other
+<p>For researchers studying novel hypergradient calculation methods, we allow
+a modular interface to implement custom algorithms without changing other
 parts of the MLO program. Specifically, users can create a new python file
 under the <code class="docutils literal notranslate"><span class="pre">betty/hypergradient</span></code> directory where they should implement their
 own algorithm, and add a new algorithm to <code class="docutils literal notranslate"><span class="pre">betty/hypergradient/__init__.py</span></code>
 so that the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class can import and use it.</p>
 <p>Recall that automatic differentiation for MLO is achieved by iteratively
-performing matrix-vector mulitplication with best-response Jacobian (See
+performing matrix-vector multiplication with the best-response Jacobian (See
 <a class="reference internal" href="../../quickstart/concept_autodiff.html"><span class="doc">Autodiff for Multilevel Optimization</span></a>):</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{flalign}
     &amp;&amp;\text{Calculate}\,:\quad&amp;\frac{\partial w^*(\lambda)}{\partial \lambda}\times v\\[2ex]
     &amp;&amp;\text{Given}\,:\quad&amp;w^*(\lambda) = \underset{w}{\mathrm{argmin}}\;\mathcal{C}(w, \lambda)
 \end{flalign}\end{split}\]</div>
-<p>In the python file, users should define how above “Calculate” part would be
-performed given <span class="math notranslate nohighlight">\(\lambda, w,\text{ and } v\)</span>.</p>
+<p>In the python file, users should implement the above “Calculate” operation,
+given <span class="math notranslate nohighlight">\(\lambda, w,\text{ and } v\)</span>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># betty/hypergradient/new_hypergrad.py</span>
 <span class="k">def</span> <span class="nf">myhypergrad</span><span class="p">(</span><span class="n">vector</span><span class="p">,</span> <span class="n">curr</span><span class="p">,</span> <span class="n">prev</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -277,15 +277,15 @@ performed given <span class="math notranslate nohighlight">\(\lambda, w,\text{ a
 <span class="sd">    prev: corresponds to the upper-level problem whose parameter is \lambda</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="o">...</span>
-    <span class="k">return</span> <span class="n">matrix_vecotr_multiplication_with_best_response_Jacobian</span>
+    <span class="k">return</span> <span class="n">matrix_vector_multiplication_with_best_response_Jacobian</span>
 </pre></div>
 </div>
 <p>Once users implement their own algorithm, in <code class="docutils literal notranslate"><span class="pre">betty/hypergradient/__init__.py</span></code>,
-they add their algorithm as follows:</p>
+they can add their algorithm as follows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">.new_hypergrad</span> <span class="kn">import</span> <span class="n">myhypergrad</span>
 
 <span class="n">jvp_fn_mapping</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;darts&quot;</span><span class="p">:</span> <span class="n">darts</span><span class="p">,</span> <span class="s2">&quot;neumann&quot;</span><span class="p">:</span> <span class="n">neumann</span><span class="p">,</span> <span class="s2">&quot;cg&quot;</span><span class="p">:</span> <span class="n">cg</span><span class="p">,</span> <span class="s2">&quot;reinforce&quot;</span><span class="p">:</span> <span class="n">reinforce</span><span class="p">}</span>
-<span class="n">jvp_fn_mapping</span><span class="p">[</span><span class="s1">&#39;myhypergrad_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">myhypergrad</span>
+<span class="n">jvp_fn_mapping</span><span class="p">[</span><span class="s2">&quot;myhypergrad_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">myhypergrad</span>
 </pre></div>
 </div>
 </section>
@@ -395,7 +395,7 @@ they add their algorithm as follows:</p>
     <div class="container-fluid">
       <div class="container">
         <div class="mobile-main-menu-header-container">
-          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty"></a>
           <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
         </div>
       </div>

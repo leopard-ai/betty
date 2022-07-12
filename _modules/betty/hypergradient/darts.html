@@ -81,7 +81,7 @@
 <div class="container-fluid header-holder tutorials-header" id="header-holder">
   <div class="container">
     <div class="header-container">
-      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty">
       <!--  <img class="call-to-action-img" src="../../../_static/images/logo-lightning-icon.png"/> -->
       </a>
 
@@ -244,7 +244,6 @@
 <span></span><span class="kn">import</span> <span class="nn">torch</span>
 
 <span class="kn">from</span> <span class="nn">betty.utils</span> <span class="kn">import</span> <span class="n">to_vec</span>
-<span class="kn">from</span> <span class="nn">betty.hypergradient.grad_utils</span> <span class="kn">import</span> <span class="n">grad_from_backward</span>
 
 
 <div class="viewcode-block" id="darts"><a class="viewcode-back" href="../../../betty/betty.hypergradient.html#betty.hypergradient.darts.darts">[docs]</a><span class="k">def</span> <span class="nf">darts</span><span class="p">(</span><span class="n">vector</span><span class="p">,</span> <span class="n">curr</span><span class="p">,</span> <span class="n">prev</span><span class="p">):</span>
@@ -274,13 +273,13 @@
     <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">trainable_parameters</span><span class="p">(),</span> <span class="n">vector</span><span class="p">):</span>
         <span class="n">p</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">add_</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">eps</span><span class="p">)</span>
     <span class="n">loss_p</span> <span class="o">=</span> <span class="n">curr</span><span class="o">.</span><span class="n">training_step_exec</span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">cur_batch</span><span class="p">)</span>
-    <span class="n">grad_p</span> <span class="o">=</span> <span class="n">grad_from_backward</span><span class="p">(</span><span class="n">loss_p</span><span class="p">,</span> <span class="n">prev</span><span class="o">.</span><span class="n">trainable_parameters</span><span class="p">())</span>
+    <span class="n">grad_p</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss_p</span><span class="p">,</span> <span class="n">prev</span><span class="o">.</span><span class="n">trainable_parameters</span><span class="p">())</span>
 
     <span class="c1"># negative</span>
     <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">trainable_parameters</span><span class="p">(),</span> <span class="n">vector</span><span class="p">):</span>
         <span class="n">p</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">add_</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">eps</span><span class="p">)</span>
     <span class="n">loss_n</span> <span class="o">=</span> <span class="n">curr</span><span class="o">.</span><span class="n">training_step_exec</span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">cur_batch</span><span class="p">)</span>
-    <span class="n">grad_n</span> <span class="o">=</span> <span class="n">grad_from_backward</span><span class="p">(</span><span class="n">loss_n</span><span class="p">,</span> <span class="n">prev</span><span class="o">.</span><span class="n">trainable_parameters</span><span class="p">())</span>
+    <span class="n">grad_n</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss_n</span><span class="p">,</span> <span class="n">prev</span><span class="o">.</span><span class="n">trainable_parameters</span><span class="p">())</span>
 
     <span class="c1"># reverse weight change</span>
     <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">trainable_parameters</span><span class="p">(),</span> <span class="n">vector</span><span class="p">):</span>
@@ -382,7 +381,7 @@
     <div class="container-fluid">
       <div class="container">
         <div class="mobile-main-menu-header-container">
-          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty"></a>
           <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
         </div>
       </div>
