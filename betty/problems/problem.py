@@ -421,6 +421,12 @@ class Problem:
                 del param.grad
 
     def state_dict(self):
+        """
+        Return all states involved in ``Problem`` with a Python dictionary. By default, it
+        includes ``self.module.state_dict`` and ``self.optimizer.state_dict``. Depending on users'
+        configurations, it may include ``self.scheuler.state_dict`` (lr scheduler) and
+        ``self.scaler.state_dict`` (fp16 training)
+        """
         state_dict = {}
         state_dict["module"] = self.module.state_dict()
         state_dict["optimizer"] = self.optimizer.state_dict()
@@ -432,6 +438,11 @@ class Problem:
         return state_dict
 
     def load_state_dict(self, state_dict):
+        """Load the state for the ``Problem``
+
+        Args:
+            state_dict (dict): Python dictionary of Problem states
+        """
         self.module.load_state_dict(state_dict["module"])
         self.optimizer.load_state_dict(state_dict["optimizer"])
         if self.scheduler is not None and "scheduler" in state_dict:
@@ -568,7 +579,7 @@ class Problem:
         """
         Add environment to the current problem.
 
-        :param logger: logger defined by users in ``Engine``.
+        :param env: Environment.
         """
         if self.env is None:
             self.env = env
