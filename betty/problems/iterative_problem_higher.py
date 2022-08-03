@@ -49,8 +49,8 @@ class HigherIterativeProblem(Problem):
         self.optimizer.step()
 
     def functional_one_step_descent(self, batch=None):
-        assert (
-            not self._fp16 and not self.is_implemented("custom_optimizer_step")
+        assert not self._fp16 and not self.is_implemented(
+            "custom_optimizer_step"
         ), "[!] FP16 training is not supported for IterativeProblem."
 
         # load data
@@ -147,7 +147,9 @@ class HigherIterativeProblem(Problem):
         """
         self.module_orig = self.module
         self.module = higher.patch.monkeypatch(
-            self.module_orig, device=self.device, track_higher_grads=not self._first_order
+            self.module_orig,
+            device=self.device,
+            track_higher_grads=not self._first_order,
         )
 
     def patch_optimizer(self):
@@ -162,11 +164,11 @@ class HigherIterativeProblem(Problem):
                 self.module_orig.parameters(),
                 fmodel=self.module,
                 device=self.device,
-                track_higher_grads=not self._first_order
+                track_higher_grads=not self._first_order,
             )
             for group in self.optimizer.param_groups:
-                group['weight_decay'] = 0
-                group['momentum'] = 0
+                group["weight_decay"] = 0
+                group["momentum"] = 0
 
     def cache_states(self):
         self.module_state_dict_cache = self.module.state_dict()

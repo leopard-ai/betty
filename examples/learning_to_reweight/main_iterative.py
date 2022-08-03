@@ -44,7 +44,12 @@ args = parser.parse_args()
 print(args)
 set_seed(args.seed)
 
-train_dataloader, meta_dataloader, test_dataloader, imbalanced_num_list = build_dataloader(
+(
+    train_dataloader,
+    meta_dataloader,
+    test_dataloader,
+    imbalanced_num_list,
+) = build_dataloader(
     seed=args.seed,
     dataset=args.dataset,
     num_meta_total=args.num_meta,
@@ -79,7 +84,9 @@ class Outer(ImplicitProblem):
 
     def configure_optimizer(self):
         meta_optimizer = optim.Adam(
-            self.module.parameters(), lr=args.meta_lr, weight_decay=args.meta_weight_decay
+            self.module.parameters(),
+            lr=args.meta_lr,
+            weight_decay=args.meta_weight_decay,
         )
         return meta_optimizer
 
@@ -141,9 +148,17 @@ class ReweightingEngine(Engine):
         return {"acc": acc, "best_acc": best_acc}
 
 
-outer_config = Config(type="darts", fp16=args.fp16, first_order=False, log_step=100, retain_graph=True)
+outer_config = Config(
+    type="darts", fp16=args.fp16, first_order=False, log_step=100, retain_graph=True
+)
 inner_config = Config(type="darts", fp16=args.fp16, unroll_steps=1, retain_graph=True)
-engine_config = EngineConfig(train_iters=15000, valid_step=100, distributed=args.distributed, roll_back=True, logger_type="tensorboard")
+engine_config = EngineConfig(
+    train_iters=15000,
+    valid_step=100,
+    distributed=args.distributed,
+    roll_back=True,
+    logger_type="tensorboard",
+)
 outer = Outer(name="outer", config=outer_config, device=args.device)
 inner = Inner(name="inner", config=inner_config, device=args.device)
 
@@ -152,6 +167,8 @@ u2l = {outer: [inner]}
 l2u = {inner: [outer]}
 dependencies = {"l2u": l2u, "u2l": u2l}
 
-engine = ReweightingEngine(config=engine_config, problems=problems, dependencies=dependencies)
+engine = ReweightingEngine(
+    config=engine_config, problems=problems, dependencies=dependencies
+)
 engine.run()
 print(f"IF {args.imbalanced_factor} || Best Acc.: {best_acc}")

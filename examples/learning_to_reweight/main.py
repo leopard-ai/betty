@@ -153,7 +153,9 @@ class ReweightingEngine(Engine):
 
 
 outer_config = Config(type="darts", fp16=args.fp16, log_step=100, retain_graph=True)
-inner_config = Config(type="cg", cg_alpha=0.1, cg_iterations=1, fp16=args.fp16, unroll_steps=1)
+inner_config = Config(
+    type="cg", cg_alpha=0.1, cg_iterations=1, fp16=args.fp16, unroll_steps=1
+)
 engine_config = EngineConfig(
     train_iters=15000,
     valid_step=100,

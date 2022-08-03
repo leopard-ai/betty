@@ -108,8 +108,8 @@ class Child(ImplicitProblem):
 engine_config = EngineConfig(train_iters=10000, logger_type="none")
 parent_config = Config(log_step=1, first_order=True, retain_graph=True)
 child_config = Config(type="cg", cg_iterations=3, cg_alpha=1, unroll_steps=100)
-#child_config = Config(type="darts", unroll_steps=100)
-#child_config = Config(type="neumann", neumann_iterations=3, unroll_steps=100)
+# child_config = Config(type="darts", unroll_steps=100)
+# child_config = Config(type="neumann", neumann_iterations=3, unroll_steps=100)
 
 parent = Parent(name="outer", config=parent_config, device=device)
 child = Child(name="inner", config=child_config, device=device)

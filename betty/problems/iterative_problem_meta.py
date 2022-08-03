@@ -4,8 +4,6 @@
 # LICENSE file in the root directory of this source tree.
 
 
-
-
 from typing import Union, Optional, Callable, Dict
 from torch.optim.optimizer import Optimizer
 from torch.optim import SGD
@@ -34,19 +32,16 @@ class MetaModule(nn.Module):
     >>>     pass # just extends two class to create MetaNet
     """
 
-    _ignore_buffers = {
-
-    }
-    _ignore_modules = {
-        _BatchNorm
-    }
+    _ignore_buffers = {}
+    _ignore_modules = {_BatchNorm}
 
     def set_params(self, params: Iterable[torch.Tensor]):
         """
         set params' value with order
         """
-        for piter, param in zip(MetaModule._name_params(self, with_module=True),
-                                params):  # type: Any,torch.Tensor
+        for piter, param in zip(
+            MetaModule._name_params(self, with_module=True), params
+        ):  # type: Any,torch.Tensor
             name, val, mmodule = piter  # type: str,nn.Parameter,nn.Module
             if param is None:
                 continue
@@ -76,7 +71,7 @@ class MetaModule(nn.Module):
         for _, val in self.name_params(with_module=False):
             yield val
 
-    def __setattr__(self, name: str, value: Union[Tensor, 'Module']) -> None:
+    def __setattr__(self, name: str, value: Union[Tensor, "Module"]) -> None:
         super().__setattr__(name, value)
 
         if isinstance(value, nn.Module):
@@ -102,14 +97,16 @@ class MetaModule(nn.Module):
             MetaModule._move_params_to_buffer(v)
 
     @staticmethod
-    def _name_params(module: nn.Module, with_module=False, prefix=''):
+    def _name_params(module: nn.Module, with_module=False, prefix=""):
         """yield all params with raw name(without module prefix)"""
         memo = set()
         for mname, mmodule in module.named_children():
             if mmodule == module:
                 continue
-            for name, val, mmmodule in MetaModule._name_params(mmodule, with_module=True, prefix=prefix):
-                whole_name = '.'.join([prefix, mname, name]).lstrip('.')
+            for name, val, mmmodule in MetaModule._name_params(
+                mmodule, with_module=True, prefix=prefix
+            ):
+                whole_name = ".".join([prefix, mname, name]).lstrip(".")
                 memo.add(whole_name)
 
                 # the name is reletive to module, cause when set or update params, setattr(module, name, val) is called.
@@ -134,7 +131,7 @@ class MetaModule(nn.Module):
                     ignore_names = MetaModule._ignore_buffers[cls]
                     break
 
-            pure_name = name.split('.')[-1]
+            pure_name = name.split(".")[-1]
             if pure_name in ignore_names:
                 continue
 
@@ -158,16 +155,13 @@ class MetaModule(nn.Module):
 
 
 class Meta(MetaModule):
-    _ignore_buffers = {
-
-    }
-    _ignore_modules = {
-        _BatchNorm
-    }
+    _ignore_buffers = {}
+    _ignore_modules = {_BatchNorm}
 
     def __init__(self, model: nn.Module):
         super().__init__()
         from copy import deepcopy
+
         model = deepcopy(model)
         for k, v in model.__dict__.items():
             if isinstance(v, dict):
@@ -176,7 +170,7 @@ class Meta(MetaModule):
                 self.__dict__.setdefault(k, list()).extend(v)
             elif not callable(v):
                 self.__dict__[k] = v
-        self.__dict__['forward'] = model.forward
+        self.__dict__["forward"] = model.forward
 
         Meta._move_params_to_buffer(self)
 
@@ -211,8 +205,8 @@ class MetaIterativeProblem(Problem):
         self.optimizer.step()
 
     def functional_one_step_descent(self, batch=None):
-        assert (
-            not self._fp16 and not self.is_implemented("custom_optimizer_step")
+        assert not self._fp16 and not self.is_implemented(
+            "custom_optimizer_step"
         ), "[!] FP16 training is not supported for IterativeProblem."
 
         # load data
@@ -229,7 +223,7 @@ class MetaIterativeProblem(Problem):
             self.trainable_parameters(),
             create_graph=not self._first_order,
             retain_graph=self._retain_graph,
-            allow_unused=self._allow_unused
+            allow_unused=self._allow_unused,
         )
 
         # backward & zero grad & param update

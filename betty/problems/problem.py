@@ -107,7 +107,6 @@ class Problem:
         """
         self._backend = engine_config.backend
 
-
     def initialize(self, engine_config):
         """
         ``initialize`` patches/sets up module, optimizer, data loader, etc. after compiling a
@@ -339,7 +338,9 @@ class Problem:
                 train_data_loader = self.configure_train_data_loader()
             self.train_data_iterator = iter(train_data_loader)
             batch = next(self.train_data_iterator)
-        batch = tuple(convert_tensor(item, self.device, self._is_default_fp16()) for item in batch)
+        batch = tuple(
+            convert_tensor(item, self.device, self._is_default_fp16()) for item in batch
+        )
 
         return batch
 
