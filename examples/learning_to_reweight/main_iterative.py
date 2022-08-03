@@ -9,7 +9,7 @@ from data import *
 from utils import *
 
 from betty.engine import Engine
-from betty.problems import ImplicitProblem
+from betty.problems import HigherIterativeProblem, ImplicitProblem, MetaIterativeProblem
 from betty.configs import Config, EngineConfig
 
 
@@ -17,7 +17,6 @@ parser = argparse.ArgumentParser(description="Meta_Weight_Net")
 parser.add_argument("--device", type=str, default="cuda")
 parser.add_argument("--fp16", action="store_true")
 parser.add_argument("--distributed", action="store_true")
-parser.add_argument("--rollback", action="store_true")
 parser.add_argument("--seed", type=int, default=0)
 parser.add_argument("--meta_net_hidden_size", type=int, default=100)
 parser.add_argument("--meta_net_num_layers", type=int, default=1)
@@ -92,18 +91,15 @@ class Outer(ImplicitProblem):
         return meta_optimizer
 
 
-class Inner(ImplicitProblem):
-    def forward(self, x):
-        return self.module(x)
-
+class Inner(MetaIterativeProblem):
     def training_step(self, batch):
         inputs, labels = batch
         inputs, labels = inputs.to(args.device), labels.to(args.device)
         outputs = self.forward(inputs)
         loss_vector = F.cross_entropy(outputs, labels.long(), reduction="none")
         loss_vector_reshape = torch.reshape(loss_vector, (-1, 1))
-        weight = self.outer(loss_vector_reshape.detach())
-        loss = torch.mean(weight * loss_vector_reshape)
+        weight = self.outer(loss_vector_reshape.data)
+        loss = torch.mean(weight * loss_vector_reshape) / torch.mean(weight)
 
         return loss
 
@@ -152,15 +148,15 @@ class ReweightingEngine(Engine):
         return {"acc": acc, "best_acc": best_acc}
 
 
-outer_config = Config(type="darts", fp16=args.fp16, log_step=100, retain_graph=True)
-inner_config = Config(
-    type="cg", cg_alpha=0.1, cg_iterations=1, fp16=args.fp16, unroll_steps=1
+outer_config = Config(
+    type="darts", fp16=args.fp16, first_order=False, log_step=100, retain_graph=True
 )
+inner_config = Config(type="darts", fp16=args.fp16, unroll_steps=1, retain_graph=True)
 engine_config = EngineConfig(
     train_iters=15000,
     valid_step=100,
     distributed=args.distributed,
-    roll_back=args.rollback,
+    roll_back=True,
     logger_type="tensorboard",
 )
 outer = Outer(name="outer", config=outer_config, device=args.device)
