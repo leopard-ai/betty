@@ -5,8 +5,8 @@ import torch
 import torch.nn.functional as F
 
 from betty.engine import Engine
-from betty.configs import Config
-from betty.problems import IterativeProblem
+from betty.configs import Config, EngineConfig
+from betty.problems import ImplicitProblem, HigherIterativeProblem
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -30,6 +30,9 @@ x_val, y_val = (
     torch.from_numpy(y_val).to(device).float(),
 )
 
+data = {"train": (x_train, y_train), "valid": (x_val, y_val)}
+torch.save(data, "data.t7")
+
 
 def make_data_loader(xs, ys):
     datasets = [(xs, ys)]
@@ -45,7 +48,7 @@ class ChildNet(torch.nn.Module):
 
     def forward(self, inputs):
         outs = inputs @ self.w
-        return outs
+        return outs, self.w
 
 
 class ParentNet(torch.nn.Module):
@@ -58,15 +61,11 @@ class ParentNet(torch.nn.Module):
         return self.w
 
 
-class Parent(IterativeProblem):
-    def forward(self):
-        return self.params[0]
-
+class Parent(ImplicitProblem):
     def training_step(self, batch):
         inputs, targets = batch
-        outs = self.inner(inputs)
+        outs = self.inner(inputs)[0]
         loss = F.binary_cross_entropy_with_logits(outs, targets)
-
         return loss
 
     def configure_train_data_loader(self):
@@ -83,15 +82,16 @@ class Parent(IterativeProblem):
             p.data.clamp_(min=1e-8)
 
 
-class Child(IterativeProblem):
-    def forward(self, inputs):
-        return self.fmodule(self.params, self.buffers, inputs)
-
+class Child(HigherIterativeProblem):
     def training_step(self, batch):
         inputs, targets = batch
-        outs = self.forward(inputs)
-        loss = F.binary_cross_entropy_with_logits(outs, targets) + 0.5 * sum(
-            self.params[0].pow(2) * self.outer()
+        outs, params = self.module(inputs)
+        loss = (
+            F.binary_cross_entropy_with_logits(outs, targets)
+            + 0.5
+            * (
+                params.unsqueeze(0) @ torch.diag(self.outer()) @ params.unsqueeze(1)
+            ).sum()
         )
         return loss
 
@@ -105,18 +105,20 @@ class Child(IterativeProblem):
         return torch.optim.SGD(self.module.parameters(), lr=0.1)
 
     def on_inner_loop_start(self):
-        self.params = (torch.nn.Parameter(torch.zeros(DATA_DIM)).to(device),)
+        self.module.w.data.zero_()
 
 
-parent_config = Config(type="darts", log_step=10, first_order=False, retain_graph=False)
-child_config = Config(type="darts", unroll_steps=100, retain_graph=True)
+engine_config = EngineConfig(train_iters=10000, logger_type="none")
+parent_config = Config(log_step=1, first_order=False, retain_graph=True)
+child_config = Config(unroll_steps=100)
+
 parent = Parent(name="outer", config=parent_config, device=device)
 child = Child(name="inner", config=child_config, device=device)
 
 problems = [parent, child]
-l2u = {child: [parent]}
 u2l = {parent: [child]}
+l2u = {child: [parent]}
 dependencies = {"l2u": l2u, "u2l": u2l}
 
-engine = Engine(config=None, problems=problems, dependencies=dependencies)
+engine = Engine(config=engine_config, problems=problems, dependencies=dependencies)
 engine.run()
