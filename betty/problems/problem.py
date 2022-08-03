@@ -7,6 +7,7 @@ import abc
 
 import torch
 
+
 from betty.configs import Config
 from betty.hypergradient import get_grads
 from betty.utils import convert_tensor, log_from_loss_dict
@@ -31,15 +32,20 @@ class Problem:
         train_data_loader=None,
         device=None,
     ):
+        # basic configurations
         self._name = name
         self._config = config if config is not None else Config()
         self.engine_config = None
+
+        # backend
+        self._backend = None
+
+        # device
         self.device = device
         if self.device is None:
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         # computation graph depedency
-        # ! dependency can be defined both in ``Module'' class and ``Engine'' class
         self._parents = []
         self._children = []
         self._paths = []
@@ -60,8 +66,9 @@ class Problem:
         # environment
         self.env = None
 
-        # fp16
+        # fp16 scaler
         self._fp16 = config.fp16
+        self.scaler = None
         if self._fp16:
             self.initial_dynamic_scale = config.initial_dynamic_scale
             self.scale_factor = config.scale_factor
@@ -86,6 +93,20 @@ class Problem:
         self._training = True
         self.ready = None
         self._count = 0
+
+    def _is_default_fp16(self):
+        if not self._fp16 or self._backend in ["deepspeed", "accelerate"]:
+            return False
+        return True
+
+    def parse_engine_config(self, engine_config):
+        """Parse engine config and set global attributes accordingly.
+
+        Args:
+            engine_config: EngineConfig
+        """
+        self._backend = engine_config.backend
+
 
     def initialize(self, engine_config):
         """
@@ -149,7 +170,7 @@ class Problem:
                 self.scheduler = self.configure_scheduler()
 
         # set up fp16 training
-        if self._fp16:
+        if self._is_default_fp16():
             assert torch.cuda.is_available()
             self.scaler = torch.cuda.amp.GradScaler(
                 init_scale=self.initial_dynamic_scale, growth_factor=self.scale_factor
@@ -165,6 +186,15 @@ class Problem:
         self.logger.info(f"Uppers: {parents_str}")
         self.logger.info(f"Lowers: {children_str}")
         self.logger.info(f"Paths: {path_str}\n")
+
+    def initialize_distributed(self, engine_config):
+        self.logger.info(
+            f"Initializing distributed training with backend '{engine_config.distributed_backend}'"
+        )
+        if not torch.distributed.is_initialized():
+            torch.distributed.init_process_group(
+                backend=engine_config.distributed_backend
+            )
 
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
@@ -183,7 +213,7 @@ class Problem:
         raise NotImplementedError
 
     def training_step_exec(self, batch):
-        if self._fp16:
+        if self._is_default_fp16():
             with torch.cuda.amp.autocast():
                 return self.training_step(batch)
         else:
@@ -309,7 +339,7 @@ class Problem:
                 train_data_loader = self.configure_train_data_loader()
             self.train_data_iterator = iter(train_data_loader)
             batch = next(self.train_data_iterator)
-        batch = tuple(convert_tensor(item, self.device, self._fp16) for item in batch)
+        batch = tuple(convert_tensor(item, self.device, self._is_default_fp16()) for item in batch)
 
         return batch
 
@@ -325,7 +355,7 @@ class Problem:
         is_dict = isinstance(maybe_loss_dict, dict)
         loss = maybe_loss_dict["loss"] if is_dict else maybe_loss_dict
         loss_no_scale = loss.item()
-        if self._fp16:
+        if self._is_default_fp16():
             loss = self.scaler.scale(loss)
         loss = loss / self.gas
 
@@ -432,7 +462,7 @@ class Problem:
         state_dict["optimizer"] = self.optimizer.state_dict()
         if self.scheduler is not None:
             state_dict["scheduler"] = self.scheduler.state_dict()
-        if self._fp16:
+        if self._is_default_fp16():
             state_dict["scaler"] = self.scaler.state_dict()
 
         return state_dict
@@ -447,7 +477,7 @@ class Problem:
         self.optimizer.load_state_dict(state_dict["optimizer"])
         if self.scheduler is not None and "scheduler" in state_dict:
             self.scheduler.load_state_dict(state_dict["scheduler"])
-        if self._fp16 and "scaler" in state_dict:
+        if self._is_default_fp16() and "scaler" in state_dict:
             self.scaler.load_state_dict(state_dict["scaler"])
 
     @abc.abstractmethod
