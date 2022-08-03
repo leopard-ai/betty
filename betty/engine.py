@@ -157,6 +157,8 @@ class Engine:
             assert len(path) > 1
             result = [node for node in path]
             results.append(result)
+        elif src not in self.dependencies["l2u"]:
+            return
         else:
             for adj in self.dependencies["l2u"][src]:
                 path.append(adj)
