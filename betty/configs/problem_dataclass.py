@@ -1,8 +1,3 @@
-# Copyright Sang Keun Choe
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
-
 from dataclasses import dataclass
 
 
@@ -40,22 +35,3 @@ class Config:
     # cg
     cg_iterations: int = 1
     cg_alpha: float = 1.0
-
-
-@dataclass
-class EngineConfig:
-    """
-    Configuration for ``Engine``.
-    """
-
-    train_iters: int = 50000
-    valid_step: int = 500
-
-    # logger
-    logger_type: str = "none"
-
-    # roll back
-    roll_back: bool = False
-
-    # distributed training
-    distributed: bool = False
