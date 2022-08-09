@@ -146,8 +146,9 @@ class Problem:
         if self.is_implemented("configure_train_data_loader"):
             train_data_loader = self.configure_train_data_loader()
         if train_data_loader is not None:
-            assert self.is_implemented("get_batch")
             self.train_data_iterator = iter(train_data_loader)
+        else:
+            assert self.is_implemented("get_batch")
 
         # set up module for the current level
         if self.is_implemented("configure_module"):
