@@ -145,11 +145,16 @@ class Problem:
         self._inner_loop_start = True
 
         # set up data loader
-        train_data_loader = self.train_data_loader
-        if self.is_implemented("configure_train_data_loader"):
-            train_data_loader = self.configure_train_data_loader()
-        if train_data_loader is not None:
-            self.train_data_iterator = iter(train_data_loader)
+        if self.train_data_loader is None and self.is_implemented(
+            "configure_train_data_loader"
+        ):
+            self.train_data_loader = self.configure_train_data_loader()
+        if self.train_data_loader is not None:
+            if not isinstance(self.train_data_loader, tuple):
+                self.train_data_loader = (self.train_data_loader,)
+            self.train_data_iterator = [
+                iter(train_data_loader) for train_data_loader in self.train_data_loader
+            ]
         else:
             assert self.is_implemented("get_batch")
 
@@ -334,14 +339,26 @@ class Problem:
         :return: New training batch
         :rtype: Any
         """
+        batch = tuple(
+            self.get_batch_single_loader(i) for i in range(len(self.train_data_loader))
+        )
+
+        return batch[0] if len(batch) == 1 else batch
+
+    def get_batch_single_loader(self, idx):
+        """
+        Load training batch from one of the user-provided data loader(s)
+
+        :return: New training batch
+        :rtype: Any
+        """
+        data_iterator = self.train_data_iterator[idx]
         try:
-            batch = next(self.train_data_iterator)
+            batch = next(data_iterator)
         except StopIteration:
-            train_data_loader = self.train_data_loader
-            if self.is_implemented("configure_train_data_loader"):
-                train_data_loader = self.configure_train_data_loader()
-            self.train_data_iterator = iter(train_data_loader)
-            batch = next(self.train_data_iterator)
+            train_data_loader = self.train_data_loader[idx]
+            self.train_data_iterator[idx] = iter(train_data_loader)
+            batch = next(self.train_data_iterator[idx])
         batch = tuple(
             convert_tensor(item, self.device, self._is_default_fp16()) for item in batch
         )
