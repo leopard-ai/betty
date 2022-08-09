@@ -76,6 +76,9 @@ class Problem:
         # gradient accumulation
         self.gas = config.gradient_accumulation
 
+        # gradient clipping
+        self.gradient_clipping = config.gradient_clipping
+
         # logger
         self.logger = None
         self.log_step = config.log_step
@@ -451,6 +454,11 @@ class Problem:
         for param in list(self.trainable_parameters()):
             if hasattr(param, "grad"):
                 del param.grad
+
+    def clip_grad(self):
+        torch.nn.utils.clip_grad_norm_(
+            parameters=self.trainable_parameters(), max_norm=self.gradient_clipping
+        )
 
     def state_dict(self):
         """

@@ -33,12 +33,19 @@ class ImplicitProblem(Problem):
             assert (
                 not self._fp16
             ), "[!] FP16 training is not supported for custom optimizer step."
+            if self.gradient_clipping > 0.0:
+                self.clip_grad()
             self.custom_optimizer_step(*args, **kwargs)
         else:
             if self._fp16:
+                if self.gradient_clipping > 0.0:
+                    self.scaler.unscale_(self.optimizer)
+                    self.clip_grad()
                 self.scaler.step(self.optimizer)
                 self.scaler.update()
             else:
+                if self.gradient_clipping > 0.0:
+                    self.clip_grad()
                 self.optimizer.step()
 
     def cache_states(self):
@@ -50,6 +57,7 @@ class ImplicitProblem(Problem):
         self.module.load_state_dict(self.module_state_dict_cache)
         if self.optimizer is not None:
             self.optimizer.load_state_dict(self.opitmizer_state_dict_cache)
+        self.module_state_dict_cache = None
         self.opitmizer_state_dict_cache = None
 
     def parameters(self):

@@ -165,8 +165,12 @@ class SSTEngine(Engine):
 
 
 engine_config = EngineConfig(train_iters=200, valid_step=50)
-finetune_config = Config(type="darts", fp16=args.fp16, retain_graph=True)
-reweight_config = Config(type="darts", fp16=args.fp16, unroll_steps=1)
+finetune_config = Config(
+    type="darts", fp16=args.fp16, retain_graph=True, gradient_clipping=10.0
+)
+reweight_config = Config(
+    type="darts", fp16=args.fp16, unroll_steps=1, gradient_clipping=10.0
+)
 
 finetune = Finetune(
     name="finetune",

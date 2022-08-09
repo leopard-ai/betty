@@ -16,6 +16,9 @@ class Config:
     # gradient accumulation
     gradient_accumulation: int = 1
 
+    # gradient clipping
+    gradient_clipping: float = 0.0
+
     # fp16 training
     fp16: bool = False
     initial_dynamic_scale: float = 4096.0
