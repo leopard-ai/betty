@@ -149,7 +149,7 @@ class HiddenLayer(nn.Module):
         self.relu = nn.ReLU()
 
     def forward(self, x):
-        return self.relu(self.fc(x))
+        return functional.dropout(self.relu(self.fc(x)), p=0.5, training=self.training)
 
 
 class MLP(nn.Module):
