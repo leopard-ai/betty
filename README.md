@@ -202,6 +202,7 @@ Happy multilevel optimization programming!
 - Gradient accumulation
 - FP16 training
 - Non-distributed data-parallel
+- Gradient clipping
 
 ### Logging
 - [(PyTorch) TensorBoard](https://pytorch.org/docs/stable/tensorboard.html)
