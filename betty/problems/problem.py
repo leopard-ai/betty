@@ -79,6 +79,9 @@ class Problem:
         # gradient clipping
         self.gradient_clipping = config.gradient_clipping
 
+        # warmup
+        self.warmup_steps = config.warmup_steps
+
         # logger
         self.logger = None
         self.log_step = config.log_step
@@ -287,7 +290,11 @@ class Problem:
                 self.log(loss_dict, global_step)
 
             # call parent step_normal after unrolling
-            if self._training and self._count % (self._unroll_steps * self.gas) == 0:
+            if (
+                self._training
+                and self._count % (self._unroll_steps * self.gas) == 0
+                and self._count > self.warmup_steps
+            ):
                 for problem in self._parents:
                     idx = problem.children.index(self)
                     problem.ready[idx] = True
@@ -329,7 +336,10 @@ class Problem:
         :type global_step: int, optional
         """
         self.step_normal(global_step=global_step)
-        if self._count % (self._unroll_steps * self.gas) == 0:
+        if (
+            self._count % (self._unroll_steps * self.gas) == 0
+            and self._count > self.warmup_steps
+        ):
             self.step_after_roll_back()
 
     def get_batch(self):

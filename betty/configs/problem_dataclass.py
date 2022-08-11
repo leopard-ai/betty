@@ -24,6 +24,9 @@ class Config:
     initial_dynamic_scale: float = 4096.0
     scale_factor: float = 2.0
 
+    # warm-up
+    warmup_steps: int = 0
+
     # logging
     log_step: int = -1
     log_local_step: bool = False
