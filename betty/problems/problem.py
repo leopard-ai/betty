@@ -24,8 +24,8 @@ class Problem:
 
     def __init__(
         self,
-        name,
-        config,
+        name=None,
+        config=None,
         module=None,
         optimizer=None,
         scheduler=None,
@@ -33,7 +33,7 @@ class Problem:
         device=None,
     ):
         # basic configurations
-        self._name = name
+        self._name = name if name is not None else "problem"
         self._config = config if config is not None else Config()
         self.engine_config = None
 
