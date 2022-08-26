@@ -373,6 +373,8 @@ class Problem:
         try:
             batch = next(data_iterator)
         except StopIteration:
+            if idx == 0:
+                self.on_epoch_end_exec()
             train_data_loader = self.train_data_loader[idx]
             self.train_data_iterator[idx] = iter(train_data_loader)
             batch = next(self.train_data_iterator[idx])
@@ -539,6 +541,10 @@ class Problem:
         ``step``.
         """
         raise NotImplementedError
+
+    def on_epoch_end_exec(self):
+        if self.is_implemented("on_epoch_end"):
+            self.on_epoch_end()
 
     def is_implemented(self, fn_name):
         """
