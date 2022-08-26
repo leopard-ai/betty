@@ -33,6 +33,7 @@ class Problem:
         device=None,
     ):
         # basic configurations
+        self._name_orig = name
         self._name = name if name is not None else "problem"
         self._config = config if config is not None else Config()
         self.engine_config = None
@@ -118,6 +119,12 @@ class Problem:
         ``initialize`` patches/sets up module, optimizer, data loader, etc. after compiling a
         user-provided configuration (e.g., fp16 training, iterative differentiation)
         """
+        if self._name_orig is None:
+            self.logger.warning(
+                "name is not defined for this Problem. We arbitrarily set "
+                "the name as 'problem' to avoid undesired behaviors."
+            )
+        delattr(self, "_name_orig")
         # engine config
         self.engine_config = engine_config
 
