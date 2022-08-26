@@ -88,6 +88,10 @@ class Problem:
         self.log_step = config.log_step
         self.log_local_step = config.log_local_step
 
+        # step counter
+        self._count = 0
+        self._global_step = 0
+
         # misc
         self._leaf = False
         self._default_grad = False
@@ -99,7 +103,6 @@ class Problem:
         self._inner_loop_start = True
         self._training = True
         self.ready = None
-        self._count = 0
 
     def _is_default_fp16(self):
         if not self._fp16 or self._backend in ["deepspeed", "accelerate"]:
@@ -342,6 +345,7 @@ class Problem:
         :param global_step: global step of the whole multilevel optimization. Defaults to None.
         :type global_step: int, optional
         """
+        self._global_step = global_step
         self.step_normal(global_step=global_step)
         if (
             self._count % (self._unroll_steps * self.gas) == 0
