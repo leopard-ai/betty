@@ -16,7 +16,7 @@ class Engine:
     dependencies. It also provides a primitive for executing multilevel optimization.
     """
 
-    def __init__(self, config, problems, dependencies=None, env=None):
+    def __init__(self, problems, config=None, dependencies=None, env=None):
         # config
         self.config = config if config is not None else EngineConfig()
         self.train_iters = 0
@@ -38,6 +38,14 @@ class Engine:
         # env
         self.env = env
 
+        # early stopping
+        self.early_stopping = False
+        self.early_stopping_tolerance = 0
+        self.early_stopping_mode = None
+        self.early_stopping_metric = None
+        self.early_stopping_counter = 0
+        self.early_stopping_best = None
+
         # initialize
         self.initialize()
 
@@ -48,6 +56,17 @@ class Engine:
         self.train_iters = self.config.train_iters
         self.valid_step = self.config.valid_step
         self.logger_type = self.config.logger_type
+
+        self.early_stopping = self.config.early_stopping
+        self.early_stopping_tolerance = self.config.early_stopping_tolerance
+        self.early_stopping_mode = self.config.early_stopping_mode
+        self.early_stopping_metric = self.config.early_stopping_metric
+        if self.early_stopping_mode == "min":
+            self.early_stopping_best = float("inf")
+        elif self.early_stopping_mode == "max":
+            self.early_stopping_best = -float("inf")
+        else:
+            raise ValueError
 
     def train_step(self):
         """
@@ -77,6 +96,26 @@ class Engine:
                         validation_stats, tag="validation", step=self.global_step
                     )
                     self.train()
+                    # early stopping
+                    if self.early_stopping:
+                        assert self.early_stopping_metric in validation_stats
+                        cur = validation_stats[self.early_stopping_metric]
+                        if self.early_stopping_mode == "min":
+                            if cur <= self.early_stopping_best:
+                                self.early_stopping_best = cur
+                                self.early_stopping_counter = 0
+                            else:
+                                self.early_stopping_counter += 1
+                        else:
+                            if cur >= self.early_stopping_best:
+                                self.early_stopping_best = cur
+                                self.early_stopping_counter = 0
+                            else:
+                                self.early_stopping_counter += 1
+
+                        if self.early_stopping_counter >= self.early_stopping_tolerance:
+                            self.logger.info("Early stopping is executed!")
+                            break
 
     def initialize(self):
         """

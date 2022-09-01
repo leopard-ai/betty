@@ -18,3 +18,9 @@ class EngineConfig:
 
     # distributed training
     distributed: bool = False
+
+    # early stopping
+    early_stopping: bool = False
+    early_stopping_mode: str = "min"
+    early_stopping_tolerance: int = 5
+    early_stopping_metric: str = "loss"
