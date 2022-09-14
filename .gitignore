@@ -7,3 +7,6 @@ _build
 *.sw*
 *.DS_Store
 betty.egg-info
+.env
+.venv
+venv/
