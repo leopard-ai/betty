@@ -382,9 +382,14 @@ class Problem:
             train_data_loader = self.train_data_loader[idx]
             self.train_data_iterator[idx] = iter(train_data_loader)
             batch = next(self.train_data_iterator[idx])
-        batch = tuple(
-            convert_tensor(item, self.device, self._is_default_fp16()) for item in batch
-        )
+        if not isinstance(batch, dict):
+            batch = tuple(
+                convert_tensor(value, self.device, self._is_default_fp16())
+                for value in batch
+            )
+        else:
+            for key, value in batch.items():
+                batch[key] = convert_tensor(value, self.device, self._is_default_fp16())
 
         return batch
 
