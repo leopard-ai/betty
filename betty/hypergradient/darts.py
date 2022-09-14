@@ -1,6 +1,6 @@
 import torch
 
-from betty.utils import to_vec
+from betty.utils import to_vec, replace_none_with_zero
 
 
 def darts(vector, curr, prev):
@@ -30,13 +30,15 @@ def darts(vector, curr, prev):
     for p, v in zip(curr.trainable_parameters(), vector):
         p.data.add_(v.data, alpha=eps)
     loss_p = curr.training_step_exec(curr.cur_batch)
-    grad_p = torch.autograd.grad(loss_p, prev.trainable_parameters())
+    grad_p = torch.autograd.grad(loss_p, prev.trainable_parameters(), allow_unused=True)
+    grad_p = replace_none_with_zero(grad_p, prev.trainable_parameters())
 
     # negative
     for p, v in zip(curr.trainable_parameters(), vector):
         p.data.add_(v.data, alpha=-2 * eps)
     loss_n = curr.training_step_exec(curr.cur_batch)
-    grad_n = torch.autograd.grad(loss_n, prev.trainable_parameters())
+    grad_n = torch.autograd.grad(loss_n, prev.trainable_parameters(), allow_unused=True)
+    grad_n = replace_none_with_zero(grad_n, prev.trainable_parameters())
 
     # reverse weight change
     for p, v in zip(curr.trainable_parameters(), vector):

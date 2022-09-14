@@ -114,3 +114,11 @@ def neg_with_none(a):
         return None
     else:
         return -a
+
+
+def replace_none_with_zero(tensor_list, reference):
+    out = []
+    for t, r in zip(tensor_list, reference):
+        fixed = t if t is not None else torch.zeros_like(r)
+        out.append(fixed)
+    return tuple(out)
