@@ -152,8 +152,6 @@ class Problem:
         for problem in self._children:
             child_config = problem.config
             children_unroll_steps.append(child_config.unroll_steps)
-        if len(children_unroll_steps) > 0:
-            assert all(s == children_unroll_steps[0] for s in children_unroll_steps)
 
         self._inner_loop_start = True
 
