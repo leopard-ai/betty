@@ -31,6 +31,8 @@ setup(
         "meta-learning",
         "pytorch",
         "multilevel optimization",
+        "machine learning",
+        "artificial intelligence",
     ],
     packages=find_packages(
         exclude=[
