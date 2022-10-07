@@ -26,43 +26,15 @@ pip install betty-ml
 
 ## Introduction
 Betty is a [PyTorch](https://pytorch.org) library for generalized meta-learning (GML)
-and multilevel optimization (MLO) that provides a unified programming interface for a
-number of GML/MLO applications including **meta-learning**, **hyperparameter
-optimization**, **neural architecture search**, **data reweighting**, **adversarial
-learning**, and **reinforcement learning**.
+and multilevel optimization (MLO) that allows an *easy-to-use* and *modular*
+programming interface for a number of *large-scale* applications including
+**meta-learning**, **hyperparameter optimization**, **neural architecture search**,
+**data reweighting**, **adversarial learning**, and **reinforcement learning**.
 
-## Benefits
-- Easy-to-use and unified programming interface for GML/MLO.
-- Various system support for large-scale GML/MLO (e.g., distributed training).
-- Flexible support for complex GML/MLO applications beyond two levels.
-
-Implementing generalized meta-learning and multilevel optimization is notoriously
-complicated. For example, it requires approximating gradients using
-iterative/implicit differentiation, and writing nested for-loops to handle
-hierarchical dependencies between multiple levels.
-
-Betty aims to abstract away low-level implementation details behind its API, while
-allowing users to write only high-level declarative code. Now, users simply need to do
-two things to implement any GML/MLO program:
+With Betty, users simply need to do two things to implement any GML/MLO programs:
 
 1. Define each level's optimization problem using the [Problem](#problem) class.
 2. Define the hierarchical problem structure using the [Engine](#engine) class.
-
-## Applications
-We provide reference implementations of several GML/MLO applications, including:
-- [Hyperparameter Optimization](examples/logistic_regression_hpo/)
-- [Neural Architecture Search](examples/neural_architecture_search/)
-- [Data Reweighting](examples/learning_to_reweight/)
-- [Domain Adaptation for Pretraining & Finetuning](examples/learning_by_ignoring/)
-- [(Implicit) Model-Agnostic Meta-Learning](examples/implicit_maml)
-
-While each of the above examples traditionally has a distinct implementation style, note
-that our implementations share the same code structure thanks to Betty. More examples
-are on the way!
-
-<p align="center">
-    <img src="https://raw.githubusercontent.com/leopard-ai/betty/main/docs/_static/imgs/mlo.png" alt="" width="100%" align="top">
-</p>
 
 ## Quick Start
 ### Problem
@@ -188,6 +160,22 @@ be handled by Betty. For more details and advanced features, users can check out
 [Tutorials](https://leopard-ai.github.io/betty/tutorial/basic/basic.html).
 
 Happy multilevel optimization programming!
+
+## Applications
+We provide reference implementations of several GML/MLO applications, including:
+- [Hyperparameter Optimization](examples/logistic_regression_hpo/)
+- [Neural Architecture Search](examples/neural_architecture_search/)
+- [Data Reweighting](examples/learning_to_reweight/)
+- [Domain Adaptation for Pretraining & Finetuning](examples/learning_by_ignoring/)
+- [(Implicit) Model-Agnostic Meta-Learning](examples/implicit_maml)
+
+While each of the above examples traditionally has a distinct implementation style, note
+that our implementations share the same code structure thanks to Betty. More examples
+are on the way!
+
+<p align="center">
+    <img src="https://raw.githubusercontent.com/leopard-ai/betty/main/docs/_static/imgs/mlo.png" alt="" width="100%" align="top">
+</p>
 
 ## Features
 ### Gradient Approximation Methods
