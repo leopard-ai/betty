@@ -26,8 +26,8 @@ pip install betty-ml
 
 ## Introduction
 Betty is a [PyTorch](https://pytorch.org) library for generalized meta-learning (GML)
-and multilevel optimization (MLO) that allows an **easy-to-use** and **modular**
-programming interface for a number of *large-scale* applications including
+and multilevel optimization (MLO) that allows a **simple** and **modular**
+programming interface for a number of **large-scale** applications including
 [meta-learning](examples/implicit_maml/),
 [hyperparameter optimization](examples/logistic_regression_hpo/),
 [neural architecture search](examples/neural_architecture_search/),
