@@ -6,7 +6,7 @@
 import abc
 
 import torch
-
+import torch.distributed as dist
 
 from betty.configs import Config
 from betty.hypergradient import get_grads
@@ -46,6 +46,9 @@ class Problem:
         if self.device is None:
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
+        # distributed
+        self._distributed = False
+
         # computation graph depedency
         self._parents = []
         self._children = []
@@ -56,6 +59,7 @@ class Problem:
         self.train_data_loader = train_data_loader
         self.train_data_iterator = None
         self.cur_batch = None
+        self.epoch_counter = None
 
         # module
         self.module = module
@@ -163,9 +167,14 @@ class Problem:
         if self.train_data_loader is not None:
             if not isinstance(self.train_data_loader, tuple):
                 self.train_data_loader = (self.train_data_loader,)
-            self.train_data_iterator = [
-                iter(train_data_loader) for train_data_loader in self.train_data_loader
-            ]
+
+            self.train_data_iterator = []
+            self.epoch_counter = []
+            for train_data_loader in self.train_data_loader:
+                if self._distributed:
+                    train_data_loader.sampler.set_epoch(0)
+                self.train_data_iterator.append(iter(train_data_loader))
+                self.epoch_counter.append(0)
         else:
             assert self.is_implemented("get_batch")
 
@@ -175,8 +184,6 @@ class Problem:
                 self.module = self.configure_module()
         assert self.module is not None, "Module must be specified!"
         self.module.to(self.device)
-        if engine_config.distributed and torch.cuda.device_count() > 1:
-            self.module = torch.nn.DataParallel(self.module)
 
         # set up optimizer
         if self.is_implemented("configure_optimizer"):
@@ -205,15 +212,6 @@ class Problem:
         self.logger.info(f"Uppers: {parents_str}")
         self.logger.info(f"Lowers: {children_str}")
         self.logger.info(f"Paths: {path_str}\n")
-
-    def initialize_distributed(self, engine_config):
-        self.logger.info(
-            f"Initializing distributed training with backend '{engine_config.distributed_backend}'"
-        )
-        if not torch.distributed.is_initialized():
-            torch.distributed.init_process_group(
-                backend=engine_config.distributed_backend
-            )
 
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
@@ -259,6 +257,8 @@ class Problem:
 
         # calculate parameter update
         if self._count % self.gas == 0:
+            if self._distributed:
+                self.synchronize_grads(self.trainable_parameters)
             self.optimizer_step()
 
             # param callback (e.g., parameter clipping)
@@ -377,7 +377,10 @@ class Problem:
         except StopIteration:
             if idx == 0:
                 self.on_epoch_end_exec()
+            self.epoch_counter[idx] += 1
             train_data_loader = self.train_data_loader[idx]
+            if self._distributed:
+                train_data_loader.sampler.set_epoch(self.epoch_counter[idx])
             self.train_data_iterator[idx] = iter(train_data_loader)
             batch = next(self.train_data_iterator[idx])
         if not isinstance(batch, dict):
@@ -481,6 +484,17 @@ class Problem:
                     param.grad = param.grad + grad
                 else:
                     param.grad = grad
+
+    def synchronize_grads(self, params):
+        for param in params:
+            grad = param.grad
+
+            # perform all_reduce
+            grad.mul_(1.0 / dist.get_world_size())
+            dist.all_reduce(grad)
+
+            #! May not need this line
+            param.grad.copy_(grad)
 
     @abc.abstractmethod
     def optimizer_step(self, *args, **kwargs):
@@ -763,6 +777,23 @@ class Problem:
     @leaf.setter
     def leaf(self, leaf):
         """
-        Set the current problem as a leaf problem
+        Set the current problem as a leaf problem.
         """
         self._leaf = leaf
+
+    @property
+    def distributed(self):
+        """
+        Return whether distributed training is enabled.
+
+        :return: distributed
+        :rtype: bool
+        """
+        return self._distributed
+
+    @distributed.setter
+    def distributed(self, distributed):
+        """
+        Set the distributed training status.
+        """
+        self._distributed = distributed

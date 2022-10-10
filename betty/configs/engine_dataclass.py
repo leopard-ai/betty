@@ -18,6 +18,7 @@ class EngineConfig:
 
     # distributed training
     distributed: bool = False
+    distributed_backend: str = "nccl"
 
     # early stopping
     early_stopping: bool = False

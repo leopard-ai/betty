@@ -5,6 +5,8 @@
 
 import time
 
+import torch.distributed as dist
+
 from betty.configs import EngineConfig
 from betty.logging import logger
 from betty.utils import log_from_loss_dict
@@ -38,6 +40,9 @@ class Engine:
         # env
         self.env = env
 
+        # distributed
+        self.is_distributed = False
+
         # early stopping
         self.early_stopping = False
         self.early_stopping_tolerance = 0
@@ -56,6 +61,9 @@ class Engine:
         self.train_iters = self.config.train_iters
         self.valid_step = self.config.valid_step
         self.logger_type = self.config.logger_type
+
+        self.is_distributed = self.config.distributed
+        self.distributed_backend = self.config.distributed_backend
 
         self.early_stopping = self.config.early_stopping
         self.early_stopping_tolerance = self.config.early_stopping_tolerance
@@ -140,6 +148,10 @@ class Engine:
 
         end = time.time()
         self.logger.info(f"Time spent on initialization: {end-start:.3f} (s)\n")
+
+    def initialize_distributed(self):
+        self.logger.info("Initializing Distributed Training...\n")
+        dist.init_process_group(backend=self.distributed_backend)
 
     def train(self):
         """
