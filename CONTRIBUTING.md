@@ -44,6 +44,14 @@ black .
 ```
 in the root directory before creating a PR.
 
+### Unit Tests
+We provide basic unit tests for several components of code.
+Please run
+```bash
+python -m unittest -v
+```
+in the root directory before creating a PR.
+
 # Report a Bug
 
 If you find a bug, please make an issue and include [BUG] in the title. In 
