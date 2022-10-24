@@ -21,8 +21,8 @@ python_requires = ">=3.6.0"
 setup(
     name="betty",
     version=version,
-    author="Sang Keun Choe",
-    author_email="sangkeuc@andrew.cmu.edu",
+    author="Sang Choe",
+    author_email="sangkeun00@gmail.com",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
