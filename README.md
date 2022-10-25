@@ -191,7 +191,7 @@ are on the way!
 ### Training
 - Gradient accumulation
 - FP16 training
-- Non-distributed data-parallel
+- Distributed data-parallel training
 - Gradient clipping
 
 ### Logging
