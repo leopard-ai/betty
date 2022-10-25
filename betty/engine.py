@@ -11,6 +11,7 @@ import torch.distributed as dist
 
 from betty.configs import EngineConfig
 from betty.logging import logger
+from betty.misc.early_stopping import EarlyStopping
 from betty.utils import log_from_loss_dict
 
 
@@ -49,12 +50,7 @@ class Engine:
         self._local_rank = 0
 
         # early stopping
-        self.early_stopping = False
-        self.early_stopping_tolerance = 0
-        self.early_stopping_mode = None
-        self.early_stopping_metric = None
-        self.early_stopping_counter = 0
-        self.early_stopping_best = None
+        self.early_stopping = None
 
         # initialize
         self.initialize()
@@ -70,16 +66,12 @@ class Engine:
         self._distributed = self.config.distributed
         self.distributed_backend = self.config.distributed_backend
 
-        self.early_stopping = self.config.early_stopping
-        self.early_stopping_tolerance = self.config.early_stopping_tolerance
-        self.early_stopping_mode = self.config.early_stopping_mode
-        self.early_stopping_metric = self.config.early_stopping_metric
-        if self.early_stopping_mode == "min":
-            self.early_stopping_best = float("inf")
-        elif self.early_stopping_mode == "max":
-            self.early_stopping_best = -float("inf")
-        else:
-            raise ValueError
+        if self.config.early_stopping:
+            self.early_stopping = EarlyStopping(
+                metric=self.config.early_stopping_metric,
+                mode=self.config.early_stopping_mode,
+                tolerance=self.config.early_stopping_tolerance,
+            )
 
     def train_step(self):
         """
@@ -110,23 +102,9 @@ class Engine:
                 self.train()
 
                 # early stopping
-                if self.early_stopping:
-                    assert self.early_stopping_metric in validation_stats
-                    cur = validation_stats[self.early_stopping_metric]
-                    if self.early_stopping_mode == "min":
-                        if cur <= self.early_stopping_best:
-                            self.early_stopping_best = cur
-                            self.early_stopping_counter = 0
-                        else:
-                            self.early_stopping_counter += 1
-                    else:
-                        if cur >= self.early_stopping_best:
-                            self.early_stopping_best = cur
-                            self.early_stopping_counter = 0
-                        else:
-                            self.early_stopping_counter += 1
-
-                    if self.early_stopping_counter >= self.early_stopping_tolerance:
+                if self.early_stopping is not None:
+                    stop = self.early_stopping(validation_stats)
+                    if stop:
                         self.logger.info("Early stopping is executed!")
                         break
 
