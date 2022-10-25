@@ -19,6 +19,7 @@ parser.add_argument("--fp16", action="store_true")
 parser.add_argument("--distributed", action="store_true")
 parser.add_argument("--rollback", action="store_true")
 parser.add_argument("--seed", type=int, default=0)
+parser.add_argument("--local_rank", type=int, default=0)
 parser.add_argument("--meta_net_hidden_size", type=int, default=100)
 parser.add_argument("--meta_net_num_layers", type=int, default=1)
 
@@ -67,7 +68,6 @@ class Outer(ImplicitProblem):
 
     def training_step(self, batch):
         inputs, labels = batch
-        inputs, labels = inputs.to(args.device), labels.to(args.device)
         outputs = self.inner(inputs)
         loss = F.cross_entropy(outputs, labels.long())
         acc = (outputs.argmax(dim=1) == labels.long()).float().mean().item() * 100
@@ -80,7 +80,7 @@ class Outer(ImplicitProblem):
     def configure_module(self):
         meta_net = MLP(
             hidden_size=args.meta_net_hidden_size, num_layers=args.meta_net_num_layers
-        ).to(device=args.device)
+        )
         return meta_net
 
     def configure_optimizer(self):
@@ -98,7 +98,6 @@ class Inner(ImplicitProblem):
 
     def training_step(self, batch):
         inputs, labels = batch
-        inputs, labels = inputs.to(args.device), labels.to(args.device)
         outputs = self.forward(inputs)
         loss_vector = F.cross_entropy(outputs, labels.long(), reduction="none")
         loss_vector_reshape = torch.reshape(loss_vector, (-1, 1))
@@ -111,7 +110,7 @@ class Inner(ImplicitProblem):
         return train_dataloader
 
     def configure_module(self):
-        return ResNet32(args.dataset == "cifar10" and 10 or 100).to(device=args.device)
+        return ResNet32(args.dataset == "cifar10" and 10 or 100)
 
     def configure_optimizer(self):
         optimizer = optim.SGD(
@@ -161,8 +160,8 @@ engine_config = EngineConfig(
     roll_back=args.rollback,
     logger_type="tensorboard",
 )
-outer = Outer(name="outer", config=outer_config, device=args.device)
-inner = Inner(name="inner", config=inner_config, device=args.device)
+outer = Outer(name="outer", config=outer_config)
+inner = Inner(name="inner", config=inner_config)
 
 problems = [outer, inner]
 u2l = {outer: [inner]}
