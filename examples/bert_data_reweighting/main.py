@@ -165,7 +165,9 @@ class SSTEngine(Engine):
         return {"loss": valid_loss, "acc": valid_accuracy, "best_acc": best_acc}
 
 
-engine_config = EngineConfig(train_iters=200, valid_step=50, distributed=args.distributed)
+engine_config = EngineConfig(
+    train_iters=200, valid_step=50, distributed=args.distributed
+)
 finetune_config = Config(
     type="darts", fp16=args.fp16, retain_graph=True, gradient_clipping=10.0
 )
