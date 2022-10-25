@@ -10,6 +10,7 @@ import torch.distributed as dist
 
 from betty.configs import Config
 from betty.hypergradient import get_grads
+from betty.data_loader import get_distributed_data_loader
 from betty.utils import convert_tensor, log_from_loss_dict
 
 
@@ -43,11 +44,12 @@ class Problem:
 
         # device
         self.device = device
-        if self.device is None:
-            self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         # distributed
         self._distributed = False
+        self._world_size = None
+        self._rank = None
+        self._local_rank = None
 
         # computation graph depedency
         self._parents = []
@@ -119,7 +121,8 @@ class Problem:
         Args:
             engine_config: EngineConfig
         """
-        self._backend = engine_config.backend
+        if len(self._parents) > 0:
+            self._roll_back = engine_config.roll_back
 
     def initialize(self, engine_config):
         """
@@ -134,6 +137,10 @@ class Problem:
         delattr(self, "_name_orig")
         # engine config
         self.engine_config = engine_config
+        self.parse_engine_config(engine_config)
+
+        # configure device
+        self.configure_device()
 
         # initialize update ready to False
         if self._leaf:
@@ -148,8 +155,6 @@ class Problem:
             parent_config = problem.config
             first_order.append(parent_config.first_order)
         self._first_order = all(first_order)
-        if len(self._parents) > 0:
-            self._roll_back = engine_config.roll_back
 
         # compile children configurations
         children_unroll_steps = []
@@ -172,7 +177,10 @@ class Problem:
             self.epoch_counter = []
             for train_data_loader in self.train_data_loader:
                 if self._distributed:
-                    train_data_loader.sampler.set_epoch(0)
+                    train_data_loader = get_distributed_data_loader(
+                        train_data_loader, world_size=self._world_size, rank=self._rank
+                    )
+                    train_data_loader.set_epoch(0)
                 self.train_data_iterator.append(iter(train_data_loader))
                 self.epoch_counter.append(0)
         else:
@@ -184,6 +192,10 @@ class Problem:
                 self.module = self.configure_module()
         assert self.module is not None, "Module must be specified!"
         self.module.to(self.device)
+        if self._distributed:
+            # self.module = torch.nn.SyncBatchNorm.convert_sync_batchnorm(self.module)
+            # self.module = torch.nn.parallel.DistributedDataParallel(self.module)
+            self.synchronize_params(self.trainable_parameters())
 
         # set up optimizer
         if self.is_implemented("configure_optimizer"):
@@ -207,11 +219,12 @@ class Problem:
         path_str = [[node.name for node in path] for path in self._paths]
         children_str = [node.name for node in self._children]
         parents_str = [node.name for node in self._parents]
-        self.logger.info("*** Problem Information ***")
-        self.logger.info(f"Name: {self._name}")
-        self.logger.info(f"Uppers: {parents_str}")
-        self.logger.info(f"Lowers: {children_str}")
-        self.logger.info(f"Paths: {path_str}\n")
+        if self.is_rank_zero():
+            self.logger.info("*** Problem Information ***")
+            self.logger.info(f"Name: {self._name}")
+            self.logger.info(f"Uppers: {parents_str}")
+            self.logger.info(f"Lowers: {children_str}")
+            self.logger.info(f"Paths: {path_str}\n")
 
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
@@ -258,12 +271,16 @@ class Problem:
         # calculate parameter update
         if self._count % self.gas == 0:
             if self._distributed:
-                self.synchronize_grads(self.trainable_parameters)
+                dist.barrier()
+                self.synchronize_grads(self.trainable_parameters())
             self.optimizer_step()
 
             # param callback (e.g., parameter clipping)
             if self.is_implemented("param_callback"):
                 self.param_callback(self.trainable_parameters())
+
+            if self._distributed:
+                self.synchronize_params(self.trainable_parameters())
 
             # zero-out grad
             self.zero_grad()
@@ -294,7 +311,11 @@ class Problem:
                 self.scheduler.step()
 
             # logging
-            if self.log_step > 0 and self._count % self.log_step == 0:
+            if (
+                self.log_step > 0
+                and self._count % self.log_step == 0
+                and self.is_rank_zero()
+            ):
                 self.log(loss_dict, global_step)
 
             # call parent step_normal after unrolling
@@ -380,7 +401,10 @@ class Problem:
             self.epoch_counter[idx] += 1
             train_data_loader = self.train_data_loader[idx]
             if self._distributed:
-                train_data_loader.sampler.set_epoch(self.epoch_counter[idx])
+                train_data_loader = get_distributed_data_loader(
+                    train_data_loader, world_size=self._world_size, rank=self._rank
+                )
+                train_data_loader.set_epoch(self.epoch_counter[idx])
             self.train_data_iterator[idx] = iter(train_data_loader)
             batch = next(self.train_data_iterator[idx])
         if not isinstance(batch, dict):
@@ -486,15 +510,21 @@ class Problem:
                     param.grad = grad
 
     def synchronize_grads(self, params):
-        for param in params:
-            grad = param.grad
+        if self._world_size > 1:
+            for param in params:
+                grad = param.grad
 
-            # perform all_reduce
-            grad.mul_(1.0 / dist.get_world_size())
-            dist.all_reduce(grad)
+                # perform all_reduce
+                grad.mul_(1.0 / self._world_size)
+                dist.all_reduce(grad)
 
-            #! May not need this line
-            param.grad.copy_(grad)
+                #! May not need this line
+                param.grad.copy_(grad)
+
+    def synchronize_params(self, params):
+        if self._world_size > 1:
+            for param in params:
+                dist.broadcast(param.data, 0)
 
     @abc.abstractmethod
     def optimizer_step(self, *args, **kwargs):
@@ -546,6 +576,19 @@ class Problem:
             self.scheduler.load_state_dict(state_dict["scheduler"])
         if self._is_default_fp16() and "scaler" in state_dict:
             self.scaler.load_state_dict(state_dict["scaler"])
+
+    def configure_distributed_training(self, dictionary):
+        self._distributed = dictionary["distributed"]
+        self._world_size = dictionary["world_size"]
+        self._rank = dictionary["rank"]
+        self._local_rank = dictionary["local_rank"]
+
+    def configure_device(self):
+        if self._distributed:
+            torch.cuda.set_device(self._local_rank)
+            self.device = torch.device("cuda", self._local_rank)
+        else:
+            self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
     @abc.abstractmethod
     def cache_states(self):
@@ -719,6 +762,14 @@ class Problem:
         """
         self._training = False
 
+    def is_rank_zero(self):
+        """
+        Check whether the current device is rank 0.
+        """
+        if self._distributed and self._rank != 0:
+            return False
+        return True
+
     @property
     def name(self):
         """[summary]
@@ -780,20 +831,3 @@ class Problem:
         Set the current problem as a leaf problem.
         """
         self._leaf = leaf
-
-    @property
-    def distributed(self):
-        """
-        Return whether distributed training is enabled.
-
-        :return: distributed
-        :rtype: bool
-        """
-        return self._distributed
-
-    @distributed.setter
-    def distributed(self, distributed):
-        """
-        Set the distributed training status.
-        """
-        self._distributed = distributed

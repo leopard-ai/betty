@@ -3,8 +3,10 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+from os import readlink
 import time
 
+import torch
 import torch.distributed as dist
 
 from betty.configs import EngineConfig
@@ -41,7 +43,10 @@ class Engine:
         self.env = env
 
         # distributed
-        self.is_distributed = False
+        self._distributed = False
+        self._world_size = 0
+        self._rank = 0
+        self._local_rank = 0
 
         # early stopping
         self.early_stopping = False
@@ -62,7 +67,7 @@ class Engine:
         self.valid_step = self.config.valid_step
         self.logger_type = self.config.logger_type
 
-        self.is_distributed = self.config.distributed
+        self._distributed = self.config.distributed
         self.distributed_backend = self.config.distributed_backend
 
         self.early_stopping = self.config.early_stopping
@@ -92,38 +97,41 @@ class Engine:
             self.global_step += 1
             self.train_step()
 
-            if it % self.valid_step == 0:
-                if self.is_implemented("validation"):
-                    self.eval()
-                    validation_stats = self.validation() or {}
-                    log_loss = log_from_loss_dict(validation_stats)
-                    self.logger.info(
-                        f"[Validation] [Global Step {self.global_step}] " f"{log_loss}"
-                    )
-                    self.logger.log(
-                        validation_stats, tag="validation", step=self.global_step
-                    )
-                    self.train()
-                    # early stopping
-                    if self.early_stopping:
-                        assert self.early_stopping_metric in validation_stats
-                        cur = validation_stats[self.early_stopping_metric]
-                        if self.early_stopping_mode == "min":
-                            if cur <= self.early_stopping_best:
-                                self.early_stopping_best = cur
-                                self.early_stopping_counter = 0
-                            else:
-                                self.early_stopping_counter += 1
-                        else:
-                            if cur >= self.early_stopping_best:
-                                self.early_stopping_best = cur
-                                self.early_stopping_counter = 0
-                            else:
-                                self.early_stopping_counter += 1
+            if it % self.valid_step == 0 and self.do_validation():
+                self.eval()
+                validation_stats = self.validation() or {}
+                log_loss = log_from_loss_dict(validation_stats)
+                self.logger.info(
+                    f"[Validation] [Global Step {self.global_step}] " f"{log_loss}"
+                )
+                self.logger.log(
+                    validation_stats, tag="validation", step=self.global_step
+                )
+                self.train()
 
-                        if self.early_stopping_counter >= self.early_stopping_tolerance:
-                            self.logger.info("Early stopping is executed!")
-                            break
+                # early stopping
+                if self.early_stopping:
+                    assert self.early_stopping_metric in validation_stats
+                    cur = validation_stats[self.early_stopping_metric]
+                    if self.early_stopping_mode == "min":
+                        if cur <= self.early_stopping_best:
+                            self.early_stopping_best = cur
+                            self.early_stopping_counter = 0
+                        else:
+                            self.early_stopping_counter += 1
+                    else:
+                        if cur >= self.early_stopping_best:
+                            self.early_stopping_best = cur
+                            self.early_stopping_counter = 0
+                        else:
+                            self.early_stopping_counter += 1
+
+                    if self.early_stopping_counter >= self.early_stopping_tolerance:
+                        self.logger.info("Early stopping is executed!")
+                        break
+
+            if self._distributed:
+                dist.barrier()
 
     def initialize(self):
         """
@@ -131,8 +139,19 @@ class Engine:
         """
         # Parse config
         self.parse_config()
+
+        # initialize distributed training
+        self.initialize_distributed()
+        dist_dict = {}
+        dist_dict["distributed"] = self._distributed
+        dist_dict["world_size"] = self._world_size
+        dist_dict["rank"] = self._rank
+        dist_dict["local_rank"] = self._local_rank
+
+        # initialize logger
         self.logger = logger(logger_type=self.logger_type)
-        self.logger.info("Initializing Multilevel Optimization...\n")
+        if self.is_rank_zero():
+            self.logger.info("Initializing Multilevel Optimization...\n")
         start = time.time()
 
         # Parse dependency
@@ -141,17 +160,29 @@ class Engine:
         # problem initialization
         for problem in self.problems:
             problem.add_logger(self.logger)
+            problem.configure_distributed_training(dist_dict)
             problem.initialize(self.config)
             if self.env is not None:
                 problem.add_env(self.env)
                 self.env.set_problem_attr(problem)
 
         end = time.time()
-        self.logger.info(f"Time spent on initialization: {end-start:.3f} (s)\n")
+        if self.is_rank_zero():
+            self.logger.info(f"Time spent on initialization: {end-start:.3f} (s)\n")
 
     def initialize_distributed(self):
-        self.logger.info("Initializing Distributed Training...\n")
-        dist.init_process_group(backend=self.distributed_backend)
+        """
+        Initialize distributed training.
+        """
+        if self._distributed:
+            dist.init_process_group(backend=self.distributed_backend)
+
+            self._world_size = dist.get_world_size()
+            assert self._world_size > 1
+            self._rank = dist.get_rank()
+
+            device_count = torch.cuda.device_count()
+            self._local_rank = self._rank % device_count
 
     def train(self):
         """
@@ -294,6 +325,19 @@ class Engine:
             setattr(self, name, problem)
 
         return name
+
+    def do_validation(self):
+        """
+        Check whether to run validation.
+        """
+        if self.is_implemented("validation") and self.is_rank_zero():
+            return True
+        return False
+
+    def is_rank_zero(self):
+        if self._distributed and self._rank != 0:
+            return False
+        return True
 
     def is_implemented(self, fn_name):
         """

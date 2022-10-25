@@ -20,6 +20,7 @@ parser = argparse.ArgumentParser(description="Meta_Weight_Net")
 parser.add_argument("--baseline", action="store_true")
 parser.add_argument("--fp16", action="store_true")
 parser.add_argument("--distributed", action="store_true")
+parser.add_argument("--local_rank", type=int, default=0)
 parser.add_argument("--rollback", action="store_true")
 parser.add_argument("--seed", type=int, default=0)
 parser.add_argument("--meta_net_hidden_size", type=int, default=500)
@@ -164,7 +165,7 @@ class SSTEngine(Engine):
         return {"loss": valid_loss, "acc": valid_accuracy, "best_acc": best_acc}
 
 
-engine_config = EngineConfig(train_iters=200, valid_step=50)
+engine_config = EngineConfig(train_iters=200, valid_step=50, distributed=args.distributed)
 finetune_config = Config(
     type="darts", fp16=args.fp16, retain_graph=True, gradient_clipping=10.0
 )
