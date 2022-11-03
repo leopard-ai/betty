@@ -99,7 +99,9 @@ class Classifier(ImplicitProblem):
         problem HPO can be achieved by its name 'hpo'
         """
         weight_decay = self.hpo()
-        reg_loss = weight_decay * sum([p.norm().pow(2) for p in self.module.parameters()])
+        reg_loss = weight_decay * sum(
+            [p.norm().pow(2) for p in self.module.parameters()]
+        )
         
         return loss + reg_loss
 
