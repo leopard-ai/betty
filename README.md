@@ -95,11 +95,13 @@ class Classifier(ImplicitProblem):
         loss = F.cross_entropy(outputs, labels)
         
         """
-        accessing weight decay hyperparameter from another problem HPO can be achieved
-        by its name 'hpo'
+        accessing weight decay hyperparameter from another
+        problem HPO can be achieved by its name 'hpo'
         """
         weight_decay = self.hpo()
-        reg_loss = weight_decay * sum([p.norm().pow(2) for p in self.module.parameters()])
+        reg_loss = weight_decay * sum(
+            [p.norm().pow(2) for p in self.module.parameters()]
+        )
         
         return loss + reg_loss
 
@@ -128,7 +130,9 @@ dependencies = {'u2l': u2l, 'l2u': l2u}
 engine_config = EngineConfig(train_iters=10000, valid_step=100)
 
 # instantiate Engine class
-engine = Engine(problems=problems, dependencies=dependencies, config=engine_config)
+engine = Engine(problems=problems,
+                dependencies=dependencies,
+                config=engine_config)
 
 # execute multilevel optimization
 engine.run()
@@ -150,7 +154,9 @@ class HPOEngine(Engine):
         # Returned dict will be automatically logged after each validation
         return {'loss': loss}
 ...
-engine = HPOEngine(problems=problems, dependencies=dependencies, config=engine_config)
+engine = HPOEngine(problems=problems,
+                   dependencies=dependencies,
+                   config=engine_config)
 engine.run()
 ```
 
