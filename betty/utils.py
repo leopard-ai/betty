@@ -109,6 +109,10 @@ def to_vec(tensor_list, alpha=1.0):
     return torch.cat([alpha * t.reshape(-1) for t in tensor_list])
 
 
+def count_parameters(tensor_list):
+    return sum([tensor.numel() for tensor in tensor_list])
+
+
 def neg_with_none(a):
     if a is None:
         return None
