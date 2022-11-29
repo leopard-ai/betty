@@ -1,6 +1,7 @@
 import torch
 
 from betty.utils import to_vec, replace_none_with_zero
+from betty.hypergradient.utils import precondition
 
 
 def darts(vector, curr, prev):
@@ -24,7 +25,9 @@ def darts(vector, curr, prev):
     """
     config = curr.config
     R = config.darts_alpha
-    eps = R / to_vec(vector).norm()
+    if config.darts_preconditioned:
+        vector = precondition(vector, curr)
+    eps = R / to_vec(vector).norm().item()
 
     # positive
     for p, v in zip(curr.trainable_parameters(), vector):

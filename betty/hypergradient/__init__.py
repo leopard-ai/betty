@@ -1,4 +1,3 @@
-from dataclasses import replace
 import torch
 
 from betty.utils import replace_none_with_zero
@@ -9,7 +8,12 @@ from .neumann import neumann
 from .reinforce import reinforce
 
 
-jvp_fn_mapping = {"darts": darts, "neumann": neumann, "cg": cg, "reinforce": reinforce}
+jvp_fn_mapping = {
+    "darts": darts,
+    "neumann": neumann,
+    "cg": cg,
+    "reinforce": reinforce,
+}
 
 
 def get_grads(loss, path, retain_graph):

@@ -568,7 +568,7 @@ class Problem:
         """Load the state for the ``Problem``
 
         Args:
-            state_dict (dict): Python dictionary of Problem states
+            state_dict (dict): Python dictionary of Problem states.
         """
         self.module.load_state_dict(state_dict["module"])
         self.optimizer.load_state_dict(state_dict["optimizer"])
@@ -578,17 +578,37 @@ class Problem:
             self.scaler.load_state_dict(state_dict["scaler"])
 
     def configure_distributed_training(self, dictionary):
+        """
+        Set the configuration for distributed training.
+
+        :param dictionary: Python dictionary of distributed training provided by Engine.
+        :type dictionary: dict
+        """
         self._distributed = dictionary["distributed"]
         self._world_size = dictionary["world_size"]
         self._rank = dictionary["rank"]
         self._local_rank = dictionary["local_rank"]
 
     def configure_device(self):
+        """
+        Set the device for the current problem.
+        """
         if self._distributed:
             torch.cuda.set_device(self._local_rank)
             self.device = torch.device("cuda", self._local_rank)
         else:
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    def get_opt_param_group_for_param(self, param):
+        param_groups = self.optimizer.param_groups
+        for group in param_groups:
+            for p in group["params"]:
+                if param is p:
+                    return group
+
+    def get_opt_state_for_param(self, param):
+        state = self.optimizer.state
+        return state[param]
 
     @abc.abstractmethod
     def cache_states(self):
