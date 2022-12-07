@@ -50,7 +50,7 @@ parser.add_argument("--unroll_steps", type=int, default=1, help="unrolling steps
 args = parser.parse_args()
 
 os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
-device = torch.device("cuda:0")
+device = torch.device("cuda")
 
 train_transform, valid_transform = utils.data_transforms_cifar10(args)
 train_data = dset.CIFAR10(
@@ -74,89 +74,59 @@ train_iters = int(
     * args.unroll_steps
 )
 
+arch_net = Architecture(steps=args.arch_steps)
+arch_optimizer = optim.Adam(
+    arch_net.parameters(),
+    lr=args.arch_lr,
+    betas=(0.5, 0.999),
+    weight_decay=args.arch_wd,
+)
+arch_loader = torch.utils.data.DataLoader(
+    train_data,
+    batch_size=args.batchsz,
+    sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[split:]),
+    pin_memory=True,
+    num_workers=2,
+)
 
-class Outer(ImplicitProblem):
-    def forward(self):
-        return self.module()
+criterion = nn.CrossEntropyLoss().to(device)
+classifier_net = Network(
+    args.init_ch, 10, args.layers, criterion, steps=args.arch_steps
+)
+classifier_optimizer = optim.SGD(
+    classifier_net.parameters(),
+    lr=args.lr,
+    momentum=args.momentum,
+    weight_decay=args.wd,
+)
+classifier_scheduler = optim.lr_scheduler.CosineAnnealingLR(
+    classifier_optimizer, float(train_iters // args.unroll_steps), eta_min=args.lr_min
+)
+classifier_loader = torch.utils.data.DataLoader(
+    train_data,
+    batch_size=args.batchsz,
+    sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[:split]),
+    pin_memory=True,
+    num_workers=2,
+)
 
+
+class Arch(ImplicitProblem):
     def training_step(self, batch):
         x, target = batch
-        x, target = x.to(device), target.to(device, non_blocking=True)
-
         alphas = self.forward()
-        loss = self.inner.module.loss(x, alphas, target)
-
-        if self.count % 50 == 0:
-            print(f"step {self.count} || loss: {loss.item()}")
+        loss = self.classifier.module.loss(x, alphas, target)
 
         return loss
 
-    def configure_train_data_loader(self):
-        valid_queue = torch.utils.data.DataLoader(
-            train_data,
-            batch_size=args.batchsz,
-            sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[split:]),
-            pin_memory=True,
-            num_workers=2,
-        )
-        return valid_queue
 
-    def configure_module(self):
-        return Architecture(steps=args.arch_steps).to(device)
-
-    def configure_optimizer(self):
-        optimizer = optim.Adam(
-            self.module.parameters(),
-            lr=args.arch_lr,
-            betas=(0.5, 0.999),
-            weight_decay=args.arch_wd,
-        )
-        return optimizer
-
-
-class Inner(ImplicitProblem):
-    def forward(self, x, alphas):
-        return self.module(x, alphas)
-
+class Classifier(ImplicitProblem):
     def training_step(self, batch):
         x, target = batch
-        x, target = x.to(device), target.to(device, non_blocking=True)
-
-        alphas = self.outer()
+        alphas = self.arch()
         loss = self.module.loss(x, alphas, target)
 
         return loss
-
-    def configure_train_data_loader(self):
-        train_queue = torch.utils.data.DataLoader(
-            train_data,
-            batch_size=args.batchsz,
-            sampler=torch.utils.data.sampler.SubsetRandomSampler(indices[:split]),
-            pin_memory=True,
-            num_workers=2,
-        )
-        return train_queue
-
-    def configure_module(self):
-        criterion = nn.CrossEntropyLoss().to(device)
-        return Network(
-            args.init_ch, 10, args.layers, criterion, steps=args.arch_steps
-        ).to(device)
-
-    def configure_optimizer(self):
-        optimizer = optim.SGD(
-            self.module.parameters(),
-            lr=args.lr,
-            momentum=args.momentum,
-            weight_decay=args.wd,
-        )
-        return optimizer
-
-    def configure_scheduler(self):
-        scheduler = optim.lr_scheduler.CosineAnnealingLR(
-            self.optimizer, float(train_iters // args.unroll_steps), eta_min=args.lr_min
-        )
-        return scheduler
 
 
 class NASEngine(Engine):
@@ -166,26 +136,41 @@ class NASEngine(Engine):
         total = 0
         for x, target in test_queue:
             x, target = x.to(device), target.to(device, non_blocking=True)
-            alphas = self.outer()
-            _, correct = self.inner.module.loss(x, alphas, target, acc=True)
+            alphas = self.arch()
+            _, correct = self.classifier.module.loss(x, alphas, target, acc=True)
             corrects += correct
             total += x.size(0)
         acc = corrects / total
 
-        print("[*] Valid Acc.:", acc)
-        alphas = self.outer()
-        torch.save({"genotype": self.inner.module.genotype(alphas)}, "genotype.t7")
+        alphas = self.arch()
+        torch.save({"genotype": self.classifier.module.genotype(alphas)}, "genotype.t7")
+        return {"acc": acc}
 
 
-outer_config = Config(retain_graph=True, first_order=True)
+outer_config = Config(retain_graph=True)
 inner_config = Config(type="darts", unroll_steps=args.unroll_steps)
 engine_config = EngineConfig(
     valid_step=args.report_freq * args.unroll_steps,
     train_iters=train_iters,
     roll_back=True,
 )
-outer = Outer(name="outer", config=outer_config, device=device)
-inner = Inner(name="inner", config=inner_config, device=device)
+outer = Arch(
+    name="arch",
+    module=arch_net,
+    optimizer=arch_optimizer,
+    train_data_loader=arch_loader,
+    config=outer_config,
+    device=device,
+)
+inner = Classifier(
+    name="classifier",
+    module=classifier_net,
+    optimizer=classifier_optimizer,
+    scheduler=classifier_scheduler,
+    train_data_loader=classifier_loader,
+    config=inner_config,
+    device=device,
+)
 
 problems = [outer, inner]
 l2u = {inner: [outer]}
