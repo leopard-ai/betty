@@ -207,7 +207,8 @@ parent = Outer(
     device=device,
 )
 children = [
-    Inner(name=f"inner_{i}", config=child_config, device=device) for i in range(arg.task_num)
+    Inner(name=f"inner_{i}", config=child_config, device=device)
+    for i in range(arg.task_num)
 ]
 env = MAMLEnv()
 problems = children + [parent]
