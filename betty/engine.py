@@ -34,7 +34,6 @@ class Engine:
 
         # problem
         self.problems = problems
-        self._problem_name_dict = {}
         self.leaves = []
 
         # dependencies
@@ -132,8 +131,12 @@ class Engine:
             self.logger.info("Initializing Multilevel Optimization...\n")
         start = time.time()
 
-        # Parse dependency
+        # parse dependency
         self.parse_dependency()
+
+        # set problem attributes
+        for problem in self.problems:
+            self.set_problem_attr(problem)
 
         # problem initialization
         for problem in self.problems:
@@ -142,7 +145,6 @@ class Engine:
             problem.initialize(self.config)
             if self.env is not None:
                 problem.add_env(self.env)
-                self.env.set_problem_attr(problem)
 
         end = time.time()
         if self.is_rank_zero():
@@ -225,7 +227,7 @@ class Engine:
                 self.dfs(adj, dst, path, results)
                 path.pop()
 
-    def parse_dependency(self, set_attr=True):
+    def parse_dependency(self):
         """
         Parse user-provided ``u2l`` and ``l2u`` dependencies to figure out 1) topological order for
         multilevel optimization execution, and 2) backpropagation path(s) for each problem. A
@@ -234,9 +236,6 @@ class Engine:
         # Parse upper-to-lower dependency
         for key, value_list in self.dependencies["u2l"].items():
             for value in value_list:
-                # set the problelm attribute for key problem in value problem
-                if set_attr:
-                    value.set_problem_attr(key)
 
                 # find all paths from low to high for backpropagation
                 paths = self.find_paths(src=value, dst=key)
@@ -245,9 +244,6 @@ class Engine:
         # Parse lower-to-upper dependency
         for key, value_list in self.dependencies["l2u"].items():
             for value in value_list:
-                # set the problelm attribute for key problem in value problem
-                if set_attr:
-                    value.set_problem_attr(key)
 
                 # add value problem to parents of key problem for backpropgation
                 key.add_parent(value)
@@ -255,13 +251,11 @@ class Engine:
 
         # Parse problems
         for problem in self.problems:
-            if set_attr:
-                self.set_problem_attr(problem)
             if self.check_leaf(problem):
                 problem.leaf = True
                 self.leaves.append(problem)
 
-    def set_dependency(self, dependencies, set_attr=False):
+    def set_dependency(self, dependencies):
         self.dependencies = dependencies
         self.leaves = []
 
@@ -270,7 +264,7 @@ class Engine:
             problem.leaf = False
             problem.clear_dependencies()
 
-        self.parse_dependency(set_attr=set_attr)
+        self.parse_dependency()
 
     def set_problem_attr(self, problem):
         """
@@ -282,25 +276,20 @@ class Engine:
         :rtype: str
         """
         name = problem.name
-        if name not in self._problem_name_dict:
-            assert not hasattr(
-                self, name
-            ), f"Problem already has an attribute named {name}!"
-            self._problem_name_dict[name] = 0
-            setattr(self, name, problem)
-        elif self._problem_name_dict[name] == 0:
-            # rename first problem
-            first_problem = getattr(self, name)
-            delattr(self, name)
-            setattr(self, name + "_0", first_problem)
 
-            self._problem_name_dict[name] += 1
-            name = name + "_" + str(self._problem_name_dict[name])
-            setattr(self, name, problem)
-        else:
-            self._problem_name_dict[name] += 1
-            name = name + "_" + str(self._problem_name_dict[name])
-            setattr(self, name, problem)
+        # set attribute for Engine
+        assert not hasattr(self, name), f"Problem already has a problelm named {name}!"
+        setattr(self, name, problem)
+
+        # set attribute for Problems
+        for prob in self.problems:
+            if prob != problem:
+                assert not hasattr(problem, name)
+                setattr(prob, name, problem)
+
+        # set attribute for Env
+        if self.env is not None:
+            setattr(self.env, name, problem)
 
         return name
 
