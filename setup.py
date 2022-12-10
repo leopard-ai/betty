@@ -15,7 +15,7 @@ description = (
     "generalized meta-learning"
 )
 
-python_requires = ">=3.6.0"
+python_requires = ">=3.6.0,<3.11.0"
 
 # run setup
 setup(
