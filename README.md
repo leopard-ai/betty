@@ -15,7 +15,7 @@
 <div align="center">
 
   <a href="https://pypi.org/project/betty-ml/">![Version](https://img.shields.io/pypi/v/betty-ml)</a>
-  <a href="https://github.com/leopard-ai/betty/tree/main/test">![Testing](https://img.shields.io/github/workflow/status/leopard-ai/betty/test)</a>
+  <a href="https://github.com/leopard-ai/betty/tree/main/test">![Testing](https://img.shields.io/github/actions/workflow/status/leopard-ai/betty/test.yaml?branch=main)</a>
   <a href="https://github.com/leopard-ai/betty/blob/main/LICENSE">![License](https://img.shields.io/github/license/leopard-ai/betty)</a>
   
 </div>
