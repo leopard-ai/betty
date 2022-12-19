@@ -1,7 +1,5 @@
-import torch
 import math
-
-from betty.utils import replace_none_with_zero
+import torch
 
 
 def get_optimzer_type(optimizer):

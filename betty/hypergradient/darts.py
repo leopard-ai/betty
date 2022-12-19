@@ -4,7 +4,7 @@ from betty.utils import to_vec, replace_none_with_zero
 from betty.hypergradient.utils import precondition
 
 
-def darts(vector, curr, prev):
+def darts(vector, curr, prev, sync):
     """
     Approximate the matrix-vector multiplication with the best response Jacobian by the
     finite difference method. More specifically, we modified the finite difference method proposed
@@ -35,18 +35,28 @@ def darts(vector, curr, prev):
     loss_p = curr.training_step_exec(curr.cur_batch)
     grad_p = torch.autograd.grad(loss_p, prev.trainable_parameters(), allow_unused=True)
     grad_p = replace_none_with_zero(grad_p, prev.trainable_parameters())
+    if sync:
+        grad_p = [-g_p.div_(2 * eps) for g_p in grad_p]
+        prev.set_grads(prev.trainable_parameters(), grad_p)
 
     # negative
     for p, v in zip(curr.trainable_parameters(), vector):
         p.data.add_(v.data, alpha=-2 * eps)
     loss_n = curr.training_step_exec(curr.cur_batch)
-    grad_n = torch.autograd.grad(loss_n, prev.trainable_parameters(), allow_unused=True)
-    grad_n = replace_none_with_zero(grad_n, prev.trainable_parameters())
+    if sync:
+        torch.autograd.backward(loss_n / (2 * eps), inputs=prev.trainable_parameters())
+    else:
+        grad_n = torch.autograd.grad(
+            loss_n, prev.trainable_parameters(), allow_unused=True
+        )
+        grad_n = replace_none_with_zero(grad_n, prev.trainable_parameters())
 
     # reverse weight change
     for p, v in zip(curr.trainable_parameters(), vector):
         p.data.add(v.data, alpha=eps)
 
-    implicit_grad = [(x - y).div_(2 * eps) for x, y in zip(grad_n, grad_p)]
+    implicit_grad = None
+    if not sync:
+        implicit_grad = [(x - y).div_(2 * eps) for x, y in zip(grad_n, grad_p)]
 
     return implicit_grad

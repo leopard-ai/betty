@@ -16,7 +16,7 @@ jvp_fn_mapping = {
 }
 
 
-def get_grads(loss, path, retain_graph):
+def get_grads(loss, path, retain_graph, do_sync):
     jvp = torch.autograd.grad(
         loss,
         path[1].trainable_parameters(),
@@ -28,6 +28,7 @@ def get_grads(loss, path, retain_graph):
         jvp_fn_type = path[i].config.type
         assert jvp_fn_type in jvp_fn_mapping
         jvp_fn = jvp_fn_mapping[jvp_fn_type]
-        jvp = jvp_fn(jvp, path[i], path[i + 1])
+        sync = bool(do_sync and i == len(path) - 2)
+        jvp = jvp_fn(jvp, path[i], path[i + 1], sync)
 
     return jvp

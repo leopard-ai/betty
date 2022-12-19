@@ -5,7 +5,7 @@ import torch
 from betty.utils import neg_with_none
 
 
-def neumann(vector, curr, prev):
+def neumann(vector, curr, prev, sync):
     """
     Approximate the matrix-vector multiplication with the best response Jacobian by the
     Neumann Series as proposed in
@@ -41,10 +41,17 @@ def neumann(vector, curr, prev):
         iterations=config.neumann_iterations,
         alpha=config.neumann_alpha,
     )
-    implicit_grad = torch.autograd.grad(
-        in_grad, prev.trainable_parameters(), grad_outputs=v2
-    )
-    implicit_grad = [neg_with_none(ig) for ig in implicit_grad]
+    if sync:
+        v2 = [neg_with_none(x) for x in v2]
+        torch.autograd.backward(
+            in_grad, inputs=prev.trainable_parameters(), grad_tensors=v2
+        )
+        implicit_grad = None
+    else:
+        implicit_grad = torch.autograd.grad(
+            in_grad, prev.trainable_parameters(), grad_outputs=v2
+        )
+        implicit_grad = [neg_with_none(ig) for ig in implicit_grad]
 
     return implicit_grad
 

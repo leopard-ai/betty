@@ -107,9 +107,6 @@ class Engine:
                         self.logger.info("Early stopping is executed!")
                         break
 
-            if self._distributed:
-                dist.barrier()
-
     def initialize(self):
         """
         Initialize dependencies (computational graph) between problems.

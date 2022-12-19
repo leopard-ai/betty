@@ -5,7 +5,7 @@ import torch
 from betty.utils import neg_with_none, to_vec
 
 
-def cg(vector, curr, prev):
+def cg(vector, curr, prev, sync):
     """
     Approximate the matrix-vector multiplication with the best response Jacobian by the
     (PyTorch's) default autograd method. Users may need to specify learning rate (``cg_alpha``) and
@@ -55,9 +55,16 @@ def cg(vector, curr, prev):
         x, p, r = x_new, p_new, r_new
     x = [config.cg_alpha * xx for xx in x]
 
-    implicit_grad = torch.autograd.grad(
-        in_grad, prev.trainable_parameters(), grad_outputs=x
-    )
-    implicit_grad = [neg_with_none(ig) for ig in implicit_grad]
+    if sync:
+        x = [neg_with_none(x_i) for x_i in x]
+        torch.autograd.backward(
+            in_grad, inputs=prev.trainable_parameters(), grad_tensors=x
+        )
+        implicit_grad = None
+    else:
+        implicit_grad = torch.autograd.grad(
+            in_grad, prev.trainable_parameters(), grad_outputs=x
+        )
+        implicit_grad = [neg_with_none(ig) for ig in implicit_grad]
 
     return implicit_grad

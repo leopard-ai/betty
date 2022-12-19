@@ -192,9 +192,8 @@ class Problem:
         assert self.module is not None, "Module must be specified!"
         self.module.to(self.device)
         if self._distributed:
-            # self.module = torch.nn.SyncBatchNorm.convert_sync_batchnorm(self.module)
-            # self.module = torch.nn.parallel.DistributedDataParallel(self.module)
-            self.synchronize_params(self.trainable_parameters())
+            #self.module = torch.nn.SyncBatchNorm.convert_sync_batchnorm(self.module)
+            self.module = torch.nn.parallel.DistributedDataParallel(self.module)
 
         # set up optimizer
         if self.is_implemented("configure_optimizer"):
@@ -269,16 +268,13 @@ class Problem:
 
         # calculate parameter update
         if self._count % self.gas == 0:
-            if self._distributed:
-                dist.barrier()
-                self.synchronize_grads(self.trainable_parameters())
             self.optimizer_step()
 
             # param callback (e.g., parameter clipping)
             if self.is_implemented("param_callback"):
                 self.param_callback(self.trainable_parameters())
 
-            if self._distributed:
+            if self._distributed and self._count % (self.gas * 20) == 0:
                 self.synchronize_params(self.trainable_parameters())
 
             # zero-out grad
@@ -476,21 +472,33 @@ class Problem:
         :type allow_unused: bool, optional
         """
         # direct grad
-        grads = torch.autograd.grad(
-            loss,
-            params,
-            create_graph=create_graph,
-            retain_graph=retain_graph,
-            allow_unused=allow_unused,
-        )
-        self.set_grads(params, grads)
+        if len(paths) > 0 or not self.gradient_accumulation_boundary():
+            grads = torch.autograd.grad(
+                loss,
+                params,
+                create_graph=create_graph,
+                retain_graph=retain_graph,
+                allow_unused=allow_unused,
+            )
+            self.set_grads(params, grads)
+        else:
+            torch.autograd.backward(
+                loss,
+                inputs=params,
+                create_graph=create_graph,
+                retain_graph=retain_graph,
+            )
 
         # indirect grad: best-response Jacobian
         if self._config.first_order:
             for idx, path in enumerate(paths):
                 retain_graph_implicit = False if idx == len(paths) - 1 else True
-                grads = get_grads(loss, path, retain_graph_implicit)
-                self.set_grads(params, grads)
+                do_sync = bool(
+                    idx == len(paths) - 1 and self.gradient_accumulation_boundary()
+                )
+                grads = get_grads(loss, path, retain_graph_implicit, do_sync)
+                if not do_sync:
+                    self.set_grads(params, grads)
 
     def set_grads(self, params, grads):
         """
@@ -507,18 +515,6 @@ class Problem:
                     param.grad = param.grad + grad
                 else:
                     param.grad = grad
-
-    def synchronize_grads(self, params):
-        if self._world_size > 1:
-            for param in params:
-                grad = param.grad
-
-                # perform all_reduce
-                grad.mul_(1.0 / self._world_size)
-                dist.all_reduce(grad)
-
-                #! May not need this line
-                param.grad.copy_(grad)
 
     def synchronize_params(self, params):
         if self._world_size > 1:
@@ -628,6 +624,9 @@ class Problem:
     def on_epoch_end_exec(self):
         if self.is_implemented("on_epoch_end"):
             self.on_epoch_end()
+
+    def gradient_accumulation_boundary(self):
+        return bool(self._count % self.gas == 0)
 
     def is_implemented(self, fn_name):
         """
