@@ -15,7 +15,7 @@
 <div align="center">
 
   <a href="https://pypi.org/project/betty-ml/">![Version](https://img.shields.io/pypi/v/betty-ml)</a>
-  <a href="https://github.com/leopard-ai/betty/tree/main/test">![Testing](https://img.shields.io/github/workflow/status/leopard-ai/betty/test)</a>
+  <a href="https://github.com/leopard-ai/betty/tree/main/test">![Testing](https://img.shields.io/github/actions/workflow/status/leopard-ai/betty/test.yaml?branch=main)</a>
   <a href="https://github.com/leopard-ai/betty/blob/main/LICENSE">![License](https://img.shields.io/github/license/leopard-ai/betty)</a>
   
 </div>
@@ -188,7 +188,7 @@ are on the way!
 ## Features
 ### Gradient Approximation Methods
 - Implicit Differentiation
-  - Finite Difference ([DARTS: Differentiable Architecture Search](https://arxiv.org/abs/1806.09055))
+  - Finite Difference (or T1-T2) ([DARTS: Differentiable Architecture Search](https://arxiv.org/abs/1806.09055))
   - Neumann Series ([Optimizing Millions of Hyperparameters by Implicit Differentiation](http://proceedings.mlr.press/v108/lorraine20a/lorraine20a.pdf))
   - Conjugate Gradient ([Meta-Learning with Implicit Gradients](https://proceedings.neurips.cc/paper/2019/file/072b030ba126b2f4b2374f342be9ed44-Paper.pdf))
 - Iterative Differentiation
