@@ -192,7 +192,7 @@ class Problem:
         assert self.module is not None, "Module must be specified!"
         self.module.to(self.device)
         if self._distributed:
-            #self.module = torch.nn.SyncBatchNorm.convert_sync_batchnorm(self.module)
+            # self.module = torch.nn.SyncBatchNorm.convert_sync_batchnorm(self.module)
             self.module = torch.nn.parallel.DistributedDataParallel(self.module)
 
         # set up optimizer
