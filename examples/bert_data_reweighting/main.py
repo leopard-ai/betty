@@ -166,7 +166,9 @@ class SSTEngine(Engine):
 
 
 engine_config = EngineConfig(
-    train_iters=200, valid_step=50, strategy=args.strategy,
+    train_iters=200,
+    valid_step=50,
+    strategy=args.strategy,
 )
 finetune_config = Config(
     type="darts", fp16=args.fp16, retain_graph=True, gradient_clipping=10.0
