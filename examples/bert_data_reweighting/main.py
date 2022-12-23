@@ -19,7 +19,7 @@ from betty.configs import Config, EngineConfig
 parser = argparse.ArgumentParser(description="Meta_Weight_Net")
 parser.add_argument("--baseline", action="store_true")
 parser.add_argument("--fp16", action="store_true")
-parser.add_argument("--distributed", action="store_true")
+parser.add_argument("--strategy", type=str, default="default")
 parser.add_argument("--local_rank", type=int, default=0)
 parser.add_argument("--rollback", action="store_true")
 parser.add_argument("--seed", type=int, default=0)
@@ -166,7 +166,7 @@ class SSTEngine(Engine):
 
 
 engine_config = EngineConfig(
-    train_iters=200, valid_step=50, distributed=args.distributed
+    train_iters=200, valid_step=50, strategy=args.strategy,
 )
 finetune_config = Config(
     type="darts", fp16=args.fp16, retain_graph=True, gradient_clipping=10.0
