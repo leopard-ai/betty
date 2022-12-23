@@ -3,14 +3,17 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import sys
 import abc
 
 import torch
 import torch.distributed as dist
 
+from betty.patch.data_loader import get_distributed_data_loader
+from betty.patch.optimizer import patch_optimizer
+from betty.patch.scheduler import patch_scheduler
 from betty.configs import Config
 from betty.hypergradient import get_grads
-from betty.data_loader import get_distributed_data_loader
 from betty.utils import convert_tensor, log_from_loss_dict
 
 
@@ -25,7 +28,7 @@ class Problem:
 
     def __init__(
         self,
-        name=None,
+        name,
         config=None,
         module=None,
         optimizer=None,
@@ -34,19 +37,17 @@ class Problem:
         device=None,
     ):
         # basic configurations
-        self._name_orig = name
-        self._name = name if name is not None else "problem"
+        self._name = name
         self._config = config if config is not None else Config()
-        self.engine_config = None
-
-        # backend
-        self._backend = None
 
         # device
         self.device = device
 
         # distributed
+        self._strategy = None
+        self.accelerator = None
         self._distributed = False
+        self._backend = None
         self._world_size = None
         self._rank = None
         self._local_rank = None
@@ -99,7 +100,6 @@ class Problem:
 
         # misc
         self._leaf = False
-        self._default_grad = False
         self._first_order = False
         self._retain_graph = config.retain_graph
         self._allow_unused = config.allow_unused
@@ -109,43 +109,15 @@ class Problem:
         self._training = True
         self.ready = None
 
-    def _is_default_fp16(self):
-        if not self._fp16 or self._backend in ["deepspeed", "accelerate"]:
-            return False
-        return True
-
-    def parse_engine_config(self, engine_config):
-        """Parse engine config and set global attributes accordingly.
-
-        Args:
-            engine_config: EngineConfig
-        """
-        if len(self._parents) > 0:
-            self._roll_back = engine_config.roll_back
-
-    def initialize(self, engine_config):
+    def initialize(self):
         """
         ``initialize`` patches/sets up module, optimizer, data loader, etc. after compiling a
         user-provided configuration (e.g., fp16 training, iterative differentiation)
         """
-        if self._name_orig is None:
-            self.logger.warning(
-                "name is not defined for this Problem. We arbitrarily set "
-                "the name as 'problem' to avoid undesired behaviors."
-            )
-        delattr(self, "_name_orig")
-        # engine config
-        self.engine_config = engine_config
-        self.parse_engine_config(engine_config)
-
         # configure device
         self.configure_device()
 
         # initialize update ready to False
-        if self._leaf:
-            assert len(self._children) == 0
-        if len(self._paths) == 0:
-            self._default_grad = True
         self.ready = [False for _ in range(len(self._children))]
 
         # compile parents configurations
@@ -155,54 +127,33 @@ class Problem:
             first_order.append(parent_config.first_order)
         self._first_order = all(first_order)
 
-        # compile children configurations
-        children_unroll_steps = []
-        for problem in self._children:
-            child_config = problem.config
-            children_unroll_steps.append(child_config.unroll_steps)
-
+        # set inner_loop_start to True
         self._inner_loop_start = True
 
         # set up data loader
-        if self.train_data_loader is None and self.is_implemented(
-            "configure_train_data_loader"
-        ):
-            self.train_data_loader = self.configure_train_data_loader()
+        if self.is_implemented("configure_train_data_loader"):
+            if self.train_data_loader is None:
+                self.train_data_loader = self.configure_train_data_loader()
         if self.train_data_loader is not None:
             if not isinstance(self.train_data_loader, tuple):
                 self.train_data_loader = (self.train_data_loader,)
-
-            self.train_data_iterator = []
-            self.epoch_counter = []
-            for train_data_loader in self.train_data_loader:
-                if self._distributed:
-                    train_data_loader = get_distributed_data_loader(
-                        train_data_loader, world_size=self._world_size, rank=self._rank
-                    )
-                    train_data_loader.set_epoch(0)
-                self.train_data_iterator.append(iter(train_data_loader))
-                self.epoch_counter.append(0)
         else:
             assert self.is_implemented("get_batch")
 
-        # set up module for the current level
+        # set up module
         if self.is_implemented("configure_module"):
-            if self.configure_module() is not None:
+            if self.module is None:
                 self.module = self.configure_module()
         assert self.module is not None, "Module must be specified!"
-        self.module.to(self.device)
-        if self._distributed:
-            # self.module = torch.nn.SyncBatchNorm.convert_sync_batchnorm(self.module)
-            self.module = torch.nn.parallel.DistributedDataParallel(self.module)
 
         # set up optimizer
         if self.is_implemented("configure_optimizer"):
-            if self.configure_optimizer() is not None:
+            if self.optimizer is None:
                 self.optimizer = self.configure_optimizer()
 
         # set up lr scheduler
         if self.is_implemented("configure_scheduler"):
-            if self.configure_scheduler is not None:
+            if self.scheduler is None:
                 self.scheduler = self.configure_scheduler()
 
         # set up fp16 training
@@ -212,8 +163,18 @@ class Problem:
                 init_scale=self.initial_dynamic_scale, growth_factor=self.scale_factor
             )
 
+        # patch module, optimizer, data loader, and scheduler
+        self.patch_module_optimizer_loader()
+
+        # make train_data_loader as iterator
+        if self.train_data_loader is not None:
+            self.train_data_iterator = []
+            self.epoch_counter = []
+            for train_data_loader in self.train_data_loader:
+                self.train_data_iterator.append(iter(train_data_loader))
+                self.epoch_counter.append(0)
+
         # Logging INFO
-        # TODO: Replace print with logging
         path_str = [[node.name for node in path] for path in self._paths]
         children_str = [node.name for node in self._children]
         parents_str = [node.name for node in self._parents]
@@ -223,6 +184,69 @@ class Problem:
             self.logger.info(f"Uppers: {parents_str}")
             self.logger.info(f"Lowers: {children_str}")
             self.logger.info(f"Paths: {path_str}\n")
+
+    def patch_module_optimizer_loader(self):
+        """
+        We patch module, optimizer, data loader, and lr scheduler for device placement,
+        distributed training, zero optimizer, fsdp, etc.
+        """
+        # patch module
+        self.module.to(self.device)
+        if self._strategy in ["distributed", "zero"]:
+            self.synchronize_params(self.parameters())
+            self.module = torch.nn.parallel.DistributedDataParallel(self.module)
+        elif self._strategy == "fsdp":
+            if len(self._paths) > 0:
+                if self.is_rank_zero():
+                    self.logger.error(
+                        "FSDP is not supported for meta learning at this moment."
+                    )
+                sys.exit(1)
+            if self.is_rank_zero():
+                self.logger.warning("FSDP requires PyTorch version >= 1.12")
+            from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+
+            self.synchronize_params(self.parameters())
+            self.module = FSDP(self.module)
+        elif self._strategy == "accelerate":
+            self.module = self.accelerator.prepare(self.module)
+
+        # patch optimizer
+        params = self.trainable_parameters()
+        if self.is_implemented("param_groups"):
+            params = self.param_groups
+        is_zero = True if self._strategy == "zero" else False
+        self.optimizer = patch_optimizer(self.optimizer, params, is_zero)
+
+        # patch scheduler
+        if self.scheduler is not None:
+            self.scheduler = patch_scheduler(self.scheduler, self.optimizer)
+            if self._strategy == "accelerate":
+                self.scheduler = self.accelerator.prepare(self.scheduler)
+
+        # accelerate optimizer & scheduler patch
+        if self._strategy == "accelerate":
+            if self.scheduler is None:
+                self.optimizer = self.accelerator.prepare(self.optimizer)
+            else:
+                self.optimizer, self.scheduler = self.accelerator.prepare(
+                    self.optimizer, self.scheduler
+                )
+
+        # patch data loader
+        if self.train_data_loader is not None:
+            if self._strategy in ["distributed", "zero", "fsdp"]:
+                self.train_data_loader = [
+                    get_distributed_data_loader(
+                        loader, world_size=self._world_size, rank=self._rank
+                    )
+                    for loader in self.train_data_loader
+                ]
+            elif self._strategy == "accelerate":
+                self.train_data_loader = [
+                    self.accelerator.prepare(data_loader)
+                    for data_loader in self.train_data_loader
+                ]
 
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
@@ -274,7 +298,7 @@ class Problem:
             if self.is_implemented("param_callback"):
                 self.param_callback(self.trainable_parameters())
 
-            if self._distributed and self._count % (self.gas * 20) == 0:
+            if self._strategy != "default" and self._count % (self.gas * 20) == 0:
                 self.synchronize_params(self.trainable_parameters())
 
             # zero-out grad
@@ -395,10 +419,7 @@ class Problem:
                 self.on_epoch_end_exec()
             self.epoch_counter[idx] += 1
             train_data_loader = self.train_data_loader[idx]
-            if self._distributed:
-                train_data_loader = get_distributed_data_loader(
-                    train_data_loader, world_size=self._world_size, rank=self._rank
-                )
+            if self._strategy in ["distributed", "zero", "fsdp"]:
                 train_data_loader.set_epoch(self.epoch_counter[idx])
             self.train_data_iterator[idx] = iter(train_data_loader)
             batch = next(self.train_data_iterator[idx])
@@ -517,6 +538,9 @@ class Problem:
                     param.grad = grad
 
     def synchronize_params(self, params):
+        """
+        synchronize parameters across distributed data-parallel processes
+        """
         if self._world_size > 1:
             for param in params:
                 dist.broadcast(param.data, 0)
@@ -538,6 +562,9 @@ class Problem:
                 del param.grad
 
     def clip_grad(self):
+        """
+        Perform gradient clipping based on the norm provided by Config
+        """
         torch.nn.utils.clip_grad_norm_(
             parameters=self.trainable_parameters(), max_norm=self.gradient_clipping
         )
@@ -579,22 +606,43 @@ class Problem:
         :param dictionary: Python dictionary of distributed training provided by Engine.
         :type dictionary: dict
         """
-        self._distributed = dictionary["distributed"]
+        self._strategy = dictionary["strategy"]
+        self._backend = dictionary["backend"]
         self._world_size = dictionary["world_size"]
         self._rank = dictionary["rank"]
         self._local_rank = dictionary["local_rank"]
+
+    def configure_roll_back(self, roll_back):
+        """
+        Set the roll-back (warm- start) option from Engine
+
+        :param roll_back: roll-back (warm-start) on/off
+        :type roll_back: bool
+        """
+        if len(self._parents) > 0:
+            self._roll_back = roll_back
 
     def configure_device(self):
         """
         Set the device for the current problem.
         """
-        if self._distributed:
+        if self._strategy in ["distributed", "zero", "fsdp"]:
             torch.cuda.set_device(self._local_rank)
             self.device = torch.device("cuda", self._local_rank)
+        elif self._strategy == "accelerate":
+            self.device = self.accelerator.device
         else:
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
     def get_opt_param_group_for_param(self, param):
+        """
+        Get optimizer param_group for specific parameter
+
+        :param param: Parameter for which optimizer param_group is inquired
+        :type param: torch.nn.Parameter
+        :return: param_group for the given parameter
+        :rtype: dict
+        """
         param_groups = self.optimizer.param_groups
         for group in param_groups:
             for p in group["params"]:
@@ -602,6 +650,14 @@ class Problem:
                     return group
 
     def get_opt_state_for_param(self, param):
+        """
+        Get optimizer state for specific parameter
+
+        :param param: Parameter for which optimizer state is inquired
+        :type param: torch.nn.Parameter
+        :return: optimizer state for the given parameter
+        :rtype: dict
+        """
         state = self.optimizer.state
         return state[param]
 
@@ -626,7 +682,18 @@ class Problem:
             self.on_epoch_end()
 
     def gradient_accumulation_boundary(self):
+        """
+        Check whether the current step is on the gradient accumulation boundary
+        """
         return bool(self._count % self.gas == 0)
+
+    def _is_default_fp16(self):
+        """
+        Check whether to use PyTorch native fp16 (mixed-precision) feature
+        """
+        if not self._fp16 or self._strategy in ["accelerate"]:
+            return False
+        return True
 
     def is_implemented(self, fn_name):
         """
@@ -752,9 +819,7 @@ class Problem:
         """
         Check whether the current device is rank 0.
         """
-        if self._distributed and self._rank != 0:
-            return False
-        return True
+        return self._rank == 0
 
     @property
     def name(self):

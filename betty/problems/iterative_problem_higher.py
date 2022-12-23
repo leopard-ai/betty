@@ -3,8 +3,6 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import torch
-
 try:
     import higher
 
@@ -13,7 +11,6 @@ except ImportError:
     HAS_HIGHER = False
 
 from betty.problems import Problem
-import betty.optim as optim
 
 
 # pylint: disable=W0223

@@ -3,7 +3,6 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from os import readlink
 import time
 
 import torch
@@ -24,6 +23,8 @@ class Engine:
     def __init__(self, problems, config=None, dependencies=None, env=None):
         # config
         self.config = config if config is not None else EngineConfig()
+
+        # step counters
         self.train_iters = 0
         self.valid_step = 0
         self.global_step = 0
@@ -43,13 +44,17 @@ class Engine:
         self.env = env
 
         # distributed
-        self._distributed = False
+        self._strategy = None
+        self._backend = None
         self._world_size = 0
         self._rank = 0
         self._local_rank = 0
 
         # early stopping
         self.early_stopping = None
+
+        # roll back
+        self._roll_back = False
 
         # initialize
         self.initialize()
@@ -60,10 +65,13 @@ class Engine:
         """
         self.train_iters = self.config.train_iters
         self.valid_step = self.config.valid_step
+
         self.logger_type = self.config.logger_type
 
-        self._distributed = self.config.distributed
-        self.distributed_backend = self.config.distributed_backend
+        self._roll_back = self.config.roll_back
+
+        self._strategy = self.config.strategy
+        self._backend = self.config.backend
 
         if self.config.early_stopping:
             self.early_stopping = EarlyStopping(
@@ -115,12 +123,7 @@ class Engine:
         self.parse_config()
 
         # initialize distributed training
-        self.initialize_distributed()
-        dist_dict = {}
-        dist_dict["distributed"] = self._distributed
-        dist_dict["world_size"] = self._world_size
-        dist_dict["rank"] = self._rank
-        dist_dict["local_rank"] = self._local_rank
+        dist_dict = self.initialize_distributed()
 
         # initialize logger
         self.logger = logger(logger_type=self.logger_type)
@@ -139,7 +142,8 @@ class Engine:
         for problem in self.problems:
             problem.add_logger(self.logger)
             problem.configure_distributed_training(dist_dict)
-            problem.initialize(self.config)
+            problem.configure_roll_back(self._roll_back)
+            problem.initialize()
             if self.env is not None:
                 problem.add_env(self.env)
 
@@ -151,8 +155,8 @@ class Engine:
         """
         Initialize distributed training.
         """
-        if self._distributed:
-            dist.init_process_group(backend=self.distributed_backend)
+        if self._strategy in ["distributed", "zero", "fsdp"]:
+            dist.init_process_group(backend=self._backend)
 
             self._world_size = dist.get_world_size()
             assert self._world_size > 1
@@ -160,6 +164,15 @@ class Engine:
 
             device_count = torch.cuda.device_count()
             self._local_rank = self._rank % device_count
+
+        dist_dict = {}
+        dist_dict["strategy"] = self._strategy
+        dist_dict["backend"] = self._backend
+        dist_dict["world_size"] = self._world_size
+        dist_dict["rank"] = self._rank
+        dist_dict["local_rank"] = self._local_rank
+
+        return dist_dict
 
     def train(self):
         """
@@ -299,9 +312,10 @@ class Engine:
         return False
 
     def is_rank_zero(self):
-        if self._distributed and self._rank != 0:
-            return False
-        return True
+        """
+        Check whether the current process is rank 0
+        """
+        return self._rank == 0
 
     def is_implemented(self, fn_name):
         """
