@@ -67,5 +67,5 @@ an example use case of how the feature would be used.
 
 If you have any questions, feel free to reach out to the maintainers:
 
-* [Sang Keun Choe](https://github.com/sangkeun00) (sangkeuc (at) cs.cmu.edu)
+* [Sang Keun Choe](https://github.com/sangkeun00) (sangkeun00 (at) gmail.com)
 * [Willie Neiswanger](https://github.com/willieneis) (neiswanger (at) cs.stanford.edu)

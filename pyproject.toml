@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "betty-ml"
-authors = [{name = "Sang Keun Choe", email = "sangkeuc@andrew.cmu.edu"}]
+authors = [{name = "Sang Keun Choe", email = "sangkeun00@gmail.com"}]
 readme = "README.md"
 license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: Apache Software License"]
