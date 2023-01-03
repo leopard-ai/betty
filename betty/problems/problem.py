@@ -214,7 +214,7 @@ class Problem:
         # patch optimizer
         params = self.trainable_parameters()
         if self.is_implemented("param_groups"):
-            params = self.param_groups
+            params = self.param_groups()
         is_zero = True if self._strategy == "zero" else False
         self.optimizer = patch_optimizer(self.optimizer, params, is_zero)
 

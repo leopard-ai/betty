@@ -27,7 +27,7 @@ def darts(vector, curr, prev, sync):
     R = config.darts_alpha
     if config.darts_preconditioned:
         vector = precondition(vector, curr)
-    eps = R / to_vec(vector).norm().item()
+    eps = R / to_vec(vector).norm().add_(1e-10).item()
 
     # positive
     for p, v in zip(curr.trainable_parameters(), vector):
