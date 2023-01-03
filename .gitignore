@@ -1,6 +1,7 @@
 __pycache__
 data
 *.t7
+*.gz
 *.pt
 *.pth
 betty_tensorboard
