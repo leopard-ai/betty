@@ -1,5 +1,6 @@
 import torch
-from torch import nn
+import torch.nn as nn
+import torch.nn.functional as F
 from transformers import BertForSequenceClassification, AutoTokenizer
 
 
@@ -7,10 +8,10 @@ class BertModel(nn.Module):
     def __init__(self, requires_grad=True):
         super(BertModel, self).__init__()
         self.bert = BertForSequenceClassification.from_pretrained(
-            "textattack/bert-base-uncased-SST-2", num_labels=2
+            "bert-large-uncased", num_labels=2,
         )
         self.tokenizer = AutoTokenizer.from_pretrained(
-            "textattack/bert-base-uncased-SST-2", do_lower_case=True
+            "bert-large-uncased", do_lower_case=True,
         )
         self.requires_grad = requires_grad
         for param in self.bert.parameters():
@@ -51,5 +52,6 @@ class MLP(nn.Module):
     def forward(self, x):
         x = self.first_hidden_layer(x)
         x = self.rest_hidden_layers(x)
+        x = F.dropout(x, p=0.2, training=self.training)
         x = self.output_layer(x)
         return torch.sigmoid(x) * 2
