@@ -232,7 +232,7 @@ dependencies = {"l2u": l2u, "u2l": u2l}
 engine_config = EngineConfig(
     train_iters=args.train_iters * args.grad_accumulation,
     valid_step=args.valid_step * args.grad_accumulation,
-    strategy=args.strategy, # strategy in ["default", "distributed", "zero"]
+    strategy=args.strategy,  # strategy in ["default", "distributed", "zero"]
 )
 engine = BERTEngine(
     config=engine_config,

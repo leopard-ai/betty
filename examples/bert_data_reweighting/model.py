@@ -8,10 +8,12 @@ class BertModel(nn.Module):
     def __init__(self, requires_grad=True):
         super(BertModel, self).__init__()
         self.bert = BertForSequenceClassification.from_pretrained(
-            "bert-large-uncased", num_labels=2,
+            "bert-large-uncased",
+            num_labels=2,
         )
         self.tokenizer = AutoTokenizer.from_pretrained(
-            "bert-large-uncased", do_lower_case=True,
+            "bert-large-uncased",
+            do_lower_case=True,
         )
         self.requires_grad = requires_grad
         for param in self.bert.parameters():
