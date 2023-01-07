@@ -25,11 +25,15 @@ def darts(vector, curr, prev, sync):
     """
     config = curr.config
     R = config.darts_alpha
-    if config.darts_preconditioned:
+    if curr._strategy == "fsdp":
+        curr_flat_param = curr.module._fsdp_wrapped_module.flat_param
+        param_len = curr_flat_param.numel() - curr_flat_param._shard_numel_padded
+        offset = curr._rank * param_len
+        vector = [vector[0][offset : offset + param_len]]
+    if config.darts_preconditioned and curr._strategy not in ["zero", "fsdp"]:
         vector = precondition(vector, curr)
-    eps = R / to_vec(vector).norm().add_(1e-10).item()
+    eps = R / to_vec(vector).norm().add_(1e-12).item()
 
-    # positive
     for p, v in zip(curr.trainable_parameters(), vector):
         p.data.add_(v.data, alpha=eps)
     loss_p = curr.training_step_exec(curr.cur_batch)
@@ -37,6 +41,14 @@ def darts(vector, curr, prev, sync):
     grad_p = replace_none_with_zero(grad_p, prev.trainable_parameters())
     if sync:
         grad_p = [-g_p.div_(2 * eps) for g_p in grad_p]
+        if prev._strategy == "fsdp":
+            prev_flat_param = prev.module._fsdp_wrapped_module.flat_param
+            offset = prev._rank * prev_flat_param.numel()
+            valid_len = prev_flat_param.numel() - prev_flat_param._shard_numel_padded
+            prev_grad_shard = grad_p[0].narrow(0, offset, valid_len)
+            new_grad_p = torch.zeros_like(prev.trainable_parameters()[0])
+            new_grad_p[:valid_len] = prev_grad_shard
+            grad_p = [new_grad_p]
         prev.set_grads(prev.trainable_parameters(), grad_p)
 
     # negative

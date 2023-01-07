@@ -1,16 +1,24 @@
-python main.py --imbalance_factor 20 --batch_size 16 --baseline --seed 0
-python main.py --imbalance_factor 20 --batch_size 16 --baseline --seed 1
-python main.py --imbalance_factor 20 --batch_size 16 --baseline --seed 2
+# Baseline
+#python main.py --batch_size 64 --baseline --fp16 --seed 0
+#python main.py --batch_size 64 --baseline --fp16 --seed 1
+#python main.py --batch_size 64 --baseline --fp16 --seed 2
 
-python main.py --imbalance_factor 20 --batch_size 16 --fp16 --seed 0
-python main.py --imbalance_factor 20 --batch_size 16 --fp16 --seed 1
-python main.py --imbalance_factor 20 --batch_size 16 --fp16 --seed 2
+# Meta-Weight-Net (single GPU fp 16)
+#python main.py --batch_size 64 --fp16 --seed 0
+#python main.py --batch_size 64 --fp16 --seed 1
+#python main.py --batch_size 64 --fp16 --seed 2
 
-python main.py --imbalance_factor 50 --batch_size 16 --baseline --seed 0
-python main.py --imbalance_factor 50 --batch_size 16 --baseline --seed 1
-python main.py --imbalance_factor 50 --batch_size 16 --baseline --seed 2
+# Meta-Weight-Net (Multi GPU)
+#torchrun --standalone --nnodes=1 --nproc_per_node=2 main.py --batch_size 64 --fp16 --strategy distributed --seed 0
+#torchrun --standalone --nnodes=1 --nproc_per_node=2 main.py --batch_size 64 --fp16 --strategy distributed --seed 1
+#torchrun --standalone --nnodes=1 --nproc_per_node=2 main.py --batch_size 64 --fp16 --strategy distributed --seed 2
 
-python main.py --imbalance_factor 50 --batch_size 16 --fp16 --seed 0
-python main.py --imbalance_factor 50 --batch_size 16 --fp16 --seed 1
-python main.py --imbalance_factor 50 --batch_size 16 --fp16 --seed 2
+# Meta-Weight-Net (Multi GPU + ZeRO)
+torchrun --standalone --nnodes=1 --nproc_per_node=2 main.py --batch_size 32 --fp16 --strategy zero --seed 0
+torchrun --standalone --nnodes=1 --nproc_per_node=2 main.py --batch_size 32 --fp16 --strategy zero --seed 1
+torchrun --standalone --nnodes=1 --nproc_per_node=2 main.py --batch_size 32 --fp16 --strategy zero --seed 2
 
+# FSDP
+#torchrun --standalone --nnodes=1 --nproc_per_node=2 main.py --batch_size 64 --fp16 --strategy fsdp --seed 0
+#torchrun --standalone --nnodes=1 --nproc_per_node=2 main.py --batch_size 64 --fp16 --strategy fsdp --seed 1
+#torchrun --standalone --nnodes=1 --nproc_per_node=2 main.py --batch_size 64 --fp16 --strategy fsdp --seed 2

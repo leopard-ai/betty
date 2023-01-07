@@ -196,24 +196,18 @@ class Problem:
             self.synchronize_params(self.parameters())
             self.module = torch.nn.parallel.DistributedDataParallel(self.module)
         elif self._strategy == "fsdp":
-            if len(self._paths) > 0:
-                if self.is_rank_zero():
-                    self.logger.error(
-                        "FSDP is not supported for meta learning at this moment."
-                    )
-                sys.exit(1)
             if self.is_rank_zero():
                 self.logger.warning("FSDP requires PyTorch version >= 1.12")
             from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
 
             self.synchronize_params(self.parameters())
-            self.module = FSDP(self.module)
+            self.module = FSDP(self.module, device_id=self.device)
         elif self._strategy == "accelerate":
             self.module = self.accelerator.prepare(self.module)
 
         # patch optimizer
         params = self.trainable_parameters()
-        if self.is_implemented("param_groups"):
+        if self.is_implemented("param_groups") and self._strategy != "fsdp":
             params = self.param_groups()
         is_zero = True if self._strategy == "zero" else False
         self.optimizer = patch_optimizer(self.optimizer, params, is_zero)
@@ -223,6 +217,13 @@ class Problem:
             self.scheduler = patch_scheduler(self.scheduler, self.optimizer)
             if self._strategy == "accelerate":
                 self.scheduler = self.accelerator.prepare(self.scheduler)
+
+        if self._is_default_fp16() and self._strategy == "fsdp":
+            from torch.distributed.fsdp.sharded_grad_scaler import ShardedGradScaler
+
+            self.scaler = ShardedGradScaler(
+                init_scale=self.initial_dynamic_scale, growth_factor=self.scale_factor
+            )
 
         # accelerate optimizer & scheduler patch
         if self._strategy == "accelerate":
@@ -541,7 +542,7 @@ class Problem:
         """
         synchronize parameters across distributed data-parallel processes
         """
-        if self._world_size > 1:
+        if self._world_size > 1 and self._strategy not in ["fsdp", "accelerate"]:
             for param in params:
                 dist.broadcast(param.data, 0)
 
@@ -565,9 +566,12 @@ class Problem:
         """
         Perform gradient clipping based on the norm provided by Config
         """
-        torch.nn.utils.clip_grad_norm_(
-            parameters=self.trainable_parameters(), max_norm=self.gradient_clipping
-        )
+        if self._strategy != "fsdp":
+            torch.nn.utils.clip_grad_norm_(
+                parameters=self.trainable_parameters(), max_norm=self.gradient_clipping
+            )
+        else:
+            self.module.clip_grad_norm_(max_norm=self.gradient_clipping)
 
     def state_dict(self):
         """

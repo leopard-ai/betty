@@ -1,20 +1,20 @@
 import torch
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as F
-from transformers import BertForSequenceClassification, AutoTokenizer
+from transformers import (
+    RobertaForSequenceClassification,
+    AutoTokenizer,
+    BertForSequenceClassification,
+)
 
 
 class BertModel(nn.Module):
-    def __init__(self, requires_grad=True):
+    def __init__(self, model_name, requires_grad=True):
         super(BertModel, self).__init__()
-        self.bert = BertForSequenceClassification.from_pretrained(
-            "bert-large-uncased",
-            num_labels=2,
+        self.bert = RobertaForSequenceClassification.from_pretrained(
+            model_name, num_labels=2
         )
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            "bert-large-uncased",
-            do_lower_case=True,
-        )
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name, do_lower_case=False)
         self.requires_grad = requires_grad
         for param in self.bert.parameters():
             param.requires_grad = requires_grad  # Each parameter requires gradient

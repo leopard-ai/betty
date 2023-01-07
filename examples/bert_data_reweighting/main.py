@@ -3,9 +3,9 @@ import argparse
 import pandas as pd
 
 import torch
-from torch.utils.data import DataLoader, ConcatDataset
+from torch.utils.data import DataLoader
 import torch.nn.functional as F
-from transformers.optimization import AdamW
+from transformers import get_linear_schedule_with_warmup
 
 from model import BertModel, MLP
 from utils import DataPrecessForSentence, correct_predictions, set_seed, split_dataset
@@ -25,17 +25,17 @@ parser.add_argument("--seed", type=int, default=0)
 parser.add_argument("--meta_net_hidden_size", type=int, default=500)
 parser.add_argument("--meta_net_num_layers", type=int, default=1)
 
-parser.add_argument("--lr", type=float, default=2e-5)
+parser.add_argument("--model_name", type=str, default="robeta-base")
+parser.add_argument("--lr", type=float, default=1e-5)
 parser.add_argument("--patience", type=int, default=0)
 parser.add_argument("--weight_decay", type=float, default=5e-4)
 parser.add_argument("--meta_lr", type=float, default=1e-5)
 parser.add_argument("--meta_weight_decay", type=float, default=0)
+parser.add_argument("--batch_size", type=int, default=120)
 
-parser.add_argument("--imbalance_factor", type=int, default=10)
+parser.add_argument("--imbalance_factor", type=int, default=25)
 parser.add_argument("--max_seq_len", type=int, default=50)
-parser.add_argument("--grad_accumulation", type=int, default=8)
-parser.add_argument("--batch_size", type=int, default=32)
-parser.add_argument("--train_iters", type=int, default=1000)
+parser.add_argument("--train_iters", type=int, default=500)
 parser.add_argument("--valid_step", type=int, default=50)
 
 args = parser.parse_args()
@@ -65,33 +65,17 @@ test_df = pd.read_csv(
 )
 
 # Finetune
-bertmodel = BertModel(requires_grad=True)
+bertmodel = BertModel(model_name=args.model_name, requires_grad=True)
 tokenizer = bertmodel.tokenizer
 train_data = DataPrecessForSentence(tokenizer, train_df, max_seq_len=args.max_seq_len)
 train_data, meta_data = split_dataset(
     train_data, imbalance_factor=args.imbalance_factor
 )
-train_data = ConcatDataset([train_data, meta_data])
 train_loader = DataLoader(train_data, shuffle=True, batch_size=args.batch_size)
 epoch_len = len(train_loader)
-param_optimizer = list(bertmodel.named_parameters())
-no_decay = ["bias", "LayerNorm.bias", "LayerNorm.weight"]
-optimizer_grouped_parameters = [
-    {
-        "params": [
-            p for n, p in param_optimizer if not any(nd in n for nd in no_decay)
-        ],
-        "weight_decay": 0.01,
-    },
-    {
-        "params": [p for n, p in param_optimizer if any(nd in n for nd in no_decay)],
-        "weight_decay": 0.0,
-    },
-]
-optimizer = AdamW(optimizer_grouped_parameters, lr=args.lr)
-scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-    optimizer,
-    T_max=args.train_iters,
+optimizer = torch.optim.AdamW(bertmodel.parameters(), lr=args.lr, weight_decay=1e-3)
+scheduler = get_linear_schedule_with_warmup(
+    optimizer, num_training_steps=args.train_iters, num_warmup_steps=0
 )
 
 # Reweight
@@ -128,28 +112,6 @@ class Finetune(ImplicitProblem):
             weight = self.reweight(probs.detach())
             loss = torch.mean(weight * loss_vector_reshape)
         return loss
-
-    def param_groups(self):
-        no_decay = ["bias", "LayerNorm.weight"]
-        param_groups = [
-            {
-                "params": [
-                    p
-                    for n, p in self.module.named_parameters()
-                    if not any(nd in n for nd in no_decay)
-                ],
-                "weight_decay": args.weight_decay,
-            },
-            {
-                "params": [
-                    p
-                    for n, p in self.module.named_parameters()
-                    if any(nd in n for nd in no_decay)
-                ],
-                "weight_decay": 0.0,
-            },
-        ]
-        return param_groups
 
 
 class Reweight(ImplicitProblem):
@@ -193,16 +155,18 @@ class BERTEngine(Engine):
         return {"loss": valid_loss, "acc": valid_accuracy, "best_acc": best_acc}
 
 
+engine_config = EngineConfig(
+    train_iters=args.train_iters, valid_step=args.valid_step, strategy=args.strategy
+)
 finetune_config = Config(
     type="darts",
     fp16=args.fp16,
     retain_graph=True,
-    gradient_clipping=10.0,
-    gradient_accumulation=args.grad_accumulation,
+    gradient_clipping=5.0,
+    log_step=args.valid_step,
+    unroll_steps=10,
 )
-reweight_config = Config(
-    type="darts", fp16=args.fp16, unroll_steps=1, gradient_clipping=10.0
-)
+reweight_config = Config(type="darts", fp16=args.fp16)
 
 finetune = Finetune(
     name="finetune",
@@ -229,11 +193,6 @@ else:
     l2u = {finetune: [reweight]}
 dependencies = {"l2u": l2u, "u2l": u2l}
 
-engine_config = EngineConfig(
-    train_iters=args.train_iters * args.grad_accumulation,
-    valid_step=args.valid_step * args.grad_accumulation,
-    strategy=args.strategy,  # strategy in ["default", "distributed", "zero"]
-)
 engine = BERTEngine(
     config=engine_config,
     problems=problems,

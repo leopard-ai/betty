@@ -31,13 +31,13 @@ class ImplicitProblem(Problem):
     def optimizer_step(self, *args, **kwargs):
         if self.is_implemented("custom_optimizer_step"):
             assert (
-                not self._fp16
+                not self._is_default_fp16()
             ), "[!] FP16 training is not supported for custom optimizer step."
             if self.gradient_clipping > 0.0:
                 self.clip_grad()
             self.custom_optimizer_step(*args, **kwargs)
         else:
-            if self._fp16:
+            if self._is_default_fp16():
                 if self.gradient_clipping > 0.0:
                     self.scaler.unscale_(self.optimizer)
                     self.clip_grad()
