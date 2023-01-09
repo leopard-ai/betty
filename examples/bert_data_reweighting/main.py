@@ -25,17 +25,18 @@ parser.add_argument("--seed", type=int, default=0)
 parser.add_argument("--meta_net_hidden_size", type=int, default=500)
 parser.add_argument("--meta_net_num_layers", type=int, default=1)
 
-parser.add_argument("--model_name", type=str, default="robeta-base")
+parser.add_argument("--model_name", type=str, default="roberta-large")
 parser.add_argument("--lr", type=float, default=1e-5)
 parser.add_argument("--patience", type=int, default=0)
-parser.add_argument("--weight_decay", type=float, default=5e-4)
+parser.add_argument("--weight_decay", type=float, default=5e-3)
 parser.add_argument("--meta_lr", type=float, default=1e-5)
 parser.add_argument("--meta_weight_decay", type=float, default=0)
 parser.add_argument("--batch_size", type=int, default=120)
 
-parser.add_argument("--imbalance_factor", type=int, default=25)
+parser.add_argument("--imbalance_factor", type=int, default=20)
 parser.add_argument("--max_seq_len", type=int, default=50)
-parser.add_argument("--train_iters", type=int, default=500)
+parser.add_argument("--train_iters", type=int, default=750)
+parser.add_argument("--warmup_iters", type=int, default=250)
 parser.add_argument("--valid_step", type=int, default=50)
 
 args = parser.parse_args()
@@ -73,9 +74,11 @@ train_data, meta_data = split_dataset(
 )
 train_loader = DataLoader(train_data, shuffle=True, batch_size=args.batch_size)
 epoch_len = len(train_loader)
-optimizer = torch.optim.AdamW(bertmodel.parameters(), lr=args.lr, weight_decay=1e-3)
+optimizer = torch.optim.AdamW(
+    bertmodel.parameters(), lr=args.lr, weight_decay=args.weight_decay
+)
 scheduler = get_linear_schedule_with_warmup(
-    optimizer, num_training_steps=args.train_iters, num_warmup_steps=0
+    optimizer, num_training_steps=args.train_iters, num_warmup_steps=args.warmup_iters
 )
 
 # Reweight
@@ -156,7 +159,9 @@ class BERTEngine(Engine):
 
 
 engine_config = EngineConfig(
-    train_iters=args.train_iters, valid_step=args.valid_step, strategy=args.strategy
+    train_iters=args.train_iters,
+    valid_step=args.valid_step,
+    strategy=args.strategy,
 )
 finetune_config = Config(
     type="darts",
@@ -164,7 +169,8 @@ finetune_config = Config(
     retain_graph=True,
     gradient_clipping=5.0,
     log_step=args.valid_step,
-    unroll_steps=10,
+    unroll_steps=5,
+    darts_preconditioned=False,
 )
 reweight_config = Config(type="darts", fp16=args.fp16)
 
