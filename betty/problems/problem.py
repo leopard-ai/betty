@@ -194,7 +194,10 @@ class Problem:
         self.module.to(self.device)
         if self._strategy in ["distributed", "zero"]:
             self.synchronize_params(self.parameters())
-            self.module = torch.nn.parallel.DistributedDataParallel(self.module)
+            self.module = torch.nn.parallel.DistributedDataParallel(
+                module=self.module,
+                gradient_as_bucket_view=True,
+            )
         elif self._strategy == "fsdp":
             if self.is_rank_zero():
                 self.logger.warning("FSDP requires PyTorch version >= 1.12")
