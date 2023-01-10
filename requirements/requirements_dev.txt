@@ -1,5 +1,8 @@
 -r requirements.txt
 
+# FSDP
+torch>=1.13.*
+
 # iterative problem
 higher
 
