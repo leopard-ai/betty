@@ -20,6 +20,7 @@ from betty.configs import Config, EngineConfig
 
 parser = argparse.ArgumentParser(description="Distributed Training Tutorial")
 parser.add_argument("--local_rank", type=int, default=0)
+parser.add_argument("--strategy", type=str, default="distributed")
 args = parser.parse_args()
 
 
@@ -68,13 +69,13 @@ def build_dataset(reweight_size=1000, imbalanced_factor=100):
 
         index_to_train.extend(index_to_class_for_train)
 
-    reweight_dataset = copy.deepcopy(dataset)
+    rwt_dataset = copy.deepcopy(dataset)
     dataset.data = dataset.data[index_to_train]
     dataset.targets = list(np.array(dataset.targets)[index_to_train])
-    reweight_dataset.data = reweight_dataset.data[index_to_meta]
-    reweight_dataset.targets = list(np.array(reweight_dataset.targets)[index_to_meta])
+    rwt_dataset.data = rwt_dataset.data[index_to_meta]
+    rwt_dataset.targets = list(np.array(rwt_dataset.targets)[index_to_meta])
 
-    return dataset, reweight_dataset
+    return dataset, rwt_dataset
 
 
 classifier_dataset, reweight_dataset = build_dataset(
@@ -253,7 +254,11 @@ class ReweightingEngine(Engine):
         return {"acc": acc, "best_acc": self.best_acc}
 
 
-engine_config = EngineConfig(train_iters=10000, valid_step=100, distributed=True)
+engine_config = EngineConfig(
+    train_iters=10000,
+    valid_step=100,
+    strategy=args.strategy,  # strategy in ["default", "distributed", "zero"]
+)
 
 problems = [reweight, classifier]
 u2l = {reweight: [classifier]}
