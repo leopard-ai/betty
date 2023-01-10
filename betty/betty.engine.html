@@ -15,7 +15,7 @@
   <!-- End Google Tag Manager -->
 
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,13 +40,11 @@
   <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="betty.problems" href="betty.problems.html" />
-    <link rel="prev" title="Distributed Training" href="../tutorial/intermediate/intermediate_distributed.html" />
+    <link rel="prev" title="Hypergradient" href="../tutorial/intermediate/intermediate_hypergradient.html" />
   <!-- Google Analytics -->
   
   <!-- End Google Analytics -->
@@ -84,7 +82,7 @@
 <div class="container-fluid header-holder tutorials-header" id="header-holder">
   <div class="container">
     <div class="header-container">
-      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
       <!--  <img class="call-to-action-img" src="../_static/images/logo-lightning-icon.png"/> -->
       </a>
 
@@ -249,15 +247,15 @@
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
   <section id="betty-engine">
-<h1>betty.engine<a class="headerlink" href="#betty-engine" title="Permalink to this headline">¶</a></h1>
+<h1>betty.engine<a class="headerlink" href="#betty-engine" title="Permalink to this heading">¶</a></h1>
 <p>Unlike traditional automatic differentiation techniques that calculate analytic Jacobian for each
 operation, multilevel optimization requires <em>approximating</em> best-response Jacobian for each level
 optimization problem. Below is the list of approximation techniques that are supported by Betty.</p>
 <section id="module-betty.engine">
-<span id="engine"></span><h2>Engine<a class="headerlink" href="#module-betty.engine" title="Permalink to this headline">¶</a></h2>
+<span id="engine"></span><h2>Engine<a class="headerlink" href="#module-betty.engine" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="betty.engine.Engine">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">betty.engine.</span></span><span class="sig-name descname"><span class="pre">Engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">problems</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependencies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/engine.html#Engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.engine.Engine" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">betty.engine.</span></span><span class="sig-name descname"><span class="pre">Engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">problems</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dependencies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/engine.html#Engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.engine.Engine" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">Engine</span></code> handles a dataflow graph based on the user-provided hierarchical problem
 dependencies. It also provides a primitive for executing multilevel optimization.</p>
 <dl class="py method">
@@ -265,16 +263,22 @@ dependencies. It also provides a primitive for executing multilevel optimization
 <span class="sig-name descname"><span class="pre">check_leaf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">problem</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/engine.html#Engine.check_leaf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.engine.Engine.check_leaf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check whether the given <code class="docutils literal notranslate"><span class="pre">problem</span></code> is a leaf problem or not.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>problem</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – Problem in multilevel optimization</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>True or False</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.engine.Engine.do_validation">
+<span class="sig-name descname"><span class="pre">do_validation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/engine.html#Engine.do_validation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.engine.Engine.do_validation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether to run validation.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -288,13 +292,13 @@ dependencies. It also provides a primitive for executing multilevel optimization
 <span class="sig-name descname"><span class="pre">find_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dst</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/engine.html#Engine.find_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.engine.Engine.find_paths" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find all paths from <code class="docutils literal notranslate"><span class="pre">src</span></code> to <code class="docutils literal notranslate"><span class="pre">dst</span></code> with a modified depth-first search algorithm.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>src</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – The end point of the upper-to-lower edge.</p></li>
 <li><p><strong>dst</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – The start point of the upper-to-lower edge.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>List of all paths from <code class="docutils literal notranslate"><span class="pre">src</span></code> to <code class="docutils literal notranslate"><span class="pre">dst</span></code>.</p>
 </dd>
 </dl>
@@ -307,17 +311,29 @@ dependencies. It also provides a primitive for executing multilevel optimization
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="betty.engine.Engine.initialize_distributed">
+<span class="sig-name descname"><span class="pre">initialize_distributed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/engine.html#Engine.initialize_distributed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.engine.Engine.initialize_distributed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize distributed training.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="betty.engine.Engine.is_implemented">
 <span class="sig-name descname"><span class="pre">is_implemented</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/engine.html#Engine.is_implemented"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.engine.Engine.is_implemented" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check whether <code class="docutils literal notranslate"><span class="pre">fn_name</span></code> method is implemented in the class.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>fn_name</strong> (<em>str</em>) – class method name</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>bool</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.engine.Engine.is_rank_zero">
+<span class="sig-name descname"><span class="pre">is_rank_zero</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/engine.html#Engine.is_rank_zero"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.engine.Engine.is_rank_zero" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether the current process is rank 0</p>
 </dd></dl>
 
 <dl class="py method">
@@ -328,7 +344,7 @@ dependencies. It also provides a primitive for executing multilevel optimization
 
 <dl class="py method">
 <dt class="sig sig-object py" id="betty.engine.Engine.parse_dependency">
-<span class="sig-name descname"><span class="pre">parse_dependency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">set_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/engine.html#Engine.parse_dependency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.engine.Engine.parse_dependency" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">parse_dependency</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/engine.html#Engine.parse_dependency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.engine.Engine.parse_dependency" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse user-provided <code class="docutils literal notranslate"><span class="pre">u2l</span></code> and <code class="docutils literal notranslate"><span class="pre">l2u</span></code> dependencies to figure out 1) topological order for
 multilevel optimization execution, and 2) backpropagation path(s) for each problem. A
 modified depth-first search algorithm is used.</p>
@@ -342,7 +358,7 @@ modified depth-first search algorithm is used.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="betty.engine.Engine.set_dependency">
-<span class="sig-name descname"><span class="pre">set_dependency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dependencies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_attr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/engine.html#Engine.set_dependency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.engine.Engine.set_dependency" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">set_dependency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dependencies</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/engine.html#Engine.set_dependency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.engine.Engine.set_dependency" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -350,13 +366,13 @@ modified depth-first search algorithm is used.</p>
 <span class="sig-name descname"><span class="pre">set_problem_attr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">problem</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/engine.html#Engine.set_problem_attr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.engine.Engine.set_problem_attr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set class attribute for the given <code class="docutils literal notranslate"><span class="pre">problem</span></code> based on their names</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>problem</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – Problem in multilevel optimization</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">problem</span></code> name</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
 </dd>
 </dl>
@@ -390,7 +406,7 @@ modified depth-first search algorithm is used.</p>
         <a href="betty.problems.html" class="btn btn-neutral float-right" title="betty.problems" accesskey="n" rel="next">Next <img src="../_static/images/chevron-right-orange.svg" class="next-page"></a>
       
       
-        <a href="../tutorial/intermediate/intermediate_distributed.html" class="btn btn-neutral" title="Distributed Training" accesskey="p" rel="prev"><img src="../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+        <a href="../tutorial/intermediate/intermediate_hypergradient.html" class="btn btn-neutral" title="Hypergradient" accesskey="p" rel="prev"><img src="../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
       
     </div>
   
@@ -423,7 +439,27 @@ modified depth-first search algorithm is used.</p>
             <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
               <ul>
 <li><a class="reference internal" href="#">betty.engine</a><ul>
-<li><a class="reference internal" href="#module-betty.engine">Engine</a></li>
+<li><a class="reference internal" href="#module-betty.engine">Engine</a><ul>
+<li><a class="reference internal" href="#betty.engine.Engine"><code class="docutils literal notranslate"><span class="pre">Engine</span></code></a><ul>
+<li><a class="reference internal" href="#betty.engine.Engine.check_leaf"><code class="docutils literal notranslate"><span class="pre">Engine.check_leaf()</span></code></a></li>
+<li><a class="reference internal" href="#betty.engine.Engine.do_validation"><code class="docutils literal notranslate"><span class="pre">Engine.do_validation()</span></code></a></li>
+<li><a class="reference internal" href="#betty.engine.Engine.eval"><code class="docutils literal notranslate"><span class="pre">Engine.eval()</span></code></a></li>
+<li><a class="reference internal" href="#betty.engine.Engine.find_paths"><code class="docutils literal notranslate"><span class="pre">Engine.find_paths()</span></code></a></li>
+<li><a class="reference internal" href="#betty.engine.Engine.initialize"><code class="docutils literal notranslate"><span class="pre">Engine.initialize()</span></code></a></li>
+<li><a class="reference internal" href="#betty.engine.Engine.initialize_distributed"><code class="docutils literal notranslate"><span class="pre">Engine.initialize_distributed()</span></code></a></li>
+<li><a class="reference internal" href="#betty.engine.Engine.is_implemented"><code class="docutils literal notranslate"><span class="pre">Engine.is_implemented()</span></code></a></li>
+<li><a class="reference internal" href="#betty.engine.Engine.is_rank_zero"><code class="docutils literal notranslate"><span class="pre">Engine.is_rank_zero()</span></code></a></li>
+<li><a class="reference internal" href="#betty.engine.Engine.parse_config"><code class="docutils literal notranslate"><span class="pre">Engine.parse_config()</span></code></a></li>
+<li><a class="reference internal" href="#betty.engine.Engine.parse_dependency"><code class="docutils literal notranslate"><span class="pre">Engine.parse_dependency()</span></code></a></li>
+<li><a class="reference internal" href="#betty.engine.Engine.run"><code class="docutils literal notranslate"><span class="pre">Engine.run()</span></code></a></li>
+<li><a class="reference internal" href="#betty.engine.Engine.set_dependency"><code class="docutils literal notranslate"><span class="pre">Engine.set_dependency()</span></code></a></li>
+<li><a class="reference internal" href="#betty.engine.Engine.set_problem_attr"><code class="docutils literal notranslate"><span class="pre">Engine.set_problem_attr()</span></code></a></li>
+<li><a class="reference internal" href="#betty.engine.Engine.train"><code class="docutils literal notranslate"><span class="pre">Engine.train()</span></code></a></li>
+<li><a class="reference internal" href="#betty.engine.Engine.train_step"><code class="docutils literal notranslate"><span class="pre">Engine.train_step()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -442,11 +478,8 @@ modified depth-first search algorithm is used.</p>
      
        <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
          <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-         <script src="../_static/jquery.js"></script>
-         <script src="../_static/underscore.js"></script>
          <script src="../_static/doctools.js"></script>
-         <script src="../_static/tabs.js"></script>
-         <script src="../_static/design-tabs.js"></script>
+         <script src="../_static/sphinx_highlight.js"></script>
      
 
   
@@ -486,7 +519,7 @@ modified depth-first search algorithm is used.</p>
     <div class="container-fluid">
       <div class="container">
         <div class="mobile-main-menu-header-container">
-          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty"></a>
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
           <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
         </div>
       </div>

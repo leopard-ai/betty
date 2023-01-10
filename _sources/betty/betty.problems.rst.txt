@@ -5,7 +5,7 @@ Problem
 -------
 
 .. automodule:: betty.problems.problem
-   :members: 
+   :members:
    :exclude-members: __call__
    :undoc-members:
 

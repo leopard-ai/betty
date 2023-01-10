@@ -81,7 +81,7 @@
 <div class="container-fluid header-holder tutorials-header" id="header-holder">
   <div class="container">
     <div class="header-container">
-      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
       <!--  <img class="call-to-action-img" src="../../../_static/images/logo-lightning-icon.png"/> -->
       </a>
 
@@ -243,10 +243,11 @@
   <h1>Source code for betty.hypergradient.darts</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">torch</span>
 
-<span class="kn">from</span> <span class="nn">betty.utils</span> <span class="kn">import</span> <span class="n">to_vec</span>
+<span class="kn">from</span> <span class="nn">betty.utils</span> <span class="kn">import</span> <span class="n">to_vec</span><span class="p">,</span> <span class="n">replace_none_with_zero</span>
+<span class="kn">from</span> <span class="nn">betty.hypergradient.utils</span> <span class="kn">import</span> <span class="n">precondition</span>
 
 
-<div class="viewcode-block" id="darts"><a class="viewcode-back" href="../../../betty/betty.hypergradient.html#betty.hypergradient.darts.darts">[docs]</a><span class="k">def</span> <span class="nf">darts</span><span class="p">(</span><span class="n">vector</span><span class="p">,</span> <span class="n">curr</span><span class="p">,</span> <span class="n">prev</span><span class="p">):</span>
+<div class="viewcode-block" id="darts"><a class="viewcode-back" href="../../../betty/betty.hypergradient.html#betty.hypergradient.darts.darts">[docs]</a><span class="k">def</span> <span class="nf">darts</span><span class="p">(</span><span class="n">vector</span><span class="p">,</span> <span class="n">curr</span><span class="p">,</span> <span class="n">prev</span><span class="p">,</span> <span class="n">sync</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Approximate the matrix-vector multiplication with the best response Jacobian by the</span>
 <span class="sd">    finite difference method. More specifically, we modified the finite difference method proposed</span>
@@ -267,25 +268,51 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">config</span> <span class="o">=</span> <span class="n">curr</span><span class="o">.</span><span class="n">config</span>
     <span class="n">R</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">darts_alpha</span>
-    <span class="n">eps</span> <span class="o">=</span> <span class="n">R</span> <span class="o">/</span> <span class="n">to_vec</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">curr</span><span class="o">.</span><span class="n">_strategy</span> <span class="o">==</span> <span class="s2">&quot;fsdp&quot;</span><span class="p">:</span>
+        <span class="n">curr_flat_param</span> <span class="o">=</span> <span class="n">curr</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">_fsdp_wrapped_module</span><span class="o">.</span><span class="n">flat_param</span>
+        <span class="n">param_len</span> <span class="o">=</span> <span class="n">curr_flat_param</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">-</span> <span class="n">curr_flat_param</span><span class="o">.</span><span class="n">_shard_numel_padded</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">curr</span><span class="o">.</span><span class="n">_rank</span> <span class="o">*</span> <span class="n">param_len</span>
+        <span class="n">vector</span> <span class="o">=</span> <span class="p">[</span><span class="n">vector</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">offset</span> <span class="p">:</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">param_len</span><span class="p">]]</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">darts_preconditioned</span> <span class="ow">and</span> <span class="n">curr</span><span class="o">.</span><span class="n">_strategy</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;zero&quot;</span><span class="p">,</span> <span class="s2">&quot;fsdp&quot;</span><span class="p">]:</span>
+        <span class="n">vector</span> <span class="o">=</span> <span class="n">precondition</span><span class="p">(</span><span class="n">vector</span><span class="p">,</span> <span class="n">curr</span><span class="p">)</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">R</span> <span class="o">/</span> <span class="n">to_vec</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span><span class="o">.</span><span class="n">add_</span><span class="p">(</span><span class="mf">1e-12</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
 
-    <span class="c1"># positive</span>
     <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">trainable_parameters</span><span class="p">(),</span> <span class="n">vector</span><span class="p">):</span>
         <span class="n">p</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">add_</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">eps</span><span class="p">)</span>
     <span class="n">loss_p</span> <span class="o">=</span> <span class="n">curr</span><span class="o">.</span><span class="n">training_step_exec</span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">cur_batch</span><span class="p">)</span>
-    <span class="n">grad_p</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss_p</span><span class="p">,</span> <span class="n">prev</span><span class="o">.</span><span class="n">trainable_parameters</span><span class="p">())</span>
+    <span class="n">grad_p</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss_p</span><span class="p">,</span> <span class="n">prev</span><span class="o">.</span><span class="n">trainable_parameters</span><span class="p">(),</span> <span class="n">allow_unused</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">grad_p</span> <span class="o">=</span> <span class="n">replace_none_with_zero</span><span class="p">(</span><span class="n">grad_p</span><span class="p">,</span> <span class="n">prev</span><span class="o">.</span><span class="n">trainable_parameters</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">sync</span><span class="p">:</span>
+        <span class="n">grad_p</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">g_p</span><span class="o">.</span><span class="n">div_</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">eps</span><span class="p">)</span> <span class="k">for</span> <span class="n">g_p</span> <span class="ow">in</span> <span class="n">grad_p</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">prev</span><span class="o">.</span><span class="n">_strategy</span> <span class="o">==</span> <span class="s2">&quot;fsdp&quot;</span><span class="p">:</span>
+            <span class="n">prev_flat_param</span> <span class="o">=</span> <span class="n">prev</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">_fsdp_wrapped_module</span><span class="o">.</span><span class="n">flat_param</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="n">prev</span><span class="o">.</span><span class="n">_rank</span> <span class="o">*</span> <span class="n">prev_flat_param</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span>
+            <span class="n">valid_len</span> <span class="o">=</span> <span class="n">prev_flat_param</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">-</span> <span class="n">prev_flat_param</span><span class="o">.</span><span class="n">_shard_numel_padded</span>
+            <span class="n">prev_grad_shard</span> <span class="o">=</span> <span class="n">grad_p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">narrow</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">valid_len</span><span class="p">)</span>
+            <span class="n">new_grad_p</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">prev</span><span class="o">.</span><span class="n">trainable_parameters</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">new_grad_p</span><span class="p">[:</span><span class="n">valid_len</span><span class="p">]</span> <span class="o">=</span> <span class="n">prev_grad_shard</span>
+            <span class="n">grad_p</span> <span class="o">=</span> <span class="p">[</span><span class="n">new_grad_p</span><span class="p">]</span>
+        <span class="n">prev</span><span class="o">.</span><span class="n">set_grads</span><span class="p">(</span><span class="n">prev</span><span class="o">.</span><span class="n">trainable_parameters</span><span class="p">(),</span> <span class="n">grad_p</span><span class="p">)</span>
 
     <span class="c1"># negative</span>
     <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">trainable_parameters</span><span class="p">(),</span> <span class="n">vector</span><span class="p">):</span>
         <span class="n">p</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">add_</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">eps</span><span class="p">)</span>
     <span class="n">loss_n</span> <span class="o">=</span> <span class="n">curr</span><span class="o">.</span><span class="n">training_step_exec</span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">cur_batch</span><span class="p">)</span>
-    <span class="n">grad_n</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss_n</span><span class="p">,</span> <span class="n">prev</span><span class="o">.</span><span class="n">trainable_parameters</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">sync</span><span class="p">:</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">backward</span><span class="p">(</span><span class="n">loss_n</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">eps</span><span class="p">),</span> <span class="n">inputs</span><span class="o">=</span><span class="n">prev</span><span class="o">.</span><span class="n">trainable_parameters</span><span class="p">())</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">grad_n</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span>
+            <span class="n">loss_n</span><span class="p">,</span> <span class="n">prev</span><span class="o">.</span><span class="n">trainable_parameters</span><span class="p">(),</span> <span class="n">allow_unused</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="n">grad_n</span> <span class="o">=</span> <span class="n">replace_none_with_zero</span><span class="p">(</span><span class="n">grad_n</span><span class="p">,</span> <span class="n">prev</span><span class="o">.</span><span class="n">trainable_parameters</span><span class="p">())</span>
 
     <span class="c1"># reverse weight change</span>
     <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">curr</span><span class="o">.</span><span class="n">trainable_parameters</span><span class="p">(),</span> <span class="n">vector</span><span class="p">):</span>
         <span class="n">p</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">eps</span><span class="p">)</span>
 
-    <span class="n">implicit_grad</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">div_</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">eps</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">grad_n</span><span class="p">,</span> <span class="n">grad_p</span><span class="p">)]</span>
+    <span class="n">implicit_grad</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sync</span><span class="p">:</span>
+        <span class="n">implicit_grad</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">div_</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">eps</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">grad_n</span><span class="p">,</span> <span class="n">grad_p</span><span class="p">)]</span>
 
     <span class="k">return</span> <span class="n">implicit_grad</span></div>
 </pre></div>
@@ -381,7 +408,7 @@
     <div class="container-fluid">
       <div class="container">
         <div class="mobile-main-menu-header-container">
-          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty"></a>
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
           <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
         </div>
       </div>

@@ -1,7 +1,7 @@
 Logging
 =======
 
-Monitoring metrics (e.g. training loss) is essential in ML development.  Betty provides
+Monitoring metrics (e.g. training loss) is essential in ML development. Betty provides
 an easy-to-use interface for flexibly logging whichever metrics are of interest to
 users, for both training and validation procedures. Specifically, users can enable
 logging by returning a Python dictionary in :code:`training_step` of the ``Problem``

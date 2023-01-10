@@ -15,7 +15,7 @@
   <!-- End Google Tag Manager -->
 
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,13 +40,11 @@
   <!-- <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" /> -->
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/tabs.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="betty.engine" href="../../betty/betty.engine.html" />
-    <link rel="prev" title="Hypergradient" href="intermediate_hypergradient.html" />
+    <link rel="next" title="Hypergradient" href="intermediate_hypergradient.html" />
+    <link rel="prev" title="Intermediate" href="intermediate.html" />
   <!-- Google Analytics -->
   
   <!-- End Google Analytics -->
@@ -84,7 +82,7 @@
 <div class="container-fluid header-holder tutorials-header" id="header-holder">
   <div class="container">
     <div class="header-container">
-      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
       <!--  <img class="call-to-action-img" src="../../_static/images/logo-lightning-icon.png"/> -->
       </a>
 
@@ -160,8 +158,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../basic/basic.html">Basic</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="intermediate.html">Intermediate</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Distributed Training</a></li>
 <li class="toctree-l2"><a class="reference internal" href="intermediate_hypergradient.html">Custom Hypergradient</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Distributed Training (Soon)</a></li>
 </ul>
 </li>
 </ul>
@@ -252,8 +250,83 @@
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
   <section id="distributed-training">
-<h1>Distributed Training<a class="headerlink" href="#distributed-training" title="Permalink to this headline">¶</a></h1>
-<p>Coming soon!</p>
+<h1>Distributed Training<a class="headerlink" href="#distributed-training" title="Permalink to this heading">¶</a></h1>
+<p>Despite the popularity of meta-learning, research in meta-learning has largely been limited to
+small-scale setups due to the memory and computation bottlenecks. In detail, meta-learning
+oftentimes requires second-order gradient information (i.e., Hessian) and/or multiple
+forward/backward computations.</p>
+<p>Distributed training emerges as a natural solution to mitigate above issues. To keep up with the
+recent trend of large foundation models, Betty supports various distributed training strategies
+for meta-learning such as distributed data parallel (DDP) and ZeRO redundancy optimizer (ZeRO).
+Most importantly, users can enable these featuers with (1) <em>one-liner change</em> in
+<code class="docutils literal notranslate"><span class="pre">EngineConfig</span></code>, and (2) launch distributed training PyTorch’s native elastic launcher like
+<code class="docutils literal notranslate"><span class="pre">torchrun</span></code>.</p>
+<section id="engineconfig">
+<h2>EngineConfig<a class="headerlink" href="#engineconfig" title="Permalink to this heading">¶</a></h2>
+<p>In Betty, we provide mulitple distributed training strategies. In v0.2.0, Betty <em>stably</em>
+supports:</p>
+<ul class="simple">
+<li><p>Distributed Data Parallel (<a class="reference external" href="https://pytorch.org/tutorials/intermediate/ddp_tutorial.html">DDP</a>).</p></li>
+<li><p>Zero Redundancy Optimizer (<a class="reference external" href="https://pytorch.org/tutorials/recipes/zero_redundancy_optimizer.html">ZeRO</a>).</p></li>
+</ul>
+<p>and also experimentally supports:</p>
+<ul class="simple">
+<li><p>Fully Sharded Data Parallel (<a class="reference external" href="https://pytorch.org/tutorials/intermediate/FSDP_tutorial.html">FSDP</a>).</p></li>
+</ul>
+<p>To enable above features, users can simply need to set <code class="docutils literal notranslate"><span class="pre">strategy</span></code> attribute in <code class="docutils literal notranslate"><span class="pre">EngineConfig</span></code>
+to user’s preferred distributed training strategy as follows.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># DDP</span>
+<span class="n">engine_config</span> <span class="o">=</span> <span class="n">EngineConfig</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;distributed&quot;</span><span class="p">,</span> <span class="n">train_iters</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+
+<span class="c1"># ZeRO</span>
+<span class="n">engine_config</span> <span class="o">=</span> <span class="n">EngineConfig</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;zero&quot;</span><span class="p">,</span> <span class="n">train_iters</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+
+<span class="c1"># FSDP (experimental)</span>
+<span class="n">engine_config</span> <span class="o">=</span> <span class="n">EngineConfig</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;fsdp&quot;</span><span class="p">,</span> <span class="n">train_iters</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="launch">
+<h2>Launch<a class="headerlink" href="#launch" title="Permalink to this heading">¶</a></h2>
+<p>Once the <code class="docutils literal notranslate"><span class="pre">strategy</span></code> is configured in <code class="docutils literal notranslate"><span class="pre">EngineConfig</span></code>, users can launch distributed
+training as a normal PyTorch distributed training job via their native (elastic) launcher.
+Depending on user’s PyTorch version, some launchers may not be supported. Here, we provide
+examples of using PyTorch’s distributed launchers. More detailed instructions can be found
+in PyTorch’s official <a class="reference external" href="https://pytorch.org/docs/stable/elastic/run.html">Tutorial</a>.</p>
+<ul class="simple">
+<li><p>PyTorch version <span class="math notranslate nohighlight">\(\geq 1.10\)</span></p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># simple</span>
+<span class="n">torchrun</span> <span class="n">train_script</span><span class="o">.</span><span class="n">py</span>
+
+<span class="c1"># detailed</span>
+<span class="n">torchrun</span> <span class="o">--</span><span class="n">rdzv_backend</span><span class="o">=</span><span class="n">c10d</span> <span class="o">--</span><span class="n">rdzv_endpoint</span><span class="o">=</span><span class="n">MASTER_ADDR</span> <span class="o">--</span><span class="n">nproc_per_node</span><span class="o">=</span><span class="n">NUM_GPUS</span> <span class="o">--</span><span class="n">nnodes</span><span class="o">=</span><span class="n">NUM_NODES</span> <span class="n">train_script</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>PyTorch version <span class="math notranslate nohighlight">\(&lt; 1.10\)</span></p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># simple</span>
+<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">launch</span> <span class="o">--</span><span class="n">use_env</span> <span class="n">train_script</span><span class="o">.</span><span class="n">py</span>
+
+<span class="c1"># detailed</span>
+<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">torch</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">launch</span> <span class="o">--</span><span class="n">nproc_per_node</span><span class="o">=</span><span class="n">NUM_GPUS</span> <span class="o">--</span><span class="n">nnodes</span><span class="o">=</span><span class="n">NUM_NODES</span> <span class="o">--</span><span class="n">node_rank</span><span class="o">=</span><span class="n">NODE</span> <span class="o">--</span><span class="n">master_addr</span><span class="o">=</span><span class="n">MASTER_ADDR</span> <span class="o">--</span><span class="n">master_port</span><span class="o">=</span><span class="n">MASTER_PORT</span> <span class="n">train_script</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">torch.distributed.launch</span></code> requires users to include <code class="docutils literal notranslate"><span class="pre">--local_rank</span></code> in
+<code class="docutils literal notranslate"><span class="pre">argparse</span></code> as below:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">argparse</span>
+<span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--local_rank&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+<span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+<span class="n">local_rank</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">local_rank</span>
+</pre></div>
+</div>
+<p>Behind the scene, Betty takes care of patching (1) module, (2) optimizer,
+(3) data loader, (4) lr scheduler, (5) loss scaler (for mixed-precision training)
+automatically for users.</p>
+</section>
 </section>
 
 
@@ -264,10 +337,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../../betty/betty.engine.html" class="btn btn-neutral float-right" title="betty.engine" accesskey="n" rel="next">Next <img src="../../_static/images/chevron-right-orange.svg" class="next-page"></a>
+        <a href="intermediate_hypergradient.html" class="btn btn-neutral float-right" title="Hypergradient" accesskey="n" rel="next">Next <img src="../../_static/images/chevron-right-orange.svg" class="next-page"></a>
       
       
-        <a href="intermediate_hypergradient.html" class="btn btn-neutral" title="Hypergradient" accesskey="p" rel="prev"><img src="../../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+        <a href="intermediate.html" class="btn btn-neutral" title="Intermediate" accesskey="p" rel="prev"><img src="../../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
       
     </div>
   
@@ -299,7 +372,11 @@
           <div class="pytorch-right-menu" id="pytorch-right-menu">
             <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
               <ul>
-<li><a class="reference internal" href="#">Distributed Training</a></li>
+<li><a class="reference internal" href="#">Distributed Training</a><ul>
+<li><a class="reference internal" href="#engineconfig">EngineConfig</a></li>
+<li><a class="reference internal" href="#launch">Launch</a></li>
+</ul>
+</li>
 </ul>
 
             </div>
@@ -316,11 +393,9 @@
      
        <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
          <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-         <script src="../../_static/jquery.js"></script>
-         <script src="../../_static/underscore.js"></script>
          <script src="../../_static/doctools.js"></script>
-         <script src="../../_static/tabs.js"></script>
-         <script src="../../_static/design-tabs.js"></script>
+         <script src="../../_static/sphinx_highlight.js"></script>
+         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
      
 
   
@@ -360,7 +435,7 @@
     <div class="container-fluid">
       <div class="container">
         <div class="mobile-main-menu-header-container">
-          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty"></a>
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
           <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
         </div>
       </div>

@@ -39,8 +39,6 @@
   <!-- <link rel="stylesheet" href="_static/pygments.css" type="text/css" /> -->
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/tabs.css" type="text/css" />
-  <link rel="stylesheet" href="_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
   <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" />
@@ -81,7 +79,7 @@
 <div class="container-fluid header-holder tutorials-header" id="header-holder">
   <div class="container">
     <div class="header-container">
-      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
       <!--  <img class="call-to-action-img" src="_static/images/logo-lightning-icon.png"/> -->
       </a>
 
@@ -408,15 +406,23 @@
 </li>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.check_ready">check_ready() (betty.problems.problem.Problem method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.children">children (betty.problems.problem.Problem property)</a>
 </li>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.clear_dependencies">clear_dependencies() (betty.problems.problem.Problem method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.clip_grad">clip_grad() (betty.problems.problem.Problem method)</a>
+</li>
       <li><a href="betty/betty.logging.html#betty.logging.logger_tensorboard.TensorBoardLogger.close">close() (betty.logging.logger_tensorboard.TensorBoardLogger method)</a>
 </li>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.config">config (betty.problems.problem.Problem property)</a>
+</li>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.configure_device">configure_device() (betty.problems.problem.Problem method)</a>
+</li>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.configure_distributed_training">configure_distributed_training() (betty.problems.problem.Problem method)</a>
+</li>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.configure_roll_back">configure_roll_back() (betty.problems.problem.Problem method)</a>
 </li>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.count">count (betty.problems.problem.Problem property)</a>
 </li>
@@ -430,13 +436,15 @@
 </li>
       <li><a href="betty/betty.logging.html#betty.logging.logger_base.LoggerBase.debug">debug() (betty.logging.logger_base.LoggerBase static method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="betty/betty.optim.html#betty.optim.adam.DifferentiableAdam">DifferentiableAdam (class in betty.optim.adam)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="betty/betty.optim.html#betty.optim.adamw.DifferentiableAdamW">DifferentiableAdamW (class in betty.optim.adamw)</a>
 </li>
       <li><a href="betty/betty.optim.html#betty.optim.sgd.DifferentiableSGD">DifferentiableSGD (class in betty.optim.sgd)</a>
+</li>
+      <li><a href="betty/betty.engine.html#betty.engine.Engine.do_validation">do_validation() (betty.engine.Engine method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -476,11 +484,19 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.get_batch">get_batch() (betty.problems.problem.Problem method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.get_batch_single_loader">get_batch_single_loader() (betty.problems.problem.Problem method)</a>
+</li>
       <li><a href="betty/betty.logging.html#betty.logging.logger_base.get_logger">get_logger() (in module betty.logging.logger_base)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.get_loss">get_loss() (betty.problems.problem.Problem method)</a>
+</li>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.get_opt_param_group_for_param">get_opt_param_group_for_param() (betty.problems.problem.Problem method)</a>
+</li>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.get_opt_state_for_param">get_opt_state_for_param() (betty.problems.problem.Problem method)</a>
+</li>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.gradient_accumulation_boundary">gradient_accumulation_boundary() (betty.problems.problem.Problem method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -498,12 +514,20 @@
         <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.initialize">(betty.problems.problem.Problem method)</a>
 </li>
       </ul></li>
+      <li><a href="betty/betty.engine.html#betty.engine.Engine.initialize_distributed">initialize_distributed() (betty.engine.Engine method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="betty/betty.engine.html#betty.engine.Engine.is_implemented">is_implemented() (betty.engine.Engine method)</a>
 
       <ul>
         <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.is_implemented">(betty.problems.problem.Problem method)</a>
+</li>
+      </ul></li>
+      <li><a href="betty/betty.engine.html#betty.engine.Engine.is_rank_zero">is_rank_zero() (betty.engine.Engine method)</a>
+
+      <ul>
+        <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.is_rank_zero">(betty.problems.problem.Problem method)</a>
 </li>
       </ul></li>
       <li><a href="betty/betty.problems.html#betty.problems.iterative_problem.IterativeProblem">IterativeProblem (class in betty.problems.iterative_problem)</a>
@@ -591,10 +615,12 @@
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.one_step_descent">one_step_descent() (betty.problems.problem.Problem method)</a>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.on_epoch_end_exec">on_epoch_end_exec() (betty.problems.problem.Problem method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.one_step_descent">one_step_descent() (betty.problems.problem.Problem method)</a>
+</li>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.optimizer_step">optimizer_step() (betty.problems.problem.Problem method)</a>
 </li>
   </ul></td>
@@ -610,6 +636,8 @@
       <li><a href="betty/betty.engine.html#betty.engine.Engine.parse_config">parse_config() (betty.engine.Engine method)</a>
 </li>
       <li><a href="betty/betty.engine.html#betty.engine.Engine.parse_dependency">parse_dependency() (betty.engine.Engine method)</a>
+</li>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.patch_module_optimizer_loader">patch_module_optimizer_loader() (betty.problems.problem.Problem method)</a>
 </li>
       <li><a href="betty/betty.problems.html#betty.problems.iterative_problem.IterativeProblem.patch_modules">patch_modules() (betty.problems.iterative_problem.IterativeProblem method)</a>
 </li>
@@ -656,20 +684,18 @@
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.set_grads">set_grads() (betty.problems.problem.Problem method)</a>
 </li>
       <li><a href="betty/betty.engine.html#betty.engine.Engine.set_problem_attr">set_problem_attr() (betty.engine.Engine method)</a>
-
-      <ul>
-        <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.set_problem_attr">(betty.problems.problem.Problem method)</a>
 </li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.state_dict">state_dict() (betty.problems.problem.Problem method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.step">step() (betty.problems.problem.Problem method)</a>
 </li>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.step_after_roll_back">step_after_roll_back() (betty.problems.problem.Problem method)</a>
 </li>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.step_normal">step_normal() (betty.problems.problem.Problem method)</a>
+</li>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.synchronize_params">synchronize_params() (betty.problems.problem.Problem method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -767,11 +793,8 @@
      
        <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
          <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-         <script src="_static/jquery.js"></script>
-         <script src="_static/underscore.js"></script>
          <script src="_static/doctools.js"></script>
-         <script src="_static/tabs.js"></script>
-         <script src="_static/design-tabs.js"></script>
+         <script src="_static/sphinx_highlight.js"></script>
      
 
   
@@ -811,7 +834,7 @@
     <div class="container-fluid">
       <div class="container">
         <div class="mobile-main-menu-header-container">
-          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty"></a>
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
           <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
         </div>
       </div>

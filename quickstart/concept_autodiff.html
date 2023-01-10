@@ -15,7 +15,7 @@
   <!-- End Google Tag Manager -->
 
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,8 +40,6 @@
   <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -84,7 +82,7 @@
 <div class="container-fluid header-holder tutorials-header" id="header-holder">
   <div class="container">
     <div class="header-container">
-      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
       <!--  <img class="call-to-action-img" src="../_static/images/logo-lightning-icon.png"/> -->
       </a>
 
@@ -254,7 +252,7 @@
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
   <section id="autodiff-for-multilevel-optimization">
-<h1>Autodiff for Multilevel Optimization<a class="headerlink" href="#autodiff-for-multilevel-optimization" title="Permalink to this headline">¶</a></h1>
+<h1>Autodiff for Multilevel Optimization<a class="headerlink" href="#autodiff-for-multilevel-optimization" title="Permalink to this heading">¶</a></h1>
 <p>In this paper, we focus in particular on <em>gradient-based</em> multilevel optimization, rather than
 zeroth-order methods like Bayesian optimization, in order to efficiently scale to high-dimensional
 problems. Essentially, gradient-based multilevel optimization calculates gradients of the cost
@@ -278,7 +276,7 @@ subsections. Once gradient calculation is enabled, gradient-based optimization i
 lower-level problems to upper-level problems in a topologically reverse order, reflecting the
 underlying hierarchy.</p>
 <section id="dataflow-graph-for-multilevel-optimization">
-<h2>Dataflow Graph for Multilevel Optimization<a class="headerlink" href="#dataflow-graph-for-multilevel-optimization" title="Permalink to this headline">¶</a></h2>
+<h2>Dataflow Graph for Multilevel Optimization<a class="headerlink" href="#dataflow-graph-for-multilevel-optimization" title="Permalink to this heading">¶</a></h2>
 <p>One may observe that the best-response Jacobian term in Equation (1) is expressed with a
 <em>total derivative</em> instead of a partial derivative. This is because <span class="math notranslate nohighlight">\(\theta_k\)</span> can affect
 <span class="math notranslate nohighlight">\(\theta_l^*\)</span> not only through a direct interaction, but also through multiple indirect
@@ -327,7 +325,7 @@ the dataflow graph is also marked with the corresponding color in Equation (2). 
 above path finding mechanism with a modified depth-first search algorithm in Betty.</p>
 </section>
 <section id="gradient-calculation-with-best-response-jacobian">
-<h2>Gradient Calculation with Best-Response Jacobian<a class="headerlink" href="#gradient-calculation-with-best-response-jacobian" title="Permalink to this headline">¶</a></h2>
+<h2>Gradient Calculation with Best-Response Jacobian<a class="headerlink" href="#gradient-calculation-with-best-response-jacobian" title="Permalink to this heading">¶</a></h2>
 <p>Automatic differentiation for MLO can be realized by calculating Equation (2) for each problem
 <span class="math notranslate nohighlight">\(P_k\)</span> (<span class="math notranslate nohighlight">\(k=1,\cdots,n\)</span>). However, a naive calculation of Equation (2) could be
 computationally onerous as it involves multiple matrix multiplications with best-response Jacobians,
@@ -457,11 +455,8 @@ or AID while those in neural networks can be analytically calculated.</p>
      
        <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
          <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-         <script src="../_static/jquery.js"></script>
-         <script src="../_static/underscore.js"></script>
          <script src="../_static/doctools.js"></script>
-         <script src="../_static/tabs.js"></script>
-         <script src="../_static/design-tabs.js"></script>
+         <script src="../_static/sphinx_highlight.js"></script>
          <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
      
 
@@ -502,7 +497,7 @@ or AID while those in neural networks can be analytically calculated.</p>
     <div class="container-fluid">
       <div class="container">
         <div class="mobile-main-menu-header-container">
-          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty"></a>
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
           <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
         </div>
       </div>

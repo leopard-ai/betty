@@ -15,7 +15,7 @@
   <!-- End Google Tag Manager -->
 
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,8 +40,6 @@
   <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -84,7 +82,7 @@
 <div class="container-fluid header-holder tutorials-header" id="header-holder">
   <div class="container">
     <div class="header-container">
-      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
       <!--  <img class="call-to-action-img" src="../_static/images/logo-lightning-icon.png"/> -->
       </a>
 
@@ -254,7 +252,7 @@
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
   <section id="software-design">
-<h1>Software Design<a class="headerlink" href="#software-design" title="Permalink to this headline">¶</a></h1>
+<h1>Software Design<a class="headerlink" href="#software-design" title="Permalink to this heading">¶</a></h1>
 <p>Betty allows for an easy-to-use, modular, and maintainable programming interface for
 multilevel optimization (MLO) by breaking down MLO into two high-level concepts — (1)
 optimization problems, and (2) problem dependencies — for which we design two abstract
@@ -265,7 +263,7 @@ Python classes:</p>
 </ul>
 <p>In this chapter, we will introduce each of these concepts/classes in depth.</p>
 <section id="problem">
-<h2>Problem<a class="headerlink" href="#problem" title="Permalink to this headline">¶</a></h2>
+<h2>Problem<a class="headerlink" href="#problem" title="Permalink to this heading">¶</a></h2>
 <p>Under our abstraction, each optimization problem <span class="math notranslate nohighlight">\(P\)</span> in MLO is defined by the (1)
 module, (2) the optimizer, (3) the data loader, (4) the sets of the upper and lower
 constraining problems, (5) the loss function, (6) the problem (or optimization)
@@ -276,7 +274,7 @@ the <code class="docutils literal notranslate"><span class="pre">Problem</span><
 
 <span class="k">class</span> <span class="nc">MyProblem</span><span class="p">(</span><span class="n">ImplicitProblem</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Users define the loss function here &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Users define the loss function here &quot;&quot;&quot;</span>
         <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">other_probs</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
         <span class="n">acc</span> <span class="o">=</span> <span class="n">get_accuracy</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;loss&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="s1">&#39;acc&#39;</span><span class="p">:</span> <span class="n">acc</span><span class="p">}</span>
@@ -297,7 +295,7 @@ the <code class="docutils literal notranslate"><span class="pre">Problem</span><
 </div>
 <p>To better understand the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class, we take a deeper dive into each component.</p>
 <section id="problem-type">
-<h3>(0) Problem type<a class="headerlink" href="#problem-type" title="Permalink to this headline">¶</a></h3>
+<h3>(0) Problem type<a class="headerlink" href="#problem-type" title="Permalink to this heading">¶</a></h3>
 <p>Automatic differentiation for multilevel optimization can be roughly categorized into
 two types: iterative differentiation (ITD) and implicit differentiation (AID). While AID
 allows users to use native PyTorch modules and optimizers, ITD requires patching both
@@ -308,26 +306,26 @@ memory efficiency, training wall time, and final accuracy. Thus, we highly recom
 using the <code class="docutils literal notranslate"><span class="pre">ImplicitProblem</span></code> class as a default setting.</p>
 </section>
 <section id="module">
-<h3>(1) Module<a class="headerlink" href="#module" title="Permalink to this headline">¶</a></h3>
+<h3>(1) Module<a class="headerlink" href="#module" title="Permalink to this heading">¶</a></h3>
 <p>The module defines the parameters to be learned in the current optimization problem, and
 corresponds to <span class="math notranslate nohighlight">\(\theta_k\)</span> in our mathematical formulation (<a class="reference internal" href="concept_mlo.html"><span class="doc">Chapter</span></a>). In practice, the module is usually defined using PyTorch’s
 <code class="docutils literal notranslate"><span class="pre">torch.nn.Module</span></code>, and is passed to the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class through the constructor.</p>
 </section>
 <section id="optimizer">
-<h3>(2) Optimizer<a class="headerlink" href="#optimizer" title="Permalink to this headline">¶</a></h3>
+<h3>(2) Optimizer<a class="headerlink" href="#optimizer" title="Permalink to this heading">¶</a></h3>
 <p>The optimizer updates parameters for the above module. In practice, the optimizer is
 most commonly defined using PyTorch’s <code class="docutils literal notranslate"><span class="pre">torch.optim.Optimizer</span></code>, and is also passed to
 the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class through the constructor.</p>
 </section>
 <section id="data-loader">
-<h3>(3) Data loader<a class="headerlink" href="#data-loader" title="Permalink to this headline">¶</a></h3>
+<h3>(3) Data loader<a class="headerlink" href="#data-loader" title="Permalink to this heading">¶</a></h3>
 <p>The data loader defines the associated training data, denoted <span class="math notranslate nohighlight">\(\mathcal{D}_k\)</span> in
 our mathematical formulation. It is normally defined using PyTorch’s
 <code class="docutils literal notranslate"><span class="pre">torch.utils.data.DataLoader</span></code>, but it can be any Python <code class="docutils literal notranslate"><span class="pre">Iterator</span></code>. The data loader
 can also be provided through the class constructor.</p>
 </section>
 <section id="upper-lower-constraining-problem-sets">
-<h3>(4) Upper &amp; Lower Constraining Problem Sets<a class="headerlink" href="#upper-lower-constraining-problem-sets" title="Permalink to this headline">¶</a></h3>
+<h3>(4) Upper &amp; Lower Constraining Problem Sets<a class="headerlink" href="#upper-lower-constraining-problem-sets" title="Permalink to this heading">¶</a></h3>
 <p>While the upper &amp; lower constraining problem sets
 <span class="math notranslate nohighlight">\(\mathcal{U}_k\;\&amp;\;\mathcal{L}_k\)</span> are at the core of our mathematical
 formulation, we don’t allow users to directly specifiy them in the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class.
@@ -338,7 +336,7 @@ need to provide the hierarchical problem dependencies only once when they initia
 provisioning constraining problems manually every time they define new problems.</p>
 </section>
 <section id="loss-function">
-<h3>(5) Loss function<a class="headerlink" href="#loss-function" title="Permalink to this headline">¶</a></h3>
+<h3>(5) Loss function<a class="headerlink" href="#loss-function" title="Permalink to this heading">¶</a></h3>
 <p>The loss function defines the optimization objective <span class="math notranslate nohighlight">\(\mathcal{C}_k\)</span> in our
 formulation.  Unlike previous components, the loss function is defined through the
 <code class="docutils literal notranslate"><span class="pre">training_step</span></code> method as shown above. In addition, the <code class="docutils literal notranslate"><span class="pre">training_step</span></code> method
@@ -351,7 +349,7 @@ standard output stream (i.e. print in the terminal). Our <code class="docutils l
 highly inspired by <a class="reference external" href="https://github.com/PyTorchLightning/pytorch-lightning">PyTorch Lightning’s</a> <code class="docutils literal notranslate"><span class="pre">training_step</span></code> method.</p>
 </section>
 <section id="optimization-configuration">
-<h3>(6) Optimization Configuration<a class="headerlink" href="#optimization-configuration" title="Permalink to this headline">¶</a></h3>
+<h3>(6) Optimization Configuration<a class="headerlink" href="#optimization-configuration" title="Permalink to this heading">¶</a></h3>
 <p>Unlike automatic differentiation in neural networks, autodiff in MLO requires
 approximating gradients with, for example, implicit differentiation. Since there can be
 different approximation methods and configurations, we allow users to specify all
@@ -361,7 +359,7 @@ fp16 training options.  We provide the default value for each attribute in <code
 so, in most cases, users will only need to specify 3-4 attributes based on their needs.</p>
 </section>
 <section id="name">
-<h3>(7) Name<a class="headerlink" href="#name" title="Permalink to this headline">¶</a></h3>
+<h3>(7) Name<a class="headerlink" href="#name" title="Permalink to this heading">¶</a></h3>
 <p>Users oftentimes need to access constraining problems
 <span class="math notranslate nohighlight">\(\mathcal{U}_k\;\&amp;\;\mathcal{L}_k\)</span> when defining the loss function in
 <code class="docutils literal notranslate"><span class="pre">training_step</span></code>. However, since constraining problems are directly provided by the
@@ -372,14 +370,14 @@ involves <code class="docutils literal notranslate"><span class="pre">Problem1(n
 access <code class="docutils literal notranslate"><span class="pre">Problem2</span></code> from <code class="docutils literal notranslate"><span class="pre">Problem1</span></code> with <code class="docutils literal notranslate"><span class="pre">self.prob2</span></code>.</p>
 </section>
 <section id="other-optional-components">
-<h3>(8) Other Optional Components<a class="headerlink" href="#other-optional-components" title="Permalink to this headline">¶</a></h3>
+<h3>(8) Other Optional Components<a class="headerlink" href="#other-optional-components" title="Permalink to this heading">¶</a></h3>
 <p>While not considered essential components, learning rate schedulers or parameter
 callbacks (e.g. parameter clipping/clamping) can optionally be provided by users as
 well. Interested users can refer to the API documentation for these features.</p>
 </section>
 </section>
 <section id="engine">
-<h2>Engine<a class="headerlink" href="#engine" title="Permalink to this headline">¶</a></h2>
+<h2>Engine<a class="headerlink" href="#engine" title="Permalink to this heading">¶</a></h2>
 <p>While <code class="docutils literal notranslate"><span class="pre">Problem</span></code> manages each optimization problem, <code class="docutils literal notranslate"><span class="pre">Engine</span></code> handles a dataflow graph
 based on the user-provided hierarchical problem dependencies. An example usage of the
 <code class="docutils literal notranslate"><span class="pre">Engine</span></code> class is provided below:</p>
@@ -401,12 +399,12 @@ based on the user-provided hierarchical problem dependencies. An example usage o
 </div>
 <p>Here, we take a deeper look into each component of <code class="docutils literal notranslate"><span class="pre">Engine</span></code>.</p>
 <section id="problems">
-<h3>(1) Problems<a class="headerlink" href="#problems" title="Permalink to this headline">¶</a></h3>
+<h3>(1) Problems<a class="headerlink" href="#problems" title="Permalink to this heading">¶</a></h3>
 <p>Users should provide all of the involved optimization problems through the <cite>problems</cite>
 argument.</p>
 </section>
 <section id="dependencies">
-<h3>(2) Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h3>
+<h3>(2) Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this heading">¶</a></h3>
 <p>As discussed in <a class="reference internal" href="concept_mlo.html"><span class="doc">this section</span></a>, MLO has two types of dependencies
 between problems: upper-to-lower and lower-to-upper. We allow users to define two
 separate graphs, one for each type of edge, using a Python dictionary, in which
@@ -417,19 +415,19 @@ for automatic differentiation with a modified depth-first search algorithm.  Mor
 graphs, as mentioned above.</p>
 </section>
 <section id="validation">
-<h3>(3) Validation<a class="headerlink" href="#validation" title="Permalink to this headline">¶</a></h3>
+<h3>(3) Validation<a class="headerlink" href="#validation" title="Permalink to this heading">¶</a></h3>
 <p>We currently allow users to define one validation stage for the <em>whole</em> multilevel
 optimization program. This can be achieved by implementing the <code class="docutils literal notranslate"><span class="pre">validation</span></code> method in
 <code class="docutils literal notranslate"><span class="pre">Engine</span></code> as shown above. As in the <code class="docutils literal notranslate"><span class="pre">training_step</span></code> method of the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class,
 users can return whichever metrics they want to log with the Python dictionary.</p>
 </section>
 <section id="engine-configuration">
-<h3>(4) Engine Configuration<a class="headerlink" href="#engine-configuration" title="Permalink to this headline">¶</a></h3>
+<h3>(4) Engine Configuration<a class="headerlink" href="#engine-configuration" title="Permalink to this heading">¶</a></h3>
 <p>Users can specify several configurations for the whole multilevel optimization program,
 such as the total training iterations, the validation step, and the logger type.</p>
 </section>
 <section id="run">
-<h3>(5) Run<a class="headerlink" href="#run" title="Permalink to this headline">¶</a></h3>
+<h3>(5) Run<a class="headerlink" href="#run" title="Permalink to this heading">¶</a></h3>
 <p>Once all initialization steps are complete, users can run the MLO program by calling the
 Engine’s <code class="docutils literal notranslate"><span class="pre">run</span></code> method, which repeatedly calls <code class="docutils literal notranslate"><span class="pre">step</span></code> methods of lowermost problems.
 The <code class="docutils literal notranslate"><span class="pre">step</span></code> methods of upper-level problems will be automatically called from the
@@ -524,11 +522,8 @@ algorithms, without requiring mathematical and programming proficiency.</p>
      
        <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
          <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-         <script src="../_static/jquery.js"></script>
-         <script src="../_static/underscore.js"></script>
          <script src="../_static/doctools.js"></script>
-         <script src="../_static/tabs.js"></script>
-         <script src="../_static/design-tabs.js"></script>
+         <script src="../_static/sphinx_highlight.js"></script>
          <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
      
 
@@ -569,7 +564,7 @@ algorithms, without requiring mathematical and programming proficiency.</p>
     <div class="container-fluid">
       <div class="container">
         <div class="mobile-main-menu-header-container">
-          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty"></a>
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
           <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
         </div>
       </div>

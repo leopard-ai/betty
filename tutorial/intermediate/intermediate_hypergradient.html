@@ -15,7 +15,7 @@
   <!-- End Google Tag Manager -->
 
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,13 +40,11 @@
   <!-- <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" /> -->
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/tabs.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Distributed Training" href="intermediate_distributed.html" />
-    <link rel="prev" title="Intermediate" href="intermediate.html" />
+    <link rel="next" title="betty.engine" href="../../betty/betty.engine.html" />
+    <link rel="prev" title="Distributed Training" href="intermediate_distributed.html" />
   <!-- Google Analytics -->
   
   <!-- End Google Analytics -->
@@ -84,7 +82,7 @@
 <div class="container-fluid header-holder tutorials-header" id="header-holder">
   <div class="container">
     <div class="header-container">
-      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
       <!--  <img class="call-to-action-img" src="../../_static/images/logo-lightning-icon.png"/> -->
       </a>
 
@@ -160,8 +158,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../basic/basic.html">Basic</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="intermediate.html">Intermediate</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="intermediate_distributed.html">Distributed Training</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Custom Hypergradient</a></li>
-<li class="toctree-l2"><a class="reference internal" href="intermediate_distributed.html">Distributed Training (Soon)</a></li>
 </ul>
 </li>
 </ul>
@@ -252,7 +250,7 @@
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
   <section id="hypergradient">
-<h1>Hypergradient<a class="headerlink" href="#hypergradient" title="Permalink to this headline">¶</a></h1>
+<h1>Hypergradient<a class="headerlink" href="#hypergradient" title="Permalink to this heading">¶</a></h1>
 <p>For researchers studying novel hypergradient calculation methods, we allow
 a modular interface to implement custom algorithms without changing other
 parts of the MLO program. Specifically, users can create a new python file
@@ -271,7 +269,7 @@ performing matrix-vector multiplication with the best-response Jacobian (See
 given <span class="math notranslate nohighlight">\(\lambda, w,\text{ and } v\)</span>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># betty/hypergradient/new_hypergrad.py</span>
 <span class="k">def</span> <span class="nf">myhypergrad</span><span class="p">(</span><span class="n">vector</span><span class="p">,</span> <span class="n">curr</span><span class="p">,</span> <span class="n">prev</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    vector: corresponds to v</span>
 <span class="sd">    curr: corresponds to the lower-level problem whose parameter is w</span>
 <span class="sd">    prev: corresponds to the upper-level problem whose parameter is \lambda</span>
@@ -298,10 +296,10 @@ they can add their algorithm as follows:</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="intermediate_distributed.html" class="btn btn-neutral float-right" title="Distributed Training" accesskey="n" rel="next">Next <img src="../../_static/images/chevron-right-orange.svg" class="next-page"></a>
+        <a href="../../betty/betty.engine.html" class="btn btn-neutral float-right" title="betty.engine" accesskey="n" rel="next">Next <img src="../../_static/images/chevron-right-orange.svg" class="next-page"></a>
       
       
-        <a href="intermediate.html" class="btn btn-neutral" title="Intermediate" accesskey="p" rel="prev"><img src="../../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+        <a href="intermediate_distributed.html" class="btn btn-neutral" title="Distributed Training" accesskey="p" rel="prev"><img src="../../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
       
     </div>
   
@@ -350,11 +348,8 @@ they can add their algorithm as follows:</p>
      
        <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
          <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-         <script src="../../_static/jquery.js"></script>
-         <script src="../../_static/underscore.js"></script>
          <script src="../../_static/doctools.js"></script>
-         <script src="../../_static/tabs.js"></script>
-         <script src="../../_static/design-tabs.js"></script>
+         <script src="../../_static/sphinx_highlight.js"></script>
          <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
      
 
@@ -395,7 +390,7 @@ they can add their algorithm as follows:</p>
     <div class="container-fluid">
       <div class="container">
         <div class="mobile-main-menu-header-container">
-          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty"></a>
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
           <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
         </div>
       </div>

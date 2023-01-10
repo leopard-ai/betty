@@ -15,7 +15,7 @@
   <!-- End Google Tag Manager -->
 
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,8 +40,6 @@
   <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -84,7 +82,7 @@
 <div class="container-fluid header-holder tutorials-header" id="header-holder">
   <div class="container">
     <div class="header-container">
-      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
       <!--  <img class="call-to-action-img" src="../_static/images/logo-lightning-icon.png"/> -->
       </a>
 
@@ -167,6 +165,8 @@
 <li class="toctree-l1"><a class="reference internal" href="betty.problems.html">betty.problems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="betty.hypergradient.html">betty.hypergradient</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">betty.optim</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#betty.optim.patch_optimizer"><code class="docutils literal notranslate"><span class="pre">patch_optimizer()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#betty.optim.patch_scheduler"><code class="docutils literal notranslate"><span class="pre">patch_scheduler()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#supported-optimizers">Supported optimizers</a></li>
 </ul>
 </li>
@@ -249,7 +249,7 @@
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
   <section id="betty-optim">
-<h1>betty.optim<a class="headerlink" href="#betty-optim" title="Permalink to this headline">¶</a></h1>
+<h1>betty.optim<a class="headerlink" href="#betty-optim" title="Permalink to this heading">¶</a></h1>
 <p>Iterative differentiation (ITD) differentiates through the optimization path, requiring
 tracking of the intermediate states of the parameter during optimization. However, native
 PyTorch optimizer overrides such intermediate states with the use of in-place operations for the
@@ -263,16 +263,16 @@ user-proviced PyTorch native optimizer/scheduler along with stateful modules.</p
 <span class="sig-prename descclassname"><span class="pre">betty.optim.</span></span><span class="sig-name descname"><span class="pre">patch_optimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/optim.html#patch_optimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.optim.patch_optimizer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Patch PyTorch’s native optimizer by replacing all in-place operations in its <code class="docutils literal notranslate"><span class="pre">step</span></code> method</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>optimizer</strong> (<a class="reference external" href="https://pytorch.org/docs/stable/_modules/torch/optim/optimizer.html#Optimizer">torch.nn.optim.Optimizer</a>) – User-provided PyTorch’s native optimizer</p></li>
 <li><p><strong>module</strong> (<a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html?highlight=module#torch.nn.Module">torch.nn.Module</a>) – User-provided PyTorch module that is being optimized by the <code class="docutils literal notranslate"><span class="pre">optimizer</span></code></p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Corresponding differentiable optimizer</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DifferentiableOptimizer</p>
 </dd>
 </dl>
@@ -283,16 +283,16 @@ user-proviced PyTorch native optimizer/scheduler along with stateful modules.</p
 <span class="sig-prename descclassname"><span class="pre">betty.optim.</span></span><span class="sig-name descname"><span class="pre">patch_scheduler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_scheduler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_optimizer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/optim.html#patch_scheduler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.optim.patch_scheduler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Patch the original learning rate scheduler to work with a patched differentiable optimizer.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>old_scheduler</strong> (<a class="reference external" href="https://pytorch.org/docs/stable/optim.html?highlight=lr_scheduler">torch.optim.lr_scheduler</a>) – User-provided PyTorch’s learning rate scheduler</p></li>
 <li><p><strong>new_optimizer</strong> (<em>DifferentiableOptimizer</em>) – Patched differentiable optimizer</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Patched learning rate scheduler</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><p><a class="reference external" href="https://pytorch.org/docs/stable/optim.html?highlight=lr_scheduler">torch.optim.lr_scheduler</a></p>
 </p>
 </dd>
@@ -300,7 +300,7 @@ user-proviced PyTorch native optimizer/scheduler along with stateful modules.</p
 </dd></dl>
 
 <section id="supported-optimizers">
-<h2>Supported optimizers<a class="headerlink" href="#supported-optimizers" title="Permalink to this headline">¶</a></h2>
+<h2>Supported optimizers<a class="headerlink" href="#supported-optimizers" title="Permalink to this heading">¶</a></h2>
 <p>Below is the list of differentiable optimizers supported by Betty.</p>
 <span class="target" id="module-betty.optim.sgd"></span><dl class="py class">
 <dt class="sig sig-object py" id="betty.optim.sgd.DifferentiableSGD">
@@ -373,7 +373,14 @@ All in-place operations are replaced.</p>
             <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
               <ul>
 <li><a class="reference internal" href="#">betty.optim</a><ul>
-<li><a class="reference internal" href="#supported-optimizers">Supported optimizers</a></li>
+<li><a class="reference internal" href="#betty.optim.patch_optimizer"><code class="docutils literal notranslate"><span class="pre">patch_optimizer()</span></code></a></li>
+<li><a class="reference internal" href="#betty.optim.patch_scheduler"><code class="docutils literal notranslate"><span class="pre">patch_scheduler()</span></code></a></li>
+<li><a class="reference internal" href="#supported-optimizers">Supported optimizers</a><ul>
+<li><a class="reference internal" href="#betty.optim.sgd.DifferentiableSGD"><code class="docutils literal notranslate"><span class="pre">DifferentiableSGD</span></code></a></li>
+<li><a class="reference internal" href="#betty.optim.adam.DifferentiableAdam"><code class="docutils literal notranslate"><span class="pre">DifferentiableAdam</span></code></a></li>
+<li><a class="reference internal" href="#betty.optim.adamw.DifferentiableAdamW"><code class="docutils literal notranslate"><span class="pre">DifferentiableAdamW</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -392,11 +399,8 @@ All in-place operations are replaced.</p>
      
        <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
          <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-         <script src="../_static/jquery.js"></script>
-         <script src="../_static/underscore.js"></script>
          <script src="../_static/doctools.js"></script>
-         <script src="../_static/tabs.js"></script>
-         <script src="../_static/design-tabs.js"></script>
+         <script src="../_static/sphinx_highlight.js"></script>
      
 
   
@@ -436,7 +440,7 @@ All in-place operations are replaced.</p>
     <div class="container-fluid">
       <div class="container">
         <div class="mobile-main-menu-header-container">
-          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty"></a>
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
           <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
         </div>
       </div>

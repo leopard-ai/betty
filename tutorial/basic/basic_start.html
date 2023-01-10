@@ -15,7 +15,7 @@
   <!-- End Google Tag Manager -->
 
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,8 +40,6 @@
   <!-- <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" /> -->
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/tabs.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -84,7 +82,7 @@
 <div class="container-fluid header-holder tutorials-header" id="header-holder">
   <div class="container">
     <div class="header-container">
-      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
       <!--  <img class="call-to-action-img" src="../../_static/images/logo-lightning-icon.png"/> -->
       </a>
 
@@ -254,7 +252,7 @@
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
   <section id="quick-start">
-<h1>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h1>
+<h1>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this heading">¶</a></h1>
 <p>Throughout our tutorials, we will use <strong>Data Reweighting for Long-Tailed Image
 Classification</strong> as our running example.  The basic context is that we aim to mitigate
 a class imbalance problem (or long-tailed distribution problem) by re-assigning
@@ -276,7 +274,7 @@ class.</p>
 <div class="line"><br /></div>
 </div>
 <section id="basic-setup">
-<h2>Basic setup<a class="headerlink" href="#basic-setup" title="Permalink to this headline">¶</a></h2>
+<h2>Basic setup<a class="headerlink" href="#basic-setup" title="Permalink to this heading">¶</a></h2>
 <p>Before diving into MLO, we do basic setup such as importing dependencies and
 constructing the imbalanced (or long-tailed) dataset. Here, we set the data imbalance
 factor to 100, meaning that the most common class has 50 times more data than the least
@@ -346,7 +344,7 @@ paste the following code.</p>
 </div>
 </section>
 <section id="problem">
-<h2>Problem<a class="headerlink" href="#problem" title="Permalink to this headline">¶</a></h2>
+<h2>Problem<a class="headerlink" href="#problem" title="Permalink to this heading">¶</a></h2>
 <p>In this example, we have a MLO program consisting of two problem levels: <em>upper</em> and
 <em>lower</em>. We respectively refer to these two problems as <strong>Reweight</strong> and <strong>Classifier</strong>,
 and create <code class="docutils literal notranslate"><span class="pre">Problem</span></code> classes for each of them.  As introduced in the <a class="reference internal" href="../../quickstart/concept_software.html"><span class="doc">Software
@@ -358,7 +356,7 @@ via the <code class="docutils literal notranslate"><span class="pre">training_st
 step-by-step guide for implementing each of these components in the <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class,
 for both the lower-level and upper-level problems.</p>
 <section id="lower-level-problem-classifier">
-<h3>Lower-level Problem (Classifier)<a class="headerlink" href="#lower-level-problem-classifier" title="Permalink to this headline">¶</a></h3>
+<h3>Lower-level Problem (Classifier)<a class="headerlink" href="#lower-level-problem-classifier" title="Permalink to this heading">¶</a></h3>
 <p>In our data reweighting example, the lower-level problem corresponds to the long-tailed
 MNIST image classification task. The data loader code is adopted from <a class="reference external" href="https://github.com/ShiYunyi/Meta-Weight-Net_Code-Optimization/blob/main/noisy_long_tail_CIFAR.py">here</a>.
 We can respectively define the module, optimizer, data loader, loss function, and
@@ -445,7 +443,7 @@ problem.</p>
 </div>
 </section>
 <section id="upper-level-problem-reweight">
-<h3>Upper-level Problem (Reweight)<a class="headerlink" href="#upper-level-problem-reweight" title="Permalink to this headline">¶</a></h3>
+<h3>Upper-level Problem (Reweight)<a class="headerlink" href="#upper-level-problem-reweight" title="Permalink to this heading">¶</a></h3>
 <p>While the lower-level problem is a classification problem, the upper-level problem is a
 reweighting problem. Specifically, <a class="reference external" href="https://arxiv.org/abs/1902.07379">Meta-Weight-Net (MWN)</a> proposes to reweight each data sample using an MLP
 with a single hidden layer, which takes a loss value as an input and outputs an
@@ -506,7 +504,7 @@ configurations for the <strong>Reweight</strong> problem.</p>
 </section>
 </section>
 <section id="engine">
-<h2>Engine<a class="headerlink" href="#engine" title="Permalink to this headline">¶</a></h2>
+<h2>Engine<a class="headerlink" href="#engine" title="Permalink to this heading">¶</a></h2>
 <p>Recalling the <a class="reference internal" href="../../quickstart/concept_software.html"><span class="doc">Software Design</span></a> chapter,
 the <code class="docutils literal notranslate"><span class="pre">Engine</span></code> class handles problem dependencies and execution of multilevel
 optimization. Let’s again take a step-by-step dive into each of these components.</p>
@@ -548,7 +546,7 @@ the <code class="docutils literal notranslate"><span class="pre">step</span></co
 </div>
 </section>
 <section id="results">
-<h2>Results<a class="headerlink" href="#results" title="Permalink to this headline">¶</a></h2>
+<h2>Results<a class="headerlink" href="#results" title="Permalink to this heading">¶</a></h2>
 <p>Once the training is done, we perform the validation procedure <em>manually</em> as below:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">transform</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span><span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">((</span><span class="mf">0.1307</span><span class="p">,),</span> <span class="p">(</span><span class="mf">0.3081</span><span class="p">,))])</span>
 <span class="n">valid_dataset</span> <span class="o">=</span> <span class="n">MNIST</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s2">&quot;./data&quot;</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">)</span>
@@ -590,10 +588,6 @@ If everything runs correctly, you should see something like below on your screen
 <p>Finally, we compare our data reweighting result with the baseline without reweighting
 in the below table:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"></th>
 <th class="head"><p>Test Accuracy</p></th>
@@ -684,11 +678,8 @@ data reweighting!</p>
      
        <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
          <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-         <script src="../../_static/jquery.js"></script>
-         <script src="../../_static/underscore.js"></script>
          <script src="../../_static/doctools.js"></script>
-         <script src="../../_static/tabs.js"></script>
-         <script src="../../_static/design-tabs.js"></script>
+         <script src="../../_static/sphinx_highlight.js"></script>
          <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
      
 
@@ -729,7 +720,7 @@ data reweighting!</p>
     <div class="container-fluid">
       <div class="container">
         <div class="mobile-main-menu-header-container">
-          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty"></a>
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
           <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
         </div>
       </div>

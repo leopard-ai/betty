@@ -15,7 +15,7 @@
   <!-- End Google Tag Manager -->
 
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,8 +40,6 @@
   <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -84,7 +82,7 @@
 <div class="container-fluid header-holder tutorials-header" id="header-holder">
   <div class="container">
     <div class="header-container">
-      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
       <!--  <img class="call-to-action-img" src="../_static/images/logo-lightning-icon.png"/> -->
       </a>
 
@@ -251,13 +249,13 @@
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
   <section id="betty-logging-package">
-<h1>betty.logging package<a class="headerlink" href="#betty-logging-package" title="Permalink to this headline">¶</a></h1>
+<h1>betty.logging package<a class="headerlink" href="#betty-logging-package" title="Permalink to this heading">¶</a></h1>
 <p>Betty provides an automatic logging feature to easily track train loss, validation accuracy, etc.
 Users can specify metrics to be logged through <code class="docutils literal notranslate"><span class="pre">train_step</span></code> method of <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class, and
 <code class="docutils literal notranslate"><span class="pre">validation</span></code> method of <code class="docutils literal notranslate"><span class="pre">Engine</span></code> class. Currently, Betty supports two types of loggers:
 <code class="docutils literal notranslate"><span class="pre">TensorBoardLogger</span></code> and <code class="docutils literal notranslate"><span class="pre">WandBLogger</span></code>.</p>
 <section id="module-betty.logging.logger_tensorboard">
-<span id="tensorboard-logger"></span><h2>Tensorboard Logger<a class="headerlink" href="#module-betty.logging.logger_tensorboard" title="Permalink to this headline">¶</a></h2>
+<span id="tensorboard-logger"></span><h2>Tensorboard Logger<a class="headerlink" href="#module-betty.logging.logger_tensorboard" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="betty.logging.logger_tensorboard.TensorBoardLogger">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">betty.logging.logger_tensorboard.</span></span><span class="sig-name descname"><span class="pre">TensorBoardLogger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/logging/logger_tensorboard.html#TensorBoardLogger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.logging.logger_tensorboard.TensorBoardLogger" title="Permalink to this definition">¶</a></dt>
@@ -272,7 +270,7 @@ Users can specify metrics to be logged through <code class="docutils literal not
 <span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stats</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/logging/logger_tensorboard.html#TensorBoardLogger.log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.logging.logger_tensorboard.TensorBoardLogger.log" title="Permalink to this definition">¶</a></dt>
 <dd><p>Log metrics/stats to PyTorch tensorboard.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stats</strong> (<em>dict</em>) – Dictoinary of values and their names to be recorded</p></li>
 <li><p><strong>tag</strong> (<em>str</em><em>, </em><em>optional</em>) – Data identifier</p></li>
@@ -286,7 +284,7 @@ Users can specify metrics to be logged through <code class="docutils literal not
 
 </section>
 <section id="module-betty.logging.logger_wandb">
-<span id="wandb-logger"></span><h2>WandB Logger<a class="headerlink" href="#module-betty.logging.logger_wandb" title="Permalink to this headline">¶</a></h2>
+<span id="wandb-logger"></span><h2>WandB Logger<a class="headerlink" href="#module-betty.logging.logger_wandb" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="betty.logging.logger_wandb.WandBLogger">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">betty.logging.logger_wandb.</span></span><span class="sig-name descname"><span class="pre">WandBLogger</span></span><a class="reference internal" href="../_modules/betty/logging/logger_wandb.html#WandBLogger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.logging.logger_wandb.WandBLogger" title="Permalink to this definition">¶</a></dt>
@@ -295,7 +293,7 @@ Users can specify metrics to be logged through <code class="docutils literal not
 <span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stats</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/logging/logger_wandb.html#WandBLogger.log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.logging.logger_wandb.WandBLogger.log" title="Permalink to this definition">¶</a></dt>
 <dd><p>Log metrics/stats to Weight &amp; Biases (wandb) logger</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stats</strong> (<em>dict</em>) – Dictoinary of values and their names to be recorded</p></li>
 <li><p><strong>tag</strong> (<em>str</em><em>, </em><em>optional</em>) – Data identifier</p></li>
@@ -309,7 +307,7 @@ Users can specify metrics to be logged through <code class="docutils literal not
 
 </section>
 <section id="module-betty.logging.logger_base">
-<span id="base-logger"></span><h2>Base Logger<a class="headerlink" href="#module-betty.logging.logger_base" title="Permalink to this headline">¶</a></h2>
+<span id="base-logger"></span><h2>Base Logger<a class="headerlink" href="#module-betty.logging.logger_base" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="betty.logging.logger_base.LoggerBase">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">betty.logging.logger_base.</span></span><span class="sig-name descname"><span class="pre">LoggerBase</span></span><a class="reference internal" href="../_modules/betty/logging/logger_base.html#LoggerBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.logging.logger_base.LoggerBase" title="Permalink to this definition">¶</a></dt>
@@ -318,7 +316,7 @@ Users can specify metrics to be logged through <code class="docutils literal not
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">debug</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/logging/logger_base.html#LoggerBase.debug"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.logging.logger_base.LoggerBase.debug" title="Permalink to this definition">¶</a></dt>
 <dd><p>Logs a message with level DEBUG on the global logger</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>msg</strong> (<em>str</em>) – debugg message</p>
 </dd>
 </dl>
@@ -329,7 +327,7 @@ Users can specify metrics to be logged through <code class="docutils literal not
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/logging/logger_base.html#LoggerBase.error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.logging.logger_base.LoggerBase.error" title="Permalink to this definition">¶</a></dt>
 <dd><p>Logs a message with level ERROR on the global logger</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>msg</strong> (<em>str</em>) – error message</p>
 </dd>
 </dl>
@@ -340,7 +338,7 @@ Users can specify metrics to be logged through <code class="docutils literal not
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/logging/logger_base.html#LoggerBase.info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.logging.logger_base.LoggerBase.info" title="Permalink to this definition">¶</a></dt>
 <dd><p>Logs a message with level INFO on the global logger</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>msg</strong> (<em>str</em>) – info message</p>
 </dd>
 </dl>
@@ -351,7 +349,7 @@ Users can specify metrics to be logged through <code class="docutils literal not
 <span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stats</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/logging/logger_base.html#LoggerBase.log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.logging.logger_base.LoggerBase.log" title="Permalink to this definition">¶</a></dt>
 <dd><p>Log metrics/stats to a visualization logger (e.g. tensorboard, wandb)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stats</strong> (<em>dict</em>) – Dictoinary of values and their names to be recorded</p></li>
 <li><p><strong>tag</strong> (<em>str</em><em>, </em><em>optional</em>) – Data identifier</p></li>
@@ -366,7 +364,7 @@ Users can specify metrics to be logged through <code class="docutils literal not
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">warning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/logging/logger_base.html#LoggerBase.warning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.logging.logger_base.LoggerBase.warning" title="Permalink to this definition">¶</a></dt>
 <dd><p>Logs a message with level WARNING on the global logger</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>msg</strong> (<em>str</em>) – warning message</p>
 </dd>
 </dl>
@@ -427,9 +425,33 @@ Users can specify metrics to be logged through <code class="docutils literal not
             <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
               <ul>
 <li><a class="reference internal" href="#">betty.logging package</a><ul>
-<li><a class="reference internal" href="#module-betty.logging.logger_tensorboard">Tensorboard Logger</a></li>
-<li><a class="reference internal" href="#module-betty.logging.logger_wandb">WandB Logger</a></li>
-<li><a class="reference internal" href="#module-betty.logging.logger_base">Base Logger</a></li>
+<li><a class="reference internal" href="#module-betty.logging.logger_tensorboard">Tensorboard Logger</a><ul>
+<li><a class="reference internal" href="#betty.logging.logger_tensorboard.TensorBoardLogger"><code class="docutils literal notranslate"><span class="pre">TensorBoardLogger</span></code></a><ul>
+<li><a class="reference internal" href="#betty.logging.logger_tensorboard.TensorBoardLogger.close"><code class="docutils literal notranslate"><span class="pre">TensorBoardLogger.close()</span></code></a></li>
+<li><a class="reference internal" href="#betty.logging.logger_tensorboard.TensorBoardLogger.log"><code class="docutils literal notranslate"><span class="pre">TensorBoardLogger.log()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-betty.logging.logger_wandb">WandB Logger</a><ul>
+<li><a class="reference internal" href="#betty.logging.logger_wandb.WandBLogger"><code class="docutils literal notranslate"><span class="pre">WandBLogger</span></code></a><ul>
+<li><a class="reference internal" href="#betty.logging.logger_wandb.WandBLogger.log"><code class="docutils literal notranslate"><span class="pre">WandBLogger.log()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-betty.logging.logger_base">Base Logger</a><ul>
+<li><a class="reference internal" href="#betty.logging.logger_base.LoggerBase"><code class="docutils literal notranslate"><span class="pre">LoggerBase</span></code></a><ul>
+<li><a class="reference internal" href="#betty.logging.logger_base.LoggerBase.debug"><code class="docutils literal notranslate"><span class="pre">LoggerBase.debug()</span></code></a></li>
+<li><a class="reference internal" href="#betty.logging.logger_base.LoggerBase.error"><code class="docutils literal notranslate"><span class="pre">LoggerBase.error()</span></code></a></li>
+<li><a class="reference internal" href="#betty.logging.logger_base.LoggerBase.info"><code class="docutils literal notranslate"><span class="pre">LoggerBase.info()</span></code></a></li>
+<li><a class="reference internal" href="#betty.logging.logger_base.LoggerBase.log"><code class="docutils literal notranslate"><span class="pre">LoggerBase.log()</span></code></a></li>
+<li><a class="reference internal" href="#betty.logging.logger_base.LoggerBase.warning"><code class="docutils literal notranslate"><span class="pre">LoggerBase.warning()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#betty.logging.logger_base.get_logger"><code class="docutils literal notranslate"><span class="pre">get_logger()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -448,11 +470,8 @@ Users can specify metrics to be logged through <code class="docutils literal not
      
        <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
          <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-         <script src="../_static/jquery.js"></script>
-         <script src="../_static/underscore.js"></script>
          <script src="../_static/doctools.js"></script>
-         <script src="../_static/tabs.js"></script>
-         <script src="../_static/design-tabs.js"></script>
+         <script src="../_static/sphinx_highlight.js"></script>
      
 
   
@@ -492,7 +511,7 @@ Users can specify metrics to be logged through <code class="docutils literal not
     <div class="container-fluid">
       <div class="container">
         <div class="mobile-main-menu-header-container">
-          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty"></a>
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
           <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
         </div>
       </div>

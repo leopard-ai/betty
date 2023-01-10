@@ -15,7 +15,7 @@
   <!-- End Google Tag Manager -->
 
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,8 +40,6 @@
   <!-- <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" /> -->
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/tabs.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -84,7 +82,7 @@
 <div class="container-fluid header-holder tutorials-header" id="header-holder">
   <div class="container">
     <div class="header-container">
-      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
       <!--  <img class="call-to-action-img" src="../../_static/images/logo-lightning-icon.png"/> -->
       </a>
 
@@ -254,7 +252,7 @@
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
   <section id="memory-optimization">
-<h1>Memory Optimization<a class="headerlink" href="#memory-optimization" title="Permalink to this headline">¶</a></h1>
+<h1>Memory Optimization<a class="headerlink" href="#memory-optimization" title="Permalink to this heading">¶</a></h1>
 <p>As MLO involves multiple optimization problems, it tends to use more GPU memory than
 traditional single-level optimization problems. Given the recent trend of large models
 (e.g., Transformers, BERT, GPT), Betty strives to support large-scale MLO and
@@ -269,7 +267,7 @@ meta-learning by implementing various memory optimization techniques.</p>
 <div class="line"><br /></div>
 </div>
 <section id="setup">
-<h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
+<h2>Setup<a class="headerlink" href="#setup" title="Permalink to this heading">¶</a></h2>
 <p>To better analyze the effects of memory optimization, we scale up our dataset and
 classifier network (from our data reweighting example in <a class="reference internal" href="basic_start.html"><span class="doc">Quick Start</span></a>) to CIFAR10
 and ResNet50. As this is not directly relevant to this tutorial, users can copy and
@@ -416,7 +414,7 @@ paste code from the collapsable code snippets below.</p>
 </div>
 </section>
 <section id="gradient-accumulation">
-<h2>Gradient Accumulation<a class="headerlink" href="#gradient-accumulation" title="Permalink to this headline">¶</a></h2>
+<h2>Gradient Accumulation<a class="headerlink" href="#gradient-accumulation" title="Permalink to this heading">¶</a></h2>
 <p>Gradient accumulation is an effective way to reduce the memory of intermediate states by
 accumulating gradients from <em>multiple small</em> mini-batches rather than calculating the
 gradient of <em>one large</em> mini-batch. In Betty, gradient accumulation can be enabled for
@@ -429,7 +427,7 @@ gradient of <em>one large</em> mini-batch. In Betty, gradient accumulation can b
 </div>
 </section>
 <section id="fp16-training">
-<h2>FP16 Training<a class="headerlink" href="#fp16-training" title="Permalink to this headline">¶</a></h2>
+<h2>FP16 Training<a class="headerlink" href="#fp16-training" title="Permalink to this heading">¶</a></h2>
 <p>FP16 (or half-precision) training replaces some of the full-precision operations (e.g.
 linear) with half-precision operations at the cost of (potential) training instability.
 In Betty, users can easily enable FP16 training for <em>each level</em> problem via <code class="docutils literal notranslate"><span class="pre">Config</span></code>
@@ -441,28 +439,11 @@ as:</p>
 <div class="line"><br /></div>
 </div>
 </section>
-<section id="non-distributed-data-parallel-training">
-<h2>(Non-distributed) Data-parallel training<a class="headerlink" href="#non-distributed-data-parallel-training" title="Permalink to this headline">¶</a></h2>
-<p>Data-parallel training splits large batches into several small batches across multiple
-GPUs and thereby reduces the memory footprint for intermediate states.  While
-distributed data-parallel training normally achieves much better training speed, Betty
-currently only supports non-distributed data-parallel training via <code class="docutils literal notranslate"><span class="pre">EngineConfig</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">engine_config</span> <span class="o">=</span> <span class="n">EngineConfig</span><span class="p">(</span><span class="n">train_iters</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">valid_step</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">distributed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="line-block">
-<div class="line"><br /></div>
-</div>
-</section>
 <section id="memory-optimization-results">
-<h2>Memory optimization results<a class="headerlink" href="#memory-optimization-results" title="Permalink to this headline">¶</a></h2>
+<h2>Memory optimization results<a class="headerlink" href="#memory-optimization-results" title="Permalink to this heading">¶</a></h2>
 <p>We perform an ablation study to analyze how each technique affects GPU memroy usage.
 The result is shown in the table below.</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"></th>
 <th class="head"><p>Memory</p></th>
@@ -474,9 +455,6 @@ The result is shown in the table below.</p>
 </tr>
 <tr class="row-odd"><td><p>+FP16</p></td>
 <td><p>4397MiB</p></td>
-</tr>
-<tr class="row-even"><td><p>+Distributed</p></td>
-<td><p>3185/3077MiB</p></td>
 </tr>
 </tbody>
 </table>
@@ -531,7 +509,6 @@ The result is shown in the table below.</p>
 <li><a class="reference internal" href="#setup">Setup</a></li>
 <li><a class="reference internal" href="#gradient-accumulation">Gradient Accumulation</a></li>
 <li><a class="reference internal" href="#fp16-training">FP16 Training</a></li>
-<li><a class="reference internal" href="#non-distributed-data-parallel-training">(Non-distributed) Data-parallel training</a></li>
 <li><a class="reference internal" href="#memory-optimization-results">Memory optimization results</a></li>
 </ul>
 </li>
@@ -551,11 +528,8 @@ The result is shown in the table below.</p>
      
        <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
          <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-         <script src="../../_static/jquery.js"></script>
-         <script src="../../_static/underscore.js"></script>
          <script src="../../_static/doctools.js"></script>
-         <script src="../../_static/tabs.js"></script>
-         <script src="../../_static/design-tabs.js"></script>
+         <script src="../../_static/sphinx_highlight.js"></script>
      
 
   
@@ -595,7 +569,7 @@ The result is shown in the table below.</p>
     <div class="container-fluid">
       <div class="container">
         <div class="mobile-main-menu-header-container">
-          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty"></a>
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
           <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
         </div>
       </div>

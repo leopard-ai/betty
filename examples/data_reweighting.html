@@ -15,7 +15,7 @@
   <!-- End Google Tag Manager -->
 
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,8 +40,6 @@
   <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -84,7 +82,7 @@
 <div class="container-fluid header-holder tutorials-header" id="header-holder">
   <div class="container">
     <div class="header-container">
-      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
       <!--  <img class="call-to-action-img" src="../_static/images/logo-lightning-icon.png"/> -->
       </a>
 
@@ -254,9 +252,9 @@
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
   <section id="data-reweighting">
-<h1>Data Reweighting<a class="headerlink" href="#data-reweighting" title="Permalink to this headline">¶</a></h1>
+<h1>Data Reweighting<a class="headerlink" href="#data-reweighting" title="Permalink to this heading">¶</a></h1>
 <section id="introduction">
-<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h2>
 <p>Here we re-implement the data reweighting algorithm from
 <a class="reference external" href="https://arxiv.org/abs/1902.07379">Meta-Weight-Net: Learning an Explicit Mapping For Sample Weighting</a>,
 which is a two level MLO program. The first level or lower level
@@ -290,7 +288,7 @@ level through a <code class="docutils literal notranslate"><span class="pre">'u2
 first level through a <code class="docutils literal notranslate"><span class="pre">'l2u'</span></code> (lower to upper) dependency.</p>
 </section>
 <section id="course-of-action">
-<h2>Course of Action<a class="headerlink" href="#course-of-action" title="Permalink to this headline">¶</a></h2>
+<h2>Course of Action<a class="headerlink" href="#course-of-action" title="Permalink to this heading">¶</a></h2>
 <p>In order to implement the data reweighting algorithm we will go through the following pipeline,</p>
 <ol class="arabic simple">
 <li><p><strong>Preparing Data:</strong> Prepare the data that will be used for training.</p></li>
@@ -299,7 +297,7 @@ first level through a <code class="docutils literal notranslate"><span class="pr
 </ol>
 </section>
 <section id="preparing-data">
-<h2>Preparing Data<a class="headerlink" href="#preparing-data" title="Permalink to this headline">¶</a></h2>
+<h2>Preparing Data<a class="headerlink" href="#preparing-data" title="Permalink to this heading">¶</a></h2>
 <p>Here we prepare the data that will be used for training the models in the different
 levels of the algorithm. We will require three different data sets. The first is
 <code class="docutils literal notranslate"><span class="pre">train_dataloader</span></code> which will be used in the first level. The second is
@@ -309,14 +307,14 @@ be prepared as given
 <a class="reference external" href="https://github.com/sangkeun00/betty/blob/main/examples/learning_to_reweight/data.py">here</a>.</p>
 </section>
 <section id="designing-models">
-<h2>Designing Models<a class="headerlink" href="#designing-models" title="Permalink to this headline">¶</a></h2>
+<h2>Designing Models<a class="headerlink" href="#designing-models" title="Permalink to this heading">¶</a></h2>
 <p>Here we design the models used in the levels. We will have to prepare one model
 each for our two levels. The first level has the <code class="docutils literal notranslate"><span class="pre">ResNet32</span></code> model and the second
 level has the <code class="docutils literal notranslate"><span class="pre">MLP</span></code> model. Both of these models can be designed as given
 <a class="reference external" href="https://github.com/sangkeun00/betty/blob/main/examples/learning_to_reweight/model.py">here</a>.</p>
 </section>
 <section id="using-betty">
-<h2>Using Betty<a class="headerlink" href="#using-betty" title="Permalink to this headline">¶</a></h2>
+<h2>Using Betty<a class="headerlink" href="#using-betty" title="Permalink to this heading">¶</a></h2>
 <p>Now we will train our models using the data reweighting algorithm with the help
 of Betty. We first import the required libraries. The code blocks used
 below can be found
@@ -340,7 +338,7 @@ below can be found
 <li><p>Define the hierarchical problem structure using the <code class="docutils literal notranslate"><span class="pre">Engine</span></code> class.</p></li>
 </ol>
 <section id="defining-problem">
-<h3>Defining <code class="docutils literal notranslate"><span class="pre">Problem</span></code><a class="headerlink" href="#defining-problem" title="Permalink to this headline">¶</a></h3>
+<h3>Defining <code class="docutils literal notranslate"><span class="pre">Problem</span></code><a class="headerlink" href="#defining-problem" title="Permalink to this heading">¶</a></h3>
 <p>Each level problem can be defined with seven components: (1) module, (2) optimizer,
 (3) data loader, (4) loss function, (5) problem configuration, (6) name, and
 (7) other optional components (e.g. learning rate scheduler). The loss function
@@ -477,7 +475,7 @@ objects which call their constructors.</p>
 our <code class="docutils literal notranslate"><span class="pre">Engine</span></code> class.</p>
 </section>
 <section id="defining-engine">
-<h3>Defining <code class="docutils literal notranslate"><span class="pre">Engine</span></code><a class="headerlink" href="#defining-engine" title="Permalink to this headline">¶</a></h3>
+<h3>Defining <code class="docutils literal notranslate"><span class="pre">Engine</span></code><a class="headerlink" href="#defining-engine" title="Permalink to this heading">¶</a></h3>
 <p>The Engine class handles the hierarchical dependencies between problems. In MLO, there
 are two types of dependencies: upper-to-lower <code class="docutils literal notranslate"><span class="pre">'u2l'</span></code> and lower-to-upper <code class="docutils literal notranslate"><span class="pre">'l2u'</span></code>.
 Both types of dependencies can be defined with Python dictionary, where the key is the
@@ -556,7 +554,7 @@ will start the program.</p>
 </section>
 </section>
 <section id="conclusion">
-<h2>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this headline">¶</a></h2>
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this heading">¶</a></h2>
 <p>Once we define all optimization problems and the hierarchical dependencies between the
 problems with, respectively, the Problem class and the Engine class, all complicated
 internal mechanism of MLO such as gradient calculation and optimization execution order
@@ -636,11 +634,8 @@ are handled by Betty.</p>
      
        <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
          <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-         <script src="../_static/jquery.js"></script>
-         <script src="../_static/underscore.js"></script>
          <script src="../_static/doctools.js"></script>
-         <script src="../_static/tabs.js"></script>
-         <script src="../_static/design-tabs.js"></script>
+         <script src="../_static/sphinx_highlight.js"></script>
          <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
      
 
@@ -681,7 +676,7 @@ are handled by Betty.</p>
     <div class="container-fluid">
       <div class="container">
         <div class="mobile-main-menu-header-container">
-          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty"></a>
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
           <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
         </div>
       </div>

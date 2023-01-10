@@ -15,7 +15,7 @@
   <!-- End Google Tag Manager -->
 
   <meta charset="utf-8">
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,8 +40,6 @@
   <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/tabs.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -84,7 +82,7 @@
 <div class="container-fluid header-holder tutorials-header" id="header-holder">
   <div class="container">
     <div class="header-container">
-      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
       <!--  <img class="call-to-action-img" src="../_static/images/logo-lightning-icon.png"/> -->
       </a>
 
@@ -252,33 +250,33 @@
              <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
               
   <section id="betty-hypergradient">
-<h1>betty.hypergradient<a class="headerlink" href="#betty-hypergradient" title="Permalink to this headline">¶</a></h1>
+<h1>betty.hypergradient<a class="headerlink" href="#betty-hypergradient" title="Permalink to this heading">¶</a></h1>
 <p>Unlike traditional automatic differentiation techniques that calculate analytic Jacobian for each
 operation, multilevel optimization requires <em>approximating</em> best-response Jacobian for each level
 optimization problem. Below is the list of approximation techniques that are supported by Betty.</p>
 <section id="module-betty.hypergradient.darts">
-<span id="finite-difference"></span><h2>finite difference<a class="headerlink" href="#module-betty.hypergradient.darts" title="Permalink to this headline">¶</a></h2>
+<span id="finite-difference"></span><h2>finite difference<a class="headerlink" href="#module-betty.hypergradient.darts" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="betty.hypergradient.darts.darts">
-<span class="sig-prename descclassname"><span class="pre">betty.hypergradient.darts.</span></span><span class="sig-name descname"><span class="pre">darts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/hypergradient/darts.html#darts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.hypergradient.darts.darts" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">betty.hypergradient.darts.</span></span><span class="sig-name descname"><span class="pre">darts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sync</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/hypergradient/darts.html#darts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.hypergradient.darts.darts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Approximate the matrix-vector multiplication with the best response Jacobian by the
 finite difference method. More specifically, we modified the finite difference method proposed
 in <a class="reference external" href="https://arxiv.org/pdf/1806.09055.pdf">DARTS: Differentiable Architecture Search</a> by
 re-interpreting it from the implicit differentiation perspective. Empirically, this method
 achieves better memory efficiency, training wall time, and test accuracy that other methods.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>vector</strong> (<em>Sequence of Tensor</em>) – Vector with which matrix-vector multiplication with best-response Jacobian (matrix) would
+<li><p><strong>vector</strong> (<em>Sequence</em><em> of </em><em>Tensor</em>) – Vector with which matrix-vector multiplication with best-response Jacobian (matrix) would
 be performed.</p></li>
 <li><p><strong>curr</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – A current level problem</p></li>
 <li><p><strong>prev</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – A directly lower-level problem to the current problem</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>(Intermediate) gradient</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Sequence of Tensor</p>
 </dd>
 </dl>
@@ -286,28 +284,28 @@ be performed.</p></li>
 
 </section>
 <section id="module-betty.hypergradient.neumann">
-<span id="neumann-series"></span><h2>neumann series<a class="headerlink" href="#module-betty.hypergradient.neumann" title="Permalink to this headline">¶</a></h2>
+<span id="neumann-series"></span><h2>neumann series<a class="headerlink" href="#module-betty.hypergradient.neumann" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="betty.hypergradient.neumann.neumann">
-<span class="sig-prename descclassname"><span class="pre">betty.hypergradient.neumann.</span></span><span class="sig-name descname"><span class="pre">neumann</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/hypergradient/neumann.html#neumann"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.hypergradient.neumann.neumann" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">betty.hypergradient.neumann.</span></span><span class="sig-name descname"><span class="pre">neumann</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sync</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/hypergradient/neumann.html#neumann"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.hypergradient.neumann.neumann" title="Permalink to this definition">¶</a></dt>
 <dd><p>Approximate the matrix-vector multiplication with the best response Jacobian by the
 Neumann Series as proposed in
 <a class="reference external" href="https://arxiv.org/abs/1911.02590">Optimizing Millions of Hyperparameters by Implicit Differentiation</a> based on implicit function theorem (IFT). Users may
 specify learning rate (<code class="docutils literal notranslate"><span class="pre">neumann_alpha</span></code>) and unrolling steps (<code class="docutils literal notranslate"><span class="pre">neumann_iterations</span></code>) in
 <code class="docutils literal notranslate"><span class="pre">Config</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>vector</strong> (<em>Sequence of Tensor</em>) – Vector with which matrix-vector multiplication with best-response Jacobian (matrix) would
+<li><p><strong>vector</strong> (<em>Sequence</em><em> of </em><em>Tensor</em>) – Vector with which matrix-vector multiplication with best-response Jacobian (matrix) would
 be performed.</p></li>
 <li><p><strong>curr</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – A current level problem</p></li>
 <li><p><strong>prev</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – A directly lower-level problem to the current problem</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>(Intermediate) gradient</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Sequence of Tensor</p>
 </dd>
 </dl>
@@ -315,26 +313,26 @@ be performed.</p></li>
 
 </section>
 <section id="module-betty.hypergradient.cg">
-<span id="conjugate-gradient"></span><h2>conjugate gradient<a class="headerlink" href="#module-betty.hypergradient.cg" title="Permalink to this headline">¶</a></h2>
+<span id="conjugate-gradient"></span><h2>conjugate gradient<a class="headerlink" href="#module-betty.hypergradient.cg" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="betty.hypergradient.cg.cg">
-<span class="sig-prename descclassname"><span class="pre">betty.hypergradient.cg.</span></span><span class="sig-name descname"><span class="pre">cg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/hypergradient/cg.html#cg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.hypergradient.cg.cg" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">betty.hypergradient.cg.</span></span><span class="sig-name descname"><span class="pre">cg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sync</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/hypergradient/cg.html#cg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.hypergradient.cg.cg" title="Permalink to this definition">¶</a></dt>
 <dd><p>Approximate the matrix-vector multiplication with the best response Jacobian by the
 (PyTorch’s) default autograd method. Users may need to specify learning rate (<code class="docutils literal notranslate"><span class="pre">cg_alpha</span></code>) and
 conjugate gradient descent iterations (<code class="docutils literal notranslate"><span class="pre">cg_iterations</span></code>) in <code class="docutils literal notranslate"><span class="pre">Config</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>vector</strong> (<em>Sequence of Tensor</em>) – Vector with which matrix-vector multiplication with best-response Jacobian (matrix) would
+<li><p><strong>vector</strong> (<em>Sequence</em><em> of </em><em>Tensor</em>) – Vector with which matrix-vector multiplication with best-response Jacobian (matrix) would
 be performed.</p></li>
 <li><p><strong>curr</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – A current level problem</p></li>
 <li><p><strong>prev</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – A directly lower-level problem to the current problem</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>(Intermediate) gradient</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Sequence of Tensor</p>
 </dd>
 </dl>
@@ -342,7 +340,7 @@ be performed.</p></li>
 
 </section>
 <section id="module-betty.hypergradient.reinforce">
-<span id="reinforce"></span><h2>reinforce<a class="headerlink" href="#module-betty.hypergradient.reinforce" title="Permalink to this headline">¶</a></h2>
+<span id="reinforce"></span><h2>reinforce<a class="headerlink" href="#module-betty.hypergradient.reinforce" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="betty.hypergradient.reinforce.reinforce">
 <span class="sig-prename descclassname"><span class="pre">betty.hypergradient.reinforce.</span></span><span class="sig-name descname"><span class="pre">reinforce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/hypergradient/reinforce.html#reinforce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.hypergradient.reinforce.reinforce" title="Permalink to this definition">¶</a></dt>
@@ -351,18 +349,18 @@ REINFORCE method. The use of REINFORCE algorithm allows users to differentiate t
 optimization with non-differentiable processes such as sampling. This method has not been
 completely implemented yet.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>vector</strong> (<em>Sequence of Tensor</em>) – Vector with which matrix-vector multiplication with best-response Jacobian (matrix) would
+<li><p><strong>vector</strong> (<em>Sequence</em><em> of </em><em>Tensor</em>) – Vector with which matrix-vector multiplication with best-response Jacobian (matrix) would
 be performed.</p></li>
 <li><p><strong>curr</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – A current level problem</p></li>
 <li><p><strong>prev</strong> (<a class="reference internal" href="betty.problems.html#betty.problems.problem.Problem" title="betty.problems.problem.Problem"><em>Problem</em></a>) – A directly lower-level problem to the current problem</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>(Intermediate) gradient</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Sequence of Tensor</p>
 </dd>
 </dl>
@@ -415,10 +413,22 @@ be performed.</p></li>
             <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
               <ul>
 <li><a class="reference internal" href="#">betty.hypergradient</a><ul>
-<li><a class="reference internal" href="#module-betty.hypergradient.darts">finite difference</a></li>
-<li><a class="reference internal" href="#module-betty.hypergradient.neumann">neumann series</a></li>
-<li><a class="reference internal" href="#module-betty.hypergradient.cg">conjugate gradient</a></li>
-<li><a class="reference internal" href="#module-betty.hypergradient.reinforce">reinforce</a></li>
+<li><a class="reference internal" href="#module-betty.hypergradient.darts">finite difference</a><ul>
+<li><a class="reference internal" href="#betty.hypergradient.darts.darts"><code class="docutils literal notranslate"><span class="pre">darts()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-betty.hypergradient.neumann">neumann series</a><ul>
+<li><a class="reference internal" href="#betty.hypergradient.neumann.neumann"><code class="docutils literal notranslate"><span class="pre">neumann()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-betty.hypergradient.cg">conjugate gradient</a><ul>
+<li><a class="reference internal" href="#betty.hypergradient.cg.cg"><code class="docutils literal notranslate"><span class="pre">cg()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-betty.hypergradient.reinforce">reinforce</a><ul>
+<li><a class="reference internal" href="#betty.hypergradient.reinforce.reinforce"><code class="docutils literal notranslate"><span class="pre">reinforce()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -437,11 +447,8 @@ be performed.</p></li>
      
        <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
          <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-         <script src="../_static/jquery.js"></script>
-         <script src="../_static/underscore.js"></script>
          <script src="../_static/doctools.js"></script>
-         <script src="../_static/tabs.js"></script>
-         <script src="../_static/design-tabs.js"></script>
+         <script src="../_static/sphinx_highlight.js"></script>
      
 
   
@@ -481,7 +488,7 @@ be performed.</p></li>
     <div class="container-fluid">
       <div class="container">
         <div class="mobile-main-menu-header-container">
-          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="Betty"></a>
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
           <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
         </div>
       </div>
