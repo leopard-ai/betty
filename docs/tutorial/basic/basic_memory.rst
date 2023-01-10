@@ -207,20 +207,6 @@ as:
 
 |
 
-(Non-distributed) Data-parallel training
-----------------------------------------
-
-Data-parallel training splits large batches into several small batches across multiple
-GPUs and thereby reduces the memory footprint for intermediate states.  While
-distributed data-parallel training normally achieves much better training speed, Betty
-currently only supports non-distributed data-parallel training via ``EngineConfig``:
-
-.. code:: python
-
-    engine_config = EngineConfig(train_iters=10000, valid_step=100, distributed=True)
-
-|
-
 Memory optimization results
 ---------------------------
 We perform an ablation study to analyze how each technique affects GPU memroy usage.
@@ -232,8 +218,6 @@ The result is shown in the table below.
 | Baseline     | 6817MiB      |
 +--------------+--------------+
 | +FP16        | 4397MiB      |
-+--------------+--------------+
-| +Distributed | 3185/3077MiB |
 +--------------+--------------+
 
 For the distributed setting, we report two memory usages (one for each GPU).
