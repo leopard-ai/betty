@@ -42,17 +42,6 @@ torchrun --standalone --nnodes=1 --nproc_per_node=2 main.py --fp16 --strategy di
 torchrun --standalone --nnodes=1 --nproc_per_node=2 main.py --fp16 --strategy zero
 ```
 
-## Results
-We present the long-tailed CIFAR-10 image classification in the below table.
-|                       | Imbalanced factor 20 | GPU Memory |
-|-----------------------|:--------------------:|:----------:|
-| Baseline              |         68.91%       |   2250MiB  |
-| Single GPU            |       **75.56%**     | **2051MiB**|
-| + mixed-precision     |       **75.56%**     | **2051MiB**|
-| + distributed         |       **75.56%**     | **2051MiB**|
-| + zero                |       **75.56%**     | **2051MiB**|
-
-
 ## Acknowledgements
 We modified the data loading code from
 https://github.com/YJiangcm/SST-2-sentiment-analysis.
