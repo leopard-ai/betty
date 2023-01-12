@@ -25,7 +25,7 @@ pip install betty-ml
 ```
 
 ## Update
-We release Betty v0.2 with new distributed training support for meta-learning! Currently
+We release *Betty v0.2* with new distributed training support for meta-learning! Currently
 available features are:
 - Distributed Data Parallel [(DDP)](https://pytorch.org/tutorials/intermediate/ddp_tutorial.html)
 - ZeRO Redundancy Optimizer [(ZeRO)](https://pytorch.org/tutorials/recipes/zero_redundancy_optimizer.html)
@@ -34,7 +34,7 @@ available features are:
 You can now easily scale up meta-learning (or even meta-meta-learning) with one-liner change!
 
 - **Example**: [Meta-Weight-Net with RoBERTa](examples/bert_data_reweighting/)
-- **Docs**: [link](https://leopard-ai.github.io/betty/tutorial/intermediate/intermediate_distributed.html)
+- **Tutorial**: [link](https://leopard-ai.github.io/betty/tutorial/intermediate/intermediate_distributed.html)
 
 
 ## Introduction
