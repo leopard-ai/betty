@@ -5,3 +5,9 @@ This an unofficial code of [CVPR'2021](https://openaccess.thecvf.com/CVPR2021): 
 You can change the robustness metric using ```--loss_type``` and the model search ```--darts_type```:
 
 ```python dsrna_search.py```
+## Results
+We present the CIFAR-100 image classification results in the below table.
+|                      | Test Acc. | 
+|----------------------|-----------|
+| SANAS (original)     | 82.96%    | 
+| SANAS (ours, step=3) | 82.81%    | 
