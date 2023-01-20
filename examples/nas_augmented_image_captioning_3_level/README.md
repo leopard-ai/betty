@@ -5,3 +5,10 @@ This an unofficial code of ***"Image Understanding by Captioning with Differenti
 ## Architecture Search
 
 ```python train_search_IUC.py```
+
+## Results
+We present the MS-COCO image captioning results in the below table.
+|                    | BLEU-4    | CIDEr.     |
+|--------------------|-----------|------------|
+| IUC (original)     | 40.0.     | 131.1      |
+| IUC (ours, step=1) | 39.8.     | 131.1      |
