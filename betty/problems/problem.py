@@ -34,11 +34,13 @@ class Problem:
         optimizer=None,
         scheduler=None,
         train_data_loader=None,
+        extra_config=None,
         device=None,
     ):
         # basic configurations
         self._name = name
         self._config = config if config is not None else Config()
+        self.cfg = extra_config
 
         # device
         self.device = device

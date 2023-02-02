@@ -33,10 +33,11 @@ class IterativeProblem(Problem):
         optimizer=None,
         scheduler=None,
         train_data_loader=None,
+        extra_config=None,
         device=None,
     ):
         super().__init__(
-            name, config, module, optimizer, scheduler, train_data_loader, device
+            name, config, module, optimizer, scheduler, train_data_loader, extra_config, device
         )
         # functorch installation check
         if not HAS_FUNCTORCH:
