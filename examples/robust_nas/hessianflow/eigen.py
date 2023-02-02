@@ -72,7 +72,6 @@ def get_eigen_full_dataset(
         THv = [torch.zeros(p.size()).to(device) for p in params]
         counter = 0
         for inputs, targets in dataloader:
-
             if batch_size == None:
                 batch_size = targets.size(0)
 

@@ -8,7 +8,6 @@ import cv2
 
 
 def collate_fn(data):
-
     data.sort(key=lambda x: x[2], reverse=True)
 
     images, captions, lengths, info = zip(*data)
@@ -25,7 +24,6 @@ def collate_fn(data):
 
 class CaptionDataset(Dataset):
     def __init__(self, json_file, h5py_file, args, transform=None):
-
         # self.split = split
         # assert self.split in {"train", "val", "test", "pseudo"}
 
@@ -89,7 +87,6 @@ def get_loader(
     args=None,
     debug=False,
 ):
-
     coco = CaptionDataset(
         json_file=json_file, h5py_file=h5_file, transform=transform, args=args
     )
@@ -145,7 +142,6 @@ def get_loader(
 
 
 def get_pseudo_loader(model, input_external):
-
     # coco_json = json.load(open(json_file,'r'))
     # ix_2_word = coco_json['ix_to_word']
     features = model.encode(input_external)

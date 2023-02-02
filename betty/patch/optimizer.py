@@ -9,7 +9,7 @@ def patch_optimizer(optimizer, params, is_zero):
             params=params,
             optimizer_class=optimizer.__class__,
             parameters_as_bucket_view=True,
-            **defaults
+            **defaults,
         )
     else:
         new_optimizer = optimizer.__class__(params, **defaults)

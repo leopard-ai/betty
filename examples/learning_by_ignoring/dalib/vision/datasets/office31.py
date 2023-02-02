@@ -141,5 +141,5 @@ class Office31(ImageList):
             Office31.CLASSES,
             data_list_file=data_list_file,
             domain_idx=domain_idx,
-            **kwargs
+            **kwargs,
         )

@@ -428,7 +428,7 @@ class DomainNet(ImageList):
         task: str,
         evaluate: Optional[bool] = False,
         download: Optional[float] = False,
-        **kwargs
+        **kwargs,
     ):
         assert task in self.image_list
         phase = "test" if evaluate else "train"

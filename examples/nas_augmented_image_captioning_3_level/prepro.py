@@ -52,7 +52,6 @@ import matplotlib.pyplot as plt
 
 
 def prepro_captions(imgs):
-
     # preprocess all the captions
     print("example processed tokens:")
     for i, img in enumerate(imgs):
@@ -187,7 +186,6 @@ def encode_captions(imgs, params, wtoi):
 
 
 def main(params):
-
     imgs = json.load(open(params["input_json"], "r"))
     seed(123)  # make reproducible
     shuffle(imgs)  # shuffle the order
@@ -255,7 +253,6 @@ def main(params):
     out["ix_to_word"] = itow  # encode the (1-indexed) vocab
     out["images"] = []
     for i, img in enumerate(imgs):
-
         jimg = {}
         jimg["split"] = img["split"]
         if "file_path" in img:
@@ -272,7 +269,6 @@ def main(params):
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
 
     # input json

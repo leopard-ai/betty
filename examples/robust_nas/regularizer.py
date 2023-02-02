@@ -283,7 +283,6 @@ class loss_curv:
         self.device = device
 
     def _find_z(self, inputs, alphas, targets, h):
-
         inputs.requires_grad_()
         outputs = self.net.eval()(inputs, alphas)
         # print(targets.size()[0])
@@ -310,7 +309,6 @@ class loss_curv:
         return z, norm_grad
 
     def regularizer(self, inputs, alphas, targets, h=3.0, lambda_=4):
-
         z, norm_grad = self._find_z(inputs, alphas, targets, h)
 
         inputs.requires_grad_()

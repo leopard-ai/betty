@@ -130,7 +130,6 @@ class DataPrecessForSentence(Dataset):
         )
 
     def trunate_and_pad(self, tokens_seq):
-
         # Concat '[CLS]' at the beginning
         tokens_seq = ["[CLS]"] + tokens_seq
         # Truncate sequences of which the lengths exceed the max_seq_len

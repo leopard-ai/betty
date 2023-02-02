@@ -70,7 +70,7 @@ class OfficeCaltech(DatasetFolder):
             os.path.join(root, self.directories[task]),
             default_loader,
             extensions=IMG_EXTENSIONS,
-            **kwargs
+            **kwargs,
         )
         self.classes = OfficeCaltech.classes
         self.class_to_idx = {

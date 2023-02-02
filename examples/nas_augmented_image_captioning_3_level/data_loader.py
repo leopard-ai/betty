@@ -176,7 +176,6 @@ def get_loader(
 
 
 def get_pseudo_loader(model, input_external, vocab):
-
     features = model.encode(input_external)
     # print(features.shape)
     # features = Variable(torch.tensor(np.random.randn(80,512)),requires_grad=False).float().cuda()

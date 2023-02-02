@@ -14,7 +14,6 @@ class DifferentiableAdamW(DifferentiableOptimizerBase):
 
     def step(self, params):
         for param_group, param_mapping in zip(self.param_groups, self.param_mappings):
-
             amsgrad = param_group["amsgrad"]
             beta1, beta2 = param_group["betas"]
 

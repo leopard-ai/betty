@@ -181,7 +181,6 @@ def create_exp_dir(path, scripts_to_save=None):
 def score_lang(
     preds, args, annfile_path="annotations/captions_val2014.json", cider_only=True
 ):
-
     ckpt = {"val_predictions": preds}
     json.dump(ckpt, open("coco-caption/ckpt.json", "w"))
     os.chdir("coco-caption")

@@ -299,7 +299,6 @@ class Inner2(ImplicitProblem):
         return self.module(input, alphas, captions, lengths)
 
     def training_step(self, batch):
-
         input_external, captions_external, lengths_external, infos_external = batch
         input_external = input_external.cuda()
         captions_external = captions_external.cuda(non_blocking=True)
@@ -434,7 +433,6 @@ class NASEngine(Engine):
         preds = []
         with torch.no_grad():
             for step, (input, caption, length, info) in enumerate(valid_queue):
-
                 input = input.cuda()
                 alphas = self.outer()
                 caption = caption.cuda()

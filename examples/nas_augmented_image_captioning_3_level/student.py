@@ -477,6 +477,7 @@ class celoss:
 
 # 	return torch.sum(- targets * F.log_softmax(logits+eps, -1).T, -1).mean()
 
+
 # https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/03-advanced/image_captioning/model.py
 class RNNDecoder(nn.Module):
     def __init__(

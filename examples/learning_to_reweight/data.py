@@ -41,7 +41,6 @@ def build_dataloader(
     corruption_ratio=0.0,
     batch_size=100,
 ):
-
     np.random.seed(seed)
     normalize = transforms.Normalize(
         mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],

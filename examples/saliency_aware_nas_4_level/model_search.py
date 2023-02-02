@@ -174,7 +174,6 @@ class Network(nn.Module):
         self.cells = nn.ModuleList()
         reduction_prev = False
         for i in range(layers):
-
             # for layer in the middle [1/3, 2/3], reduce via stride=2
             if i in [layers // 3, 2 * layers // 3]:
                 c_curr *= 2

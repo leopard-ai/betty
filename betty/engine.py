@@ -246,7 +246,6 @@ class Engine:
         # Parse upper-to-lower dependency
         for key, value_list in self.dependencies["u2l"].items():
             for value in value_list:
-
                 # find all paths from low to high for backpropagation
                 paths = self.find_paths(src=value, dst=key)
                 key.add_paths(paths)
@@ -254,7 +253,6 @@ class Engine:
         # Parse lower-to-upper dependency
         for key, value_list in self.dependencies["l2u"].items():
             for value in value_list:
-
                 # add value problem to parents of key problem for backpropgation
                 key.add_parent(value)
                 value.add_child(key)
