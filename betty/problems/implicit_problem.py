@@ -24,7 +24,14 @@ class ImplicitProblem(Problem):
         device=None,
     ):
         super().__init__(
-            name, config, module, optimizer, scheduler, train_data_loader, extra_config, device
+            name,
+            config,
+            module,
+            optimizer,
+            scheduler,
+            train_data_loader,
+            extra_config,
+            device,
         )
         self.module_state_dict_cache = None
         self.opitmizer_state_dict_cache = None

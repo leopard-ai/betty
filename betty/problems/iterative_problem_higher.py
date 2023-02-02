@@ -31,7 +31,14 @@ class HigherIterativeProblem(Problem):
         device=None,
     ):
         super().__init__(
-            name, config, module, optimizer, scheduler, train_data_loader, extra_config, device
+            name,
+            config,
+            module,
+            optimizer,
+            scheduler,
+            train_data_loader,
+            extra_config,
+            device,
         )
         # functorch installation check
         if not HAS_HIGHER:
