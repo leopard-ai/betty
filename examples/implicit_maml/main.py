@@ -205,10 +205,7 @@ parent = Outer(
     scheduler=parent_scheduler,
     config=parent_config,
 )
-children = [
-    Inner(name=f"inner_{i}", config=child_config)
-    for i in range(arg.task_num)
-]
+children = [Inner(name=f"inner_{i}", config=child_config) for i in range(arg.task_num)]
 env = MAMLEnv()
 problems = children + [parent]
 u2l = {parent: children}
