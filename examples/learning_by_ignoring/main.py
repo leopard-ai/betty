@@ -150,7 +150,7 @@ class Pretraining(ImplicitProblem):
         return train_source_loader
 
     def configure_module(self):
-        return build_model(num_classes=train_source_dataset.num_classes).to(device)
+        return build_model(num_classes=train_source_dataset.num_classes)
 
     def configure_optimizer(self):
         return build_optimizer(self.module, args)
@@ -202,7 +202,7 @@ class Finetuning(ImplicitProblem):
         return train_loader
 
     def configure_module(self):
-        return build_model(num_classes=test_target_dataset.num_classes).to(device)
+        return build_model(num_classes=test_target_dataset.num_classes)
 
     def configure_optimizer(self):
         return build_optimizer(self.module, args)
@@ -255,7 +255,7 @@ class Reweighting(ImplicitProblem):
         return valid_loader
 
     def configure_module(self):
-        return build_model(num_classes=1).to(device)
+        return build_model(num_classes=1)
 
     def configure_optimizer(self):
         return build_optimizer(self.module, args)
@@ -312,9 +312,9 @@ finetune_config = Config(type="darts", unroll_steps=1, allow_unused=False)
 pretrain_config = Config(type="darts", unroll_steps=1, allow_unused=False)
 engine_config = EngineConfig(valid_step=20, train_iters=1000, roll_back=False)
 
-reweight = Reweighting(name="reweight", config=reweight_config, device=device)
-finetune = Finetuning(name="finetune", config=finetune_config, device=device)
-pretrain = Pretraining(name="pretrain", config=pretrain_config, device=device)
+reweight = Reweighting(name="reweight", config=reweight_config)
+finetune = Finetuning(name="finetune", config=finetune_config)
+pretrain = Pretraining(name="pretrain", config=pretrain_config)
 if args.baseline:
     problems = [finetune, pretrain]
 else:

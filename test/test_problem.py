@@ -62,8 +62,6 @@ class Inner(ImplicitProblem):
 
 class ProblemTest(unittest.TestCase):
     def setUp(self):
-        device = "cpu"
-
         # data preparation
         w_gt = np.random.randn(20)
         x = np.random.randn(100, 20)
@@ -72,12 +70,12 @@ class ProblemTest(unittest.TestCase):
 
         x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.5)
         x_train, y_train = (
-            torch.from_numpy(x_train).to(device).float(),
-            torch.from_numpy(y_train).to(device).float(),
+            torch.from_numpy(x_train).float(),
+            torch.from_numpy(y_train).float(),
         )
         x_val, y_val = (
-            torch.from_numpy(x_val).to(device).float(),
-            torch.from_numpy(y_val).to(device).float(),
+            torch.from_numpy(x_val).float(),
+            torch.from_numpy(y_val).float(),
         )
 
         # data_loader
@@ -85,8 +83,8 @@ class ProblemTest(unittest.TestCase):
         self.valid_loader = [(x_val, y_val)]
 
         # module
-        self.train_module = ChildNet().to(device)
-        self.valid_module = ParentNet().to(device)
+        self.train_module = ChildNet()
+        self.valid_module = ParentNet()
 
         # optimizer
         self.train_optimizer = torch.optim.SGD(self.train_module.parameters(), lr=0.1)
@@ -105,7 +103,6 @@ class ProblemTest(unittest.TestCase):
             optimizer=self.valid_optimizer,
             train_data_loader=self.valid_loader,
             config=self.valid_config,
-            device=device,
         )
         self.inner = Inner(
             name="inner",
@@ -113,7 +110,6 @@ class ProblemTest(unittest.TestCase):
             optimizer=self.train_optimizer,
             train_data_loader=self.train_loader,
             config=self.train_config,
-            device=device,
         )
 
     def test_add_child(self):

@@ -35,7 +35,6 @@ class Problem:
         scheduler=None,
         train_data_loader=None,
         extra_config=None,
-        device=None,
     ):
         # basic configurations
         self._name = name
@@ -43,7 +42,7 @@ class Problem:
         self.cfg = extra_config
 
         # device
-        self.device = device
+        self.device = None
 
         # distributed
         self._strategy = None
@@ -640,6 +639,10 @@ class Problem:
             self.device = torch.device("cuda", self._local_rank)
         elif self._strategy == "accelerate":
             self.device = self.accelerator.device
+        elif self._strategy == "cpu":
+            self.device = "cpu"
+        elif self._strategy == "gpu":
+            self.device = "cuda"
         else:
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
 

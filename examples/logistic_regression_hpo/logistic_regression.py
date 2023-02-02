@@ -8,8 +8,6 @@ from betty.engine import Engine
 from betty.configs import Config, EngineConfig
 from betty.problems import ImplicitProblem, HigherIterativeProblem
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-
 # hyperparameters
 DATA_NUM = 1000
 DATA_DIM = 20
@@ -22,12 +20,12 @@ y = (y > 0).astype(float)
 
 x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.5)
 x_train, y_train = (
-    torch.from_numpy(x_train).to(device).float(),
-    torch.from_numpy(y_train).to(device).float(),
+    torch.from_numpy(x_train).float(),
+    torch.from_numpy(y_train).float(),
 )
 x_val, y_val = (
-    torch.from_numpy(x_val).to(device).float(),
-    torch.from_numpy(y_val).to(device).float(),
+    torch.from_numpy(x_val).float(),
+    torch.from_numpy(y_val).float(),
 )
 
 data = {"train": (x_train, y_train), "valid": (x_val, y_val)}
@@ -72,7 +70,7 @@ class Parent(ImplicitProblem):
         return make_data_loader(x_val, y_val)
 
     def configure_module(self):
-        return ParentNet().to(device)
+        return ParentNet()
 
     def configure_optimizer(self):
         return torch.optim.SGD(self.module.parameters(), lr=1, momentum=0.9)
@@ -99,7 +97,7 @@ class Child(HigherIterativeProblem):
         return make_data_loader(x_train, y_train)
 
     def configure_module(self):
-        return ChildNet().to(device)
+        return ChildNet()
 
     def configure_optimizer(self):
         return torch.optim.SGD(self.module.parameters(), lr=0.1)
@@ -112,8 +110,8 @@ engine_config = EngineConfig(train_iters=10000, logger_type="none")
 parent_config = Config(log_step=1, first_order=False, retain_graph=True)
 child_config = Config(unroll_steps=100)
 
-parent = Parent(name="outer", config=parent_config, device=device)
-child = Child(name="inner", config=child_config, device=device)
+parent = Parent(name="outer", config=parent_config)
+child = Child(name="inner", config=child_config)
 
 problems = [parent, child]
 u2l = {parent: [child]}

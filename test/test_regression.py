@@ -62,9 +62,6 @@ class Inner(ImplicitProblem):
 
 class RegressionTest(unittest.TestCase):
     def setUp(self):
-        device = "cpu"
-        self.device = device
-
         # data preparation
         w_gt = np.random.randn(20)
         x = np.random.randn(1000, 20)
@@ -73,12 +70,12 @@ class RegressionTest(unittest.TestCase):
 
         x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.5)
         x_train, y_train = (
-            torch.from_numpy(x_train).to(self.device).float(),
-            torch.from_numpy(y_train).to(self.device).float(),
+            torch.from_numpy(x_train).float(),
+            torch.from_numpy(y_train).float(),
         )
         x_val, y_val = (
-            torch.from_numpy(x_val).to(self.device).float(),
-            torch.from_numpy(y_val).to(self.device).float(),
+            torch.from_numpy(x_val).float(),
+            torch.from_numpy(y_val).float(),
         )
 
         # data_loader
@@ -86,7 +83,7 @@ class RegressionTest(unittest.TestCase):
         self.valid_loader = [(x_val, y_val)]
 
         # module
-        self.valid_module = ParentNet().to(device)
+        self.valid_module = ParentNet()
 
         # optimizer
         self.valid_optimizer = torch.optim.SGD(
@@ -103,12 +100,11 @@ class RegressionTest(unittest.TestCase):
             optimizer=self.valid_optimizer,
             train_data_loader=self.valid_loader,
             config=self.valid_config,
-            device=device,
         )
 
     def test_darts(self):
         self.train_config = Config(unroll_steps=100)
-        self.train_module = ChildNet().to(self.device)
+        self.train_module = ChildNet()
         self.train_optimizer = torch.optim.SGD(self.train_module.parameters(), lr=0.1)
         self.inner = Inner(
             name="inner",
@@ -116,7 +112,6 @@ class RegressionTest(unittest.TestCase):
             optimizer=self.train_optimizer,
             train_data_loader=self.train_loader,
             config=self.train_config,
-            device=self.device,
         )
         problems = [self.outer, self.inner]
         u2l = {self.outer: [self.inner]}
@@ -134,7 +129,7 @@ class RegressionTest(unittest.TestCase):
         self.train_config = Config(
             type="cg", cg_iterations=3, cg_alpha=0.1, unroll_steps=100
         )
-        self.train_module = ChildNet().to(self.device)
+        self.train_module = ChildNet()
         self.train_optimizer = torch.optim.SGD(self.train_module.parameters(), lr=0.1)
         self.inner = Inner(
             name="inner",
@@ -142,7 +137,6 @@ class RegressionTest(unittest.TestCase):
             optimizer=self.train_optimizer,
             train_data_loader=self.train_loader,
             config=self.train_config,
-            device=self.device,
         )
         problems = [self.outer, self.inner]
         u2l = {self.outer: [self.inner]}
@@ -160,7 +154,7 @@ class RegressionTest(unittest.TestCase):
         self.train_config = Config(
             type="neumann", neumann_iterations=5, unroll_steps=100
         )
-        self.train_module = ChildNet().to(self.device)
+        self.train_module = ChildNet()
         self.train_optimizer = torch.optim.SGD(self.train_module.parameters(), lr=0.1)
         self.inner = Inner(
             name="inner",
@@ -168,7 +162,6 @@ class RegressionTest(unittest.TestCase):
             optimizer=self.train_optimizer,
             train_data_loader=self.train_loader,
             config=self.train_config,
-            device=self.device,
         )
         problems = [self.outer, self.inner]
         u2l = {self.outer: [self.inner]}

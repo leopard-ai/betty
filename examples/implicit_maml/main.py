@@ -204,10 +204,9 @@ parent = Outer(
     optimizer=parent_optimizer,
     scheduler=parent_scheduler,
     config=parent_config,
-    device=device,
 )
 children = [
-    Inner(name=f"inner_{i}", config=child_config, device=device)
+    Inner(name=f"inner_{i}", config=child_config)
     for i in range(arg.task_num)
 ]
 env = MAMLEnv()

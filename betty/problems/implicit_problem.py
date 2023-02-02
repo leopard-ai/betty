@@ -21,7 +21,6 @@ class ImplicitProblem(Problem):
         scheduler=None,
         train_data_loader=None,
         extra_config=None,
-        device=None,
     ):
         super().__init__(
             name,
@@ -31,7 +30,6 @@ class ImplicitProblem(Problem):
             scheduler,
             train_data_loader,
             extra_config,
-            device,
         )
         self.module_state_dict_cache = None
         self.opitmizer_state_dict_cache = None

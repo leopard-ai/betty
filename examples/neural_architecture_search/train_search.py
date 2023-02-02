@@ -89,7 +89,7 @@ arch_loader = torch.utils.data.DataLoader(
     num_workers=2,
 )
 
-criterion = nn.CrossEntropyLoss().to(device)
+criterion = nn.CrossEntropyLoss()
 classifier_net = Network(
     args.init_ch, 10, args.layers, criterion, steps=args.arch_steps
 )
@@ -160,7 +160,6 @@ outer = Arch(
     optimizer=arch_optimizer,
     train_data_loader=arch_loader,
     config=outer_config,
-    device=device,
 )
 inner = Classifier(
     name="classifier",
@@ -169,7 +168,6 @@ inner = Classifier(
     scheduler=classifier_scheduler,
     train_data_loader=classifier_loader,
     config=inner_config,
-    device=device,
 )
 
 problems = [outer, inner]
