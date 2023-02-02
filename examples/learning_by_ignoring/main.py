@@ -160,6 +160,21 @@ class Pretraining(ImplicitProblem):
             self.optimizer, step_size=args.step_size, gamma=args.gamma
         )
 
+    def param_groups(self):
+        param_groups = [
+            {
+                "params": [
+                    param
+                    for name, param in self.module.named_parameters()
+                    if "fc" not in name
+                ],
+                "lr": args.features_lr,
+            },
+            {"params": self.module.fc.parameters(), "lr": args.classifier_lr},
+        ]
+
+        return param_groups
+
 
 class Finetuning(ImplicitProblem):
     def forward(self, x):
@@ -196,6 +211,21 @@ class Finetuning(ImplicitProblem):
         return optim.lr_scheduler.StepLR(
             self.optimizer, step_size=args.step_size, gamma=args.gamma
         )
+
+    def param_groups(self):
+        param_groups = [
+            {
+                "params": [
+                    param
+                    for name, param in self.module.named_parameters()
+                    if "fc" not in name
+                ],
+                "lr": args.features_lr,
+            },
+            {"params": self.module.fc.parameters(), "lr": args.classifier_lr},
+        ]
+
+        return param_groups
 
 
 class Reweighting(ImplicitProblem):
@@ -234,6 +264,21 @@ class Reweighting(ImplicitProblem):
         return optim.lr_scheduler.StepLR(
             self.optimizer, step_size=args.step_size, gamma=args.gamma
         )
+
+    def param_groups(self):
+        param_groups = [
+            {
+                "params": [
+                    param
+                    for name, param in self.module.named_parameters()
+                    if "fc" not in name
+                ],
+                "lr": args.features_lr,
+            },
+            {"params": self.module.fc.parameters(), "lr": args.classifier_lr},
+        ]
+
+        return param_groups
 
 
 best_acc = -1
