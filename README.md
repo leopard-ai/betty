@@ -8,7 +8,7 @@
   <a href="https://leopard-ai.github.io/betty/">Docs</a> |
   <a href="https://leopard-ai.github.io/betty/tutorial/basic/basic.html">Tutorials</a> |
   <a href="https://github.com/leopard-ai/betty/tree/main/examples">Examples</a> |
-  <a href="https://arxiv.org/abs/2207.02849">Paper</a> |
+  <a href="https://openreview.net/pdf?id=LV_MeMS38Q9">Paper</a> |
   <a href="https://www.casl-project.ai/">CASL Project</a>
 </p>
 
