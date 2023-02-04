@@ -30,7 +30,9 @@ pip install betty-ml
 ```
 
 ## Update
-We release *Betty v0.2* with new distributed training support for meta-learning! Currently
+**[Jan 21 2023]** Betty got accepted as a *notable-top-5% (oral)* paper at [ICLR 2023](https://openreview.net/forum?id=LV_MeMS38Q9)!
+
+**[Jan 12 2023]** We release *Betty v0.2* with new distributed training support for meta-learning! Currently
 available features are:
 - Distributed Data Parallel [(DDP)](https://pytorch.org/tutorials/intermediate/ddp_tutorial.html)
 - ZeRO Redundancy Optimizer [(ZeRO)](https://pytorch.org/tutorials/recipes/zero_redundancy_optimizer.html)
