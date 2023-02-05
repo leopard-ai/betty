@@ -8,7 +8,7 @@ help make Betty even better by either
 3. [Requesting a feature](#request-a-feature) that you would like to
    see in Betty.
 
-# Create a PR
+## Create a PR
 
 To create a PR:
 
@@ -39,31 +39,36 @@ would want.
 
 We use [black](https://black.readthedocs.io/en/stable/getting_started.html) to
 format our code. Please use the latest stable version, and run
+
 ```bash
 black .
 ```
+
 in the root directory before creating a PR.
 
 ### Unit Tests
+
 We provide basic unit tests for several components of code.
 Please run
+
 ```bash
 python -m unittest -v
 ```
+
 in the root directory before creating a PR.
 
-# Report a Bug
+## Report a Bug
 
-If you find a bug, please make an issue and include [BUG] in the title. In 
+If you find a bug, please make an issue and include [BUG] in the title. In
 your issue, please give a description of how to reproduce the bug.
 
-# Request a Feature
+## Request a Feature
 
 For any feature request, submit an issue with [REQUEST] in the title.
 As part of the issue, describe why this would be beneficial for Betty and give
 an example use case of how the feature would be used.
 
-# Maintainers
+## Maintainers
 
 If you have any questions, feel free to reach out to the maintainers:
 

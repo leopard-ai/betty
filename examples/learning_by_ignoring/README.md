@@ -1,6 +1,7 @@
 # Data Reweighting for Pre-training
 
 ## Introduction
+
 Pretraining/finetuning frameworks are getting popularized with the recent advancement in
 self-supervised learning.
 However, pretraining data are oftentimes from a different distribution than finetuning data,
@@ -14,8 +15,11 @@ The similar idea was also proposed in
 (NeurIPS 2021).
 
 ## Dataset
+
 OfficeHome dataset can be downloaded from [here](http://155.33.198.138/lbi_data.zip)
+
 ## Environment
+
 Our code is developed/tested on:
 
 - Python 3.8.10
@@ -23,20 +27,27 @@ Our code is developed/tested on:
 - torchvision 1.11
 
 ## Scripts
+
 Baseline:
-```
+
+```bash
 python main.py --gpu=0 --source_domain=Cl --target_domain=Ar --lam=7e-3 --baseline
 ```
+
 Learning by Ignoring:
-```
+
+```bash
 python main.py --gpu=0 --source_domain=Cl --target_domain=Ar --lam=7e-3
 ```
+
 Run all experiments:
-```
+
+```bash
 bash run.sh
 ```
 
 ## Results
+
 We present the result of Learning by Ignoring on the OfficeHome datset.
 
 |            | Cl-Ar  | Ar-Pr  | Pr-Rw  | Rw-Cl  |
