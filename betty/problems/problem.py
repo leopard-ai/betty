@@ -160,12 +160,17 @@ class Problem:
         # set up fp16 training
         if self._is_default_fp16():
             assert torch.cuda.is_available()
-            self.scaler = torch.cuda.amp.GradScaler(
+            scaler_cls = torch.cuda.amp.GradScaler
+            if self._strategy == "fsdp":
+                from torch.distributed.fsdp.sharded_grad_scaler import ShardedGradScaler
+
+                scaler_cls = ShardedGradScaler
+            self.scaler = scaler_cls(
                 init_scale=self.initial_dynamic_scale, growth_factor=self.scale_factor
             )
 
         # patch module, optimizer, data loader, and scheduler
-        self.patch_module_optimizer_loader()
+        self.patch_everything()
 
         # make train_data_loader as iterator
         if self.train_data_loader is not None:
@@ -186,12 +191,25 @@ class Problem:
             self.logger.info(f"Lowers: {children_str}")
             self.logger.info(f"Paths: {path_str}\n")
 
-    def patch_module_optimizer_loader(self):
+    def patch_everything(self):
         """
         We patch module, optimizer, data loader, and lr scheduler for device placement,
         distributed training, zero optimizer, fsdp, etc.
         """
-        # patch module
+        self.patch_module()
+        self.patch_optimizer()
+        if self.scheduler is not None:
+            self.patch_scheduler()
+        if self.train_data_loader is not None:
+            self.train_data_loader = [
+                self.patch_data_loader(data_loader)
+                for data_loader in self.train_data_loader
+            ]
+
+    def patch_module(self):
+        """
+        Patch module given the systems configuration (e.g., DDP, FSDP)
+        """
         self.module.to(self.device)
         if self._strategy in ["distributed", "zero"]:
             self.synchronize_params(self.parameters())
@@ -209,49 +227,68 @@ class Problem:
         elif self._strategy == "accelerate":
             self.module = self.accelerator.prepare(self.module)
 
-        # patch optimizer
+    def patch_optimizer(self):
+        """
+        Patch optimizer given the systems configuration (e.g., DDP, FSDP)
+        """
         params = self.trainable_parameters()
         if self.is_implemented("param_groups") and self._strategy != "fsdp":
             params = self.param_groups()
         is_zero = True if self._strategy == "zero" else False
-        self.optimizer = patch_optimizer(self.optimizer, params, is_zero)
-
-        # patch scheduler
-        if self.scheduler is not None:
-            self.scheduler = patch_scheduler(self.scheduler, self.optimizer)
-            if self._strategy == "accelerate":
-                self.scheduler = self.accelerator.prepare(self.scheduler)
-
-        if self._is_default_fp16() and self._strategy == "fsdp":
-            from torch.distributed.fsdp.sharded_grad_scaler import ShardedGradScaler
-
-            self.scaler = ShardedGradScaler(
-                init_scale=self.initial_dynamic_scale, growth_factor=self.scale_factor
-            )
-
-        # accelerate optimizer & scheduler patch
         if self._strategy == "accelerate":
-            if self.scheduler is None:
-                self.optimizer = self.accelerator.prepare(self.optimizer)
-            else:
-                self.optimizer, self.scheduler = self.accelerator.prepare(
-                    self.optimizer, self.scheduler
-                )
+            self.optimizer = self.accelerator.prepare(self.optimizer)
+        else:
+            self.optimizer = patch_optimizer(self.optimizer, params, is_zero)
 
-        # patch data loader
-        if self.train_data_loader is not None:
-            if self._strategy in ["distributed", "zero", "fsdp"]:
-                self.train_data_loader = [
-                    get_distributed_data_loader(
-                        loader, world_size=self._world_size, rank=self._rank
-                    )
-                    for loader in self.train_data_loader
-                ]
-            elif self._strategy == "accelerate":
-                self.train_data_loader = [
-                    self.accelerator.prepare(data_loader)
-                    for data_loader in self.train_data_loader
-                ]
+    def patch_scheduler(self):
+        """
+        Patch scheduler given the systems configuration (e.g., DDP, FSDP)
+        """
+        self.scheduler = patch_scheduler(self.scheduler, self.optimizer)
+        if self._strategy == "accelerate":
+            self.scheduler = self.accelerator.prepare(self.scheduler)
+
+    def patch_data_loader(self, loader):
+        """
+        Patch data loader given the systems configuration (e.g., DDP, FSDP)
+        """
+        if self._strategy in ["distributed", "zero", "fsdp"]:
+            patched_loader = get_distributed_data_loader(
+                loader, world_size=self._world_size, rank=self._rank
+            )
+        elif self._strategy == "accelerate":
+            patched_loader = self.accelerator.prepare(loader)
+        else:
+            patched_loader = loader
+
+        return patched_loader
+
+    def set_module(self, module):
+        """
+        Set new module for the current Problem class.
+        """
+        self.module = module
+        self.patch_module()
+
+    def set_optimizer(self, optimizer):
+        """
+        Set new optimizer for the current Problem class.
+        """
+        self.optimizer = optimizer
+        self.patch_optimizer()
+
+    def set_scheduler(self, scheduler):
+        """
+        Set new scheduler for the current Problem class.
+        """
+        self.scheduler = scheduler
+        self.patch_scheduler()
+
+    def set_train_data_loader(self, loader, idx=0):
+        """
+        Set new data loader for the current Problem class.
+        """
+        self.train_data_loader[idx] = self.patch_data_loader(loader)
 
     def __call__(self, *args, **kwargs):
         return self.forward(*args, **kwargs)
