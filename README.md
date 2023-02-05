@@ -27,8 +27,10 @@ pip install betty-ml
 ```
 
 ## Update
+
 We release *Betty v0.2* with new distributed training support for meta-learning! Currently
 available features are:
+
 - Distributed Data Parallel [(DDP)](https://pytorch.org/tutorials/intermediate/ddp_tutorial.html)
 - ZeRO Redundancy Optimizer [(ZeRO)](https://pytorch.org/tutorials/recipes/zero_redundancy_optimizer.html)
 - *(experimental)* Fully Sharded Data Parallel [(FSDP)](https://pytorch.org/tutorials/intermediate/FSDP_tutorial.html)
@@ -38,8 +40,8 @@ You can now easily scale up meta-learning (or even meta-meta-learning) with one-
 - **Example**: [Meta-Weight-Net with RoBERTa](examples/bert_data_reweighting/)
 - **Tutorial**: [link](https://leopard-ai.github.io/betty/tutorial/intermediate/intermediate_distributed.html)
 
-
 ## Introduction
+
 Betty is a [PyTorch](https://pytorch.org) library for generalized meta-learning (GML)
 and multilevel optimization (MLO) that allows a **simple** and **modular**
 programming interface for a number of **large-scale** applications including
@@ -54,14 +56,18 @@ With Betty, users simply need to do two things to implement any GML/MLO programs
 2. Define the hierarchical problem structure using the [Engine](#engine) class.
 
 ## Quick Start
+
 ### Problem
+
 #### Basics
+
 Each level problem can be defined with seven components: (1) module, (2) optimizer, (3)
 data loader, (4) loss function, (5) problem configuration, (6) name, and (7) other
 optional components (e.g.  learning rate scheduler). The loss function (4) can be
 defined via the `training_step` method, while all other components can be provided
 through the class constructor. For example, an image classification problem can be
 defined as follows:
+
 ```python
 from betty.problems import ImplicitProblem
 from betty.configs import Config
@@ -90,6 +96,7 @@ cls_prob = Classifier(name='classifier',
 ```
 
 #### Interactions between problems
+
 In GML/MLO, each problem will often need to access modules from other problems to
 define its loss function. This can be achieved by using the `name` attribute as
 follows:
@@ -122,8 +129,11 @@ class Classifier(ImplicitProblem):
 
 cls_prob = Classifier(name='classifier', module=...)
 ```
+
 ### Engine
+
 #### Basics
+
 The `Engine` class handles the hierarchical dependencies between problems. In GML/MLO,
 there are two types of dependencies: upper-to-lower (`u2l`) and lower-to-upper (`l2u`).
 Both types of dependencies can be defined with a Python dictionary, where the key is
@@ -156,6 +166,7 @@ engine.run()
 Since `Engine` manages the whole GML/MLO program, you can also perform a global validation
 stage within it. All problems that comprise the GML/MLO program can again be accessed with
 their names.
+
 ```python
 class HPOEngine(Engine):
     # set up global validation
@@ -185,7 +196,9 @@ be handled by Betty. For more details and advanced features, users can check out
 Happy multilevel optimization programming!
 
 ## Applications
+
 We provide reference implementations of several GML/MLO applications, including:
+
 - [Hyperparameter Optimization](examples/logistic_regression_hpo/)
 - [Neural Architecture Search](examples/neural_architecture_search/)
 - [Data Reweighting](examples/learning_to_reweight/)
@@ -201,7 +214,9 @@ are on the way!
 </p>
 
 ## Features
+
 ### Gradient Approximation Methods
+
 - Implicit Differentiation
   - Finite Difference (or T1-T2) ([DARTS: Differentiable Architecture Search](https://arxiv.org/abs/1806.09055))
   - Neumann Series ([Optimizing Millions of Hyperparameters by Implicit Differentiation](http://proceedings.mlr.press/v108/lorraine20a/lorraine20a.pdf))
@@ -210,22 +225,27 @@ are on the way!
   - Reverse-mode Automatic Differentiation ([Model-Agnostic Meta-Learning (MAML)](https://arxiv.org/abs/1703.03400))
 
 ### Training
+
 - Gradient accumulation
 - FP16 training
 - Distributed data-parallel training
 - Gradient clipping
 
 ### Logging
+
 - [(PyTorch) TensorBoard](https://pytorch.org/docs/stable/tensorboard.html)
 - [wandb](https://github.com/wandb/client)
 
 ## Contributing
+
 We welcome contributions from the community! Please see our [contributing
 guidelines](CONTRIBUTING.md) for details on how to contribute to Betty.
 
 ## Citation
+
 If you use Betty in your research, please cite [our
 paper](https://arxiv.org/abs/2207.02849) with the following Bibtex entry.
+
 ```
 @article{choe2022betty,
   title={Betty: An Automatic Differentiation Library for Multilevel Optimization},
@@ -236,4 +256,5 @@ paper](https://arxiv.org/abs/2207.02849) with the following Bibtex entry.
 ```
 
 ## License
+
 Betty is licensed under the [Apache 2.0 License](LICENSE).
