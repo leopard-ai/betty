@@ -74,8 +74,8 @@ class Parent(ImplicitProblem):
     def configure_optimizer(self):
         return torch.optim.SGD(self.module.parameters(), lr=1, momentum=0.9)
 
-    def param_callback(self, params):
-        for p in params:
+    def param_callback(self):
+        for p in self.trainable_parameters():
             p.data.clamp_(min=1e-8)
 
 

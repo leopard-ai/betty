@@ -38,8 +38,8 @@ class Outer(ImplicitProblem):
         loss = F.binary_cross_entropy_with_logits(outs, targets)
         return loss
 
-    def param_callback(self, params):
-        for p in params:
+    def param_callback(self):
+        for p in self.trainable_parameters():
             p.data.clamp_(min=1e-8)
 
 

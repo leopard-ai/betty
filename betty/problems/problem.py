@@ -328,6 +328,8 @@ class Problem:
             retain_graph=self._retain_graph,
             allow_unused=self._allow_unused,
         )
+        if self.is_implemented("grad_callback"):
+            self.grad_callback()
 
         # calculate parameter update
         if self._count % self.gas == 0:
@@ -335,7 +337,7 @@ class Problem:
 
             # param callback (e.g., parameter clipping)
             if self.is_implemented("param_callback"):
-                self.param_callback(self.trainable_parameters())
+                self.param_callback()
 
             if self._strategy != "default" and self._count % (self.gas * 20) == 0:
                 self.synchronize_params(self.trainable_parameters())
@@ -455,7 +457,7 @@ class Problem:
             batch = next(data_iterator)
         except StopIteration:
             if idx == 0:
-                self.on_epoch_end_exec()
+                self.epoch_callback_exec()
             self.epoch_counter[idx] += 1
             train_data_loader = self.train_data_loader[idx]
             if self._strategy in ["distributed", "zero", "fsdp"]:
@@ -713,9 +715,9 @@ class Problem:
         """
         raise NotImplementedError
 
-    def on_epoch_end_exec(self):
-        if self.is_implemented("on_epoch_end"):
-            self.on_epoch_end()
+    def epoch_callback_exec(self):
+        if self.is_implemented("epoch_callback"):
+            self.epoch_callback()
 
     def gradient_accumulation_boundary(self):
         """
