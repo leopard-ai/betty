@@ -115,9 +115,6 @@ class Problem:
         ``initialize`` patches/sets up module, optimizer, data loader, etc. after compiling a
         user-provided configuration (e.g., fp16 training, iterative differentiation)
         """
-        # configure device
-        self.configure_device()
-
         # initialize update ready to False
         self.ready = [False for _ in range(len(self._children))]
 
@@ -667,21 +664,11 @@ class Problem:
         if len(self._parents) > 0:
             self._roll_back = roll_back
 
-    def configure_device(self):
+    def configure_device(self, device):
         """
         Set the device for the current problem.
         """
-        if self._strategy in ["distributed", "zero", "fsdp"]:
-            torch.cuda.set_device(self._local_rank)
-            self.device = torch.device("cuda", self._local_rank)
-        elif self._strategy == "accelerate":
-            self.device = self.accelerator.device
-        elif self._strategy == "cpu":
-            self.device = "cpu"
-        elif self._strategy == "gpu":
-            self.device = "cuda"
-        else:
-            self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = device
 
     def get_opt_param_group_for_param(self, param):
         """

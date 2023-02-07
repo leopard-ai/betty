@@ -56,6 +56,9 @@ class Engine:
         # roll back
         self._roll_back = False
 
+        # device
+        self.device = None
+
         # initialize
         self.initialize()
 
@@ -123,7 +126,7 @@ class Engine:
         self.parse_config()
 
         # initialize distributed training
-        dist_dict = self.initialize_distributed()
+        dist_dict = self.configure_systems()
 
         # initialize logger
         self.logger = logger(logger_type=self.logger_type)
@@ -131,17 +134,23 @@ class Engine:
             self.logger.info("Initializing Multilevel Optimization...\n")
         start = time.time()
 
-        # parse dependency
+        # parse problem dependency
         self.parse_dependency()
 
         # set problem attributes
         for problem in self.problems:
             self.set_problem_attr(problem)
 
+        # env initialization
+        if self.env is not None:
+            self.env.configure_distributed_training(dist_dict)
+            self.env.configure_device(self.device)
+
         # problem initialization
         for problem in self.problems:
             problem.add_logger(self.logger)
             problem.configure_distributed_training(dist_dict)
+            problem.configure_device(self.device)
             problem.configure_roll_back(self._roll_back)
             problem.initialize()
             if self.env is not None:
@@ -151,10 +160,11 @@ class Engine:
         if self.is_rank_zero():
             self.logger.info(f"Time spent on initialization: {end-start:.3f} (s)\n")
 
-    def initialize_distributed(self):
+    def configure_systems(self):
         """
-        Initialize distributed training.
+        Configure basic systems set-up like distributed training and device placement.
         """
+        # configure distributed training
         if self._strategy in ["distributed", "zero", "fsdp"]:
             dist.init_process_group(backend=self._backend)
 
@@ -171,6 +181,19 @@ class Engine:
         dist_dict["world_size"] = self._world_size
         dist_dict["rank"] = self._rank
         dist_dict["local_rank"] = self._local_rank
+
+        # configure device for the current rank
+        if self._strategy in ["distributed", "zero", "fsdp"]:
+            torch.cuda.set_device(self._local_rank)
+            self.device = torch.device("cuda", self._local_rank)
+        elif self._strategy == "accelerate":
+            self.device = self.accelerator.device
+        elif self._strategy == "cpu":
+            self.device = "cpu"
+        elif self._strategy == "gpu":
+            self.device = "cuda"
+        else:
+            self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         return dist_dict
 
