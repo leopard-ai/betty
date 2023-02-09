@@ -6,186 +6,183 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
+from torchmeta.datasets.helpers import omniglot, miniimagenet
+from torchmeta.utils.data import BatchMetaDataLoader
+
 from betty.engine import Engine
 from betty.problems import ImplicitProblem
 from betty.configs import Config, EngineConfig
 from betty.envs import Env
 
-from support.omniglot_loader import OmniglotNShot
+from models import OmniglotCNN, MiniImagenetCNN
 
 
 argparser = argparse.ArgumentParser()
-argparser.add_argument("--n_way", type=int, help="n way", default=5)
-argparser.add_argument("--k_spt", type=int, help="k shot for support set", default=5)
-argparser.add_argument("--k_qry", type=int, help="k shot for query set", default=15)
-argparser.add_argument(
-    "--inner_steps", type=int, help="number of inner steps", default=5
-)
-argparser.add_argument(
-    "--task_num", type=int, help="meta batch size, namely task num", default=16
-)
+argparser.add_argument("--task", type=str, help="task", default="omniglot")
+argparser.add_argument("--ways", type=int, help="n ways", default=5)
+argparser.add_argument("--shots", type=int, help="k shots (train)", default=5)
+argparser.add_argument("--test_shots", type=int, help="k shots (test)", default=15)
+argparser.add_argument("--inner_steps", type=int, help="num inner steps", default=5)
+argparser.add_argument("--task_num", type=int, help="meta batch size", default=16)
 argparser.add_argument("--seed", type=int, help="random seed", default=1)
-arg = argparser.parse_args()
+argparser.add_argument('--n_conv', type=int, default=4)
+argparser.add_argument('--n_dense', type=int, default=0)
+argparser.add_argument('--hidden_dim', type=int, default=64)
+argparser.add_argument('--in_channels', type=int, default=1)
+argparser.add_argument('--hidden_channels', type=int, default=64)
+args = argparser.parse_args()
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-torch.manual_seed(arg.seed)
+# Random seed setup
+torch.manual_seed(args.seed)
 if torch.cuda.is_available():
-    torch.cuda.manual_seed_all(arg.seed)
-np.random.seed(arg.seed)
+    torch.cuda.manual_seed_all(args.seed)
+np.random.seed(args.seed)
 
-db = OmniglotNShot(
-    "/tmp/omniglot-data",
-    batchsz=arg.task_num,
-    n_way=arg.n_way,
-    k_shot=arg.k_spt,
-    k_query=arg.k_qry,
-    imgsz=28,
+# data loader
+dataset_cls = None
+if args.task == "omniglot":
+    dataset_cls = omniglot
+elif args.task == "miniimagenet":
+    dataset_cls = miniimagenet
+
+train_set = dataset_cls(
+    "data",
+    ways=args.ways,
+    shots=args.shots,
+    test_shots=args.test_shots,
+    meta_train=True,
+    download=True,
+)
+train_loader = BatchMetaDataLoader(
+    train_set,
+    batch_size=1,
+    num_workers=4,
+    shuffle=True,
+    pin_memory=True,
+)
+test_set = dataset_cls(
+    "data",
+    ways=args.ways,
+    shots=args.shots,
+    test_shots=args.test_shots,
+    meta_val=True,
+    download=True,
+)
+test_loader = BatchMetaDataLoader(
+    test_set,
+    batch_size=1,
+    num_workers=4,
+    shuffle=True,
+    pin_memory=True,
 )
 
-db_test = OmniglotNShot(
-    "/tmp/omniglot-data-test",
-    batchsz=arg.task_num,
-    n_way=arg.n_way,
-    k_shot=arg.k_spt,
-    k_query=arg.k_qry,
-    imgsz=28,
-    mode="test",
-)
+
+# module & optimizer setup
+model_cls = None
+if args.task == "omniglot":
+    model_cls = OmniglotCNN
+elif args.task == "miniimagenet":
+    model_cls = MiniImagenetCNN
+parent_module = model_cls(args.ways)
+parent_optimizer = optim.Adam(parent_module.parameters(), lr=3e-4)
+
+child_module = model_cls(args.ways)
+child_optimizer = optim.SGD(child_module.parameters(), lr=1e-1)
 
 
-class Net(nn.Module):
-    def __init__(self, n_way):
-        super(Net, self).__init__()
-        self.net = nn.Sequential(
-            nn.Conv2d(1, 64, 3),
-            nn.BatchNorm2d(64, momentum=1, affine=True, track_running_stats=False),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(2, 2),
-            nn.Conv2d(64, 64, 3),
-            nn.BatchNorm2d(64, momentum=1, affine=True, track_running_stats=False),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(2, 2),
-            nn.Conv2d(64, 64, 3),
-            nn.BatchNorm2d(64, momentum=1, affine=True, track_running_stats=False),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(2, 2),
-            nn.Flatten(),
-            nn.Linear(64, n_way),
-        )
+def reg_loss(parameters, reference_parameters, reg_lambda=0.5):
+    loss = 0
+    for p1, p2 in zip(parameters, reference_parameters):
+        loss += torch.sum(torch.pow((p1 - p2), 2))
 
-    def forward(self, x):
-        return self.net(x)
-
-
-parent_module = Net(arg.n_way)
-parent_optimizer = optim.Adam(parent_module.parameters(), lr=0.001)
-parent_scheduler = optim.lr_scheduler.StepLR(parent_optimizer, step_size=100, gamma=0.9)
+    return reg_lambda * loss
 
 
 class Outer(ImplicitProblem):
     def training_step(self, batch):
         inputs, labels = batch
-        inputs, labels = inputs.cuda(), labels.cuda()
-        accs = []
-        loss = 0
-        for idx in range(len(self._children)):
-            net = getattr(self, f"inner_{idx}")
-            out = net(inputs[idx])
-            loss += F.cross_entropy(out, labels[idx]) / len(self._children)
-            accs.append((out.argmax(dim=1) == labels[idx]).detach())
-        acc = 100.0 * torch.cat(accs).float().mean().item()
+        out = self.inner(inputs)
+        loss = F.cross_entropy(out, labels)
+        acc = 100.0 * (out.argmax(dim=1) == labels).float().mean().item()
 
         return {"loss": loss, "acc": acc}
 
     def get_batch(self):
-        x_spt, y_spt, x_qry, y_qry = self.env.batch
-        return (x_qry, y_qry)
+        inputs, labels = self.env.batch["test"]
+
+        return inputs[0].to(self.device), labels[0].to(self.device)
 
 
 class Inner(ImplicitProblem):
     def training_step(self, batch):
         inputs, labels = batch
-        inputs, labels = inputs.cuda(), labels.cuda()
-        idx = self.outer.children.index(self)
-        out = self.module(inputs[idx])
-        loss = F.cross_entropy(out, labels[idx]) + self.reg_loss()
+        out = self.module(inputs)
+        loss = F.cross_entropy(out, labels)
+        reg = reg_loss(self.parameters(), self.outer.parameters())
 
-        return loss
-
-    def reg_loss(self):
-        return 0.5 * sum(
-            [
-                (p1 - p2).pow(2).sum()
-                for p1, p2 in zip(
-                    self.trainable_parameters(), self.outer.trainable_parameters()
-                )
-            ]
-        )
+        return loss + reg
 
     def get_batch(self):
-        x_spt, y_spt, x_qry, y_qry = self.env.batch
-        return (x_spt, y_spt)
+        inputs, labels = self.env.batch["train"]
+
+        return inputs[0].to(self.device), labels[0].to(self.device)
 
     def on_inner_loop_start(self):
         self.module.load_state_dict(self.outer.module.state_dict())
-
-    def configure_module(self):
-        return Net(arg.n_way)
-
-    def configure_optimizer(self):
-        return optim.SGD(self.module.parameters(), lr=0.1)
 
 
 class MAMLEnv(Env):
     def __init__(self):
         super().__init__()
 
-        self.data_loader = db
+        self.train_data_loader = train_loader
+        self.train_data_iterator = iter(self.train_data_loader)
         self.batch = None
 
     def step(self):
         try:
-            self.batch = next(self.data_loader)
+            self.batch = next(self.train_data_iterator)
         except StopIteration:
-            self.data_iterator = iter(db)
-            self.batch = next(self.data_loader)
+            self.train_data_iterator = iter(self.train_data_loader)
+            self.batch = next(self.train_data_iterator)
 
 
 class MAMLEngine(Engine):
     def train_step(self):
-        if self.global_step % arg.inner_steps == 1 or arg.inner_steps == 1:
+        if self.global_step % args.inner_steps == 1 or args.inner_steps == 1:
             self.env.step()
         for leaf in self.leaves:
             leaf.step(global_step=self.global_step)
 
     def validation(self):
+        self.outer.module.train()
         if not hasattr(self, "best_acc"):
             self.best_acc = -1
-        test_iter = len(db_test.datasets_cache["test"]) // arg.task_num + 1
-        test_loader = iter(db_test)
-        test_net = Net(arg.n_way).to(device)
+        test_net = model_cls(args.ways).to(self.device)
         test_optim = optim.SGD(test_net.parameters(), lr=0.1)
         accs = []
-        for _ in range(test_iter):
-            batch = next(test_loader)
-            x_spts, y_spts, x_qrys, y_qrys = batch
-            x_spts, y_spts, x_qrys, y_qrys = (
-                x_spts.to(device),
-                y_spts.to(device),
-                x_qrys.to(device),
-                y_qrys.to(device),
-            )
-            for x_spt, y_spt, x_qry, y_qry in zip(x_spts, y_spts, x_qrys, y_qrys):
-                test_net.load_state_dict(self.outer.module.state_dict())
-                for _ in range(arg.inner_steps):
-                    out = test_net(x_spt)
-                    loss = F.cross_entropy(out, y_spt)
-                    test_optim.zero_grad()
-                    loss.backward()
-                    test_optim.step()
+        for idx, batch in enumerate(test_loader):
+            if idx == 500:
+                break
+            train_inputs, train_labels = batch["train"]
+            test_inputs, test_labels = batch["test"]
+            train_inputs = train_inputs[0].to(self.device)
+            train_labels = train_labels[0].to(self.device)
+            test_inputs = test_inputs[0].to(self.device)
+            test_labels = test_labels[0].to(self.device)
+            test_net.load_state_dict(self.outer.module.state_dict())
+            for _ in range(args.inner_steps):
+                out = test_net(train_inputs)
+                loss = F.cross_entropy(out, train_labels) + reg_loss(
+                    list(test_net.parameters()), self.outer.parameters()
+                )
+                #loss = F.cross_entropy(out, train_labels)
+                test_optim.zero_grad()
+                loss.backward()
+                test_optim.step()
 
-                out = test_net(x_qry)
-                accs.append((out.argmax(dim=1) == y_qry).detach())
+            out = test_net(test_inputs)
+            accs.append((out.argmax(dim=1) == test_labels).detach())
 
         acc = 100.0 * torch.cat(accs).float().mean().item()
         if acc > self.best_acc:
@@ -194,24 +191,25 @@ class MAMLEngine(Engine):
         return {"acc": acc, "best_acc": self.best_acc}
 
 
-engine_config = EngineConfig(valid_step=100)
-parent_config = Config(log_step=10, retain_graph=True)
-child_config = Config(type="darts", unroll_steps=arg.inner_steps)
+engine_config = EngineConfig(valid_step=20000, train_iters=1000000)
+parent_config = Config(
+    log_step=800, retain_graph=True, gradient_accumulation=args.task_num
+)
+child_config = Config(type="darts", unroll_steps=args.inner_steps)
 
-parent = Outer(
+outer = Outer(
     name="outer",
     module=parent_module,
     optimizer=parent_optimizer,
-    scheduler=parent_scheduler,
     config=parent_config,
 )
-children = [Inner(name=f"inner_{i}", config=child_config) for i in range(arg.task_num)]
+inner = Inner(
+    name="inner", module=child_module, optimizer=child_optimizer, config=child_config
+)
 env = MAMLEnv()
-problems = children + [parent]
-u2l = {parent: children}
-l2u = {}
-for c in children:
-    l2u[c] = [parent]
+problems = [outer, inner]
+u2l = {outer: [inner]}
+l2u = {inner: [outer]}
 dependencies = {"u2l": u2l, "l2u": l2u}
 engine = MAMLEngine(
     config=engine_config, problems=problems, dependencies=dependencies, env=env
