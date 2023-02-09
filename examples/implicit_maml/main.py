@@ -25,11 +25,11 @@ argparser.add_argument("--test_shots", type=int, help="k shots (test)", default=
 argparser.add_argument("--inner_steps", type=int, help="num inner steps", default=5)
 argparser.add_argument("--task_num", type=int, help="meta batch size", default=16)
 argparser.add_argument("--seed", type=int, help="random seed", default=1)
-argparser.add_argument('--n_conv', type=int, default=4)
-argparser.add_argument('--n_dense', type=int, default=0)
-argparser.add_argument('--hidden_dim', type=int, default=64)
-argparser.add_argument('--in_channels', type=int, default=1)
-argparser.add_argument('--hidden_channels', type=int, default=64)
+argparser.add_argument("--n_conv", type=int, default=4)
+argparser.add_argument("--n_dense", type=int, default=0)
+argparser.add_argument("--hidden_dim", type=int, default=64)
+argparser.add_argument("--in_channels", type=int, default=1)
+argparser.add_argument("--hidden_channels", type=int, default=64)
 args = argparser.parse_args()
 
 # Random seed setup
@@ -176,7 +176,7 @@ class MAMLEngine(Engine):
                 loss = F.cross_entropy(out, train_labels) + reg_loss(
                     list(test_net.parameters()), self.outer.parameters()
                 )
-                #loss = F.cross_entropy(out, train_labels)
+                # loss = F.cross_entropy(out, train_labels)
                 test_optim.zero_grad()
                 loss.backward()
                 test_optim.step()

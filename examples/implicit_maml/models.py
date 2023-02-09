@@ -15,9 +15,9 @@ def truncated_normal_(tensor, mean=0.0, std=1.0):
 
 
 def fc_init_(module):
-    if hasattr(module, 'weight') and module.weight is not None:
+    if hasattr(module, "weight") and module.weight is not None:
         truncated_normal_(module.weight.data, mean=0.0, std=0.01)
-    if hasattr(module, 'bias') and module.bias is not None:
+    if hasattr(module, "bias") and module.bias is not None:
         torch.nn.init.constant_(module.bias.data, 0.0)
     return module
 
@@ -29,7 +29,6 @@ def maml_init_(module):
 
 
 class LinearBlock(torch.nn.Module):
-
     def __init__(self, input_size, output_size):
         super(LinearBlock, self).__init__()
         self.relu = torch.nn.ReLU()
@@ -51,13 +50,9 @@ class LinearBlock(torch.nn.Module):
 
 
 class ConvBlock(torch.nn.Module):
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 max_pool=True,
-                 max_pool_factor=1.0):
+    def __init__(
+        self, in_channels, out_channels, kernel_size, max_pool=True, max_pool_factor=1.0
+    ):
         super(ConvBlock, self).__init__()
         stride = (int(2 * max_pool_factor), int(2 * max_pool_factor))
         if max_pool:
@@ -98,29 +93,32 @@ class ConvBlock(torch.nn.Module):
 
 
 class ConvBase(torch.nn.Sequential):
-
     # NOTE:
     #     Omniglot: hidden=64, channels=1, no max_pool
     #     MiniImagenet: hidden=32, channels=3, max_pool
 
-    def __init__(self,
-                 hidden=64,
-                 channels=1,
-                 max_pool=False,
-                 layers=4,
-                 max_pool_factor=1.0):
-        core = [ConvBlock(channels,
-                          hidden,
-                          (3, 3),
-                          max_pool=max_pool,
-                          max_pool_factor=max_pool_factor),
-                ]
+    def __init__(
+        self, hidden=64, channels=1, max_pool=False, layers=4, max_pool_factor=1.0
+    ):
+        core = [
+            ConvBlock(
+                channels,
+                hidden,
+                (3, 3),
+                max_pool=max_pool,
+                max_pool_factor=max_pool_factor,
+            ),
+        ]
         for _ in range(layers - 1):
-            core.append(ConvBlock(hidden,
-                                  hidden,
-                                  kernel_size=(3, 3),
-                                  max_pool=max_pool,
-                                  max_pool_factor=max_pool_factor))
+            core.append(
+                ConvBlock(
+                    hidden,
+                    hidden,
+                    kernel_size=(3, 3),
+                    max_pool=max_pool,
+                    max_pool_factor=max_pool_factor,
+                )
+            )
         super(ConvBase, self).__init__(*core)
 
 
@@ -147,7 +145,9 @@ class OmniglotFC(torch.nn.Module):
         super(OmniglotFC, self).__init__()
         if sizes is None:
             sizes = [256, 128, 64, 64]
-        layers = [LinearBlock(input_size, sizes[0]), ]
+        layers = [
+            LinearBlock(input_size, sizes[0]),
+        ]
         for s_i, s_o in zip(sizes[:-1], sizes[1:]):
             layers.append(LinearBlock(s_i, s_o))
         layers = torch.nn.Sequential(*layers)
@@ -186,13 +186,13 @@ class OmniglotCNN(torch.nn.Module):
         super(OmniglotCNN, self).__init__()
         self.hidden_size = hidden_size
         self.base = ConvBase(
-             hidden=hidden_size,
-             channels=1,
-             max_pool=False,
-             layers=layers,
+            hidden=hidden_size,
+            channels=1,
+            max_pool=False,
+            layers=layers,
         )
         self.features = torch.nn.Sequential(
-            #Lambda(lambda x: x.view(-1, 1, 28, 28)),
+            # Lambda(lambda x: x.view(-1, 1, 28, 28)),
             self.base,
             Lambda(lambda x: x.mean(dim=[2, 3])),
             Flatten(),
@@ -208,7 +208,6 @@ class OmniglotCNN(torch.nn.Module):
 
 
 class CNN4Backbone(ConvBase):
-
     def __init__(
         self,
         hidden_size=64,
@@ -287,7 +286,6 @@ class CNN4(torch.nn.Module):
         x = self.features(x)
         x = self.classifier(x)
         return x
-
 
 
 class Lambda(torch.nn.Module):

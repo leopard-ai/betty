@@ -28,3 +28,7 @@ python main.py --inner_steps 5
 
 Our implementation currently doesn't match the accuracy of the original paper.
 We are actively investigating the issue, and update the repo as soon as possible.
+
+## Acknowledgement
+
+We followed the CNN architecture from [learn2learn](https://learn2learn.net).
