@@ -9,7 +9,8 @@
   <a href="https://leopard-ai.github.io/betty/tutorial/basic/basic.html">Tutorials</a> |
   <a href="https://github.com/leopard-ai/betty/tree/main/examples">Examples</a> |
   <a href="https://openreview.net/pdf?id=LV_MeMS38Q9">Paper</a> |
-  <a href="https://www.casl-project.ai/">CASL Project</a>
+  <a href="https://github.com/leopard-ai/betty#citation">Citation</a> |
+  <a href="https://www.casl-project.ai/">CASL</a>
 </p>
 
 <div align="center">
@@ -252,11 +253,13 @@ If you use Betty in your research, please cite [our
 paper](https://arxiv.org/abs/2207.02849) with the following Bibtex entry.
 
 ```
-@article{choe2022betty,
-  title={Betty: An Automatic Differentiation Library for Multilevel Optimization},
-  author={Choe, Sang Keun and Neiswanger, Willie and Xie, Pengtao and Xing, Eric},
-  journal={arXiv preprint arXiv:2207.02849},
-  year={2022}
+@inproceedings{
+choe2023betty,
+title={Betty: An Automatic Differentiation Library for Multilevel Optimization},
+author={Sang Keun Choe and Willie Neiswanger and Pengtao Xie and Eric Xing},
+booktitle={The Eleventh International Conference on Learning Representations },
+year={2023},
+url={https://openreview.net/forum?id=LV_MeMS38Q9}
 }
 ```
 
