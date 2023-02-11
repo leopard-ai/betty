@@ -10,9 +10,7 @@ def conv_block(in_channels, out_channels, **kwargs):
                 ("conv", nn.Conv2d(in_channels, out_channels, **kwargs)),
                 (
                     "norm",
-                    nn.BatchNorm2d(
-                        out_channels, track_running_stats=False
-                    ),
+                    nn.BatchNorm2d(out_channels, track_running_stats=False),
                 ),
                 ("relu", nn.ReLU()),
                 ("pool", nn.MaxPool2d(2)),
