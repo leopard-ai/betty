@@ -2,19 +2,20 @@ import argparse
 import numpy as np
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+from torchvision.transforms import ToTensor, Resize, Compose
 
-from torchmeta.datasets.helpers import omniglot, miniimagenet
+from torchmeta.datasets import Omniglot, MiniImagenet
 from torchmeta.utils.data import BatchMetaDataLoader
+from torchmeta.transforms import ClassSplitter, Categorical, Rotation
 
 from betty.engine import Engine
 from betty.problems import ImplicitProblem
 from betty.configs import Config, EngineConfig
 from betty.envs import Env
 
-from models import OmniglotCNN, MiniImagenetCNN
+from models import ConvOmniglot, ConvMiniImagenet
 
 
 argparser = argparse.ArgumentParser()
@@ -25,11 +26,8 @@ argparser.add_argument("--test_shots", type=int, help="k shots (test)", default=
 argparser.add_argument("--inner_steps", type=int, help="num inner steps", default=5)
 argparser.add_argument("--task_num", type=int, help="meta batch size", default=16)
 argparser.add_argument("--seed", type=int, help="random seed", default=1)
-argparser.add_argument("--n_conv", type=int, default=4)
-argparser.add_argument("--n_dense", type=int, default=0)
-argparser.add_argument("--hidden_dim", type=int, default=64)
-argparser.add_argument("--in_channels", type=int, default=1)
-argparser.add_argument("--hidden_channels", type=int, default=64)
+argparser.add_argument("--hidden_size", type=int, default=64)
+argparser.add_argument("--reg", type=float, default=0.5)
 args = argparser.parse_args()
 
 # Random seed setup
@@ -39,37 +37,61 @@ if torch.cuda.is_available():
 np.random.seed(args.seed)
 
 # data loader
-dataset_cls = None
-if args.task == "omniglot":
-    dataset_cls = omniglot
-elif args.task == "miniimagenet":
-    dataset_cls = miniimagenet
-
-train_set = dataset_cls(
-    "data",
-    ways=args.ways,
-    shots=args.shots,
-    test_shots=args.test_shots,
-    meta_train=True,
-    download=True,
+dataset_transform = ClassSplitter(
+    shuffle=True,
+    num_train_per_class=args.shots,
+    num_test_per_class=args.test_shots,
 )
+if args.task == "omniglot":
+    class_augmentations = [Rotation([90, 180, 270])]
+    transform = Compose([Resize(28), ToTensor()])
+    meta_train_dataset = Omniglot(
+        "data",
+        transform=transform,
+        target_transform=Categorical(args.ways),
+        num_classes_per_task=args.ways,
+        meta_train=True,
+        class_augmentations=class_augmentations,
+        dataset_transform=dataset_transform,
+        download=True,
+    )
+    meta_test_dataset = Omniglot(
+        "data",
+        transform=transform,
+        target_transform=Categorical(args.ways),
+        num_classes_per_task=args.ways,
+        meta_test=True,
+        dataset_transform=dataset_transform,
+    )
+elif args.task == "miniimagenet":
+    transform = Compose([Resize(84), ToTensor()])
+    meta_train_dataset = MiniImagenet(
+        "data",
+        transform=transform,
+        target_transform=Categorical(args.ways),
+        num_classes_per_task=args.ways,
+        meta_train=True,
+        dataset_transform=dataset_transform,
+        download=True,
+    )
+    meta_test_dataset = MiniImagenet(
+        "data",
+        transform=transform,
+        target_transform=Categorical(args.ways),
+        num_classes_per_task=args.ways,
+        meta_test=True,
+        dataset_transform=dataset_transform,
+    )
+
 train_loader = BatchMetaDataLoader(
-    train_set,
+    meta_train_dataset,
     batch_size=1,
     num_workers=4,
     shuffle=True,
     pin_memory=True,
 )
-test_set = dataset_cls(
-    "data",
-    ways=args.ways,
-    shots=args.shots,
-    test_shots=args.test_shots,
-    meta_val=True,
-    download=True,
-)
 test_loader = BatchMetaDataLoader(
-    test_set,
+    meta_test_dataset,
     batch_size=1,
     num_workers=4,
     shuffle=True,
@@ -80,17 +102,22 @@ test_loader = BatchMetaDataLoader(
 # module & optimizer setup
 model_cls = None
 if args.task == "omniglot":
-    model_cls = OmniglotCNN
+    model_cls = ConvOmniglot
 elif args.task == "miniimagenet":
-    model_cls = MiniImagenetCNN
-parent_module = model_cls(args.ways)
-parent_optimizer = optim.Adam(parent_module.parameters(), lr=3e-4)
+    model_cls = ConvMiniImagenet
 
-child_module = model_cls(args.ways)
+parent_module = model_cls(args.ways, args.hidden_size)
+parent_optimizer = optim.AdamW(parent_module.parameters(), lr=3e-4)
+parent_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+    parent_optimizer,
+    T_max=int(args.task_num * 7500),
+)
+
+child_module = model_cls(args.ways, args.hidden_size)
 child_optimizer = optim.SGD(child_module.parameters(), lr=1e-1)
 
 
-def reg_loss(parameters, reference_parameters, reg_lambda=0.5):
+def reg_loss(parameters, reference_parameters, reg_lambda=0.25):
     loss = 0
     for p1, p2 in zip(parameters, reference_parameters):
         loss += torch.sum(torch.pow((p1 - p2), 2))
@@ -118,7 +145,7 @@ class Inner(ImplicitProblem):
         inputs, labels = batch
         out = self.module(inputs)
         loss = F.cross_entropy(out, labels)
-        reg = reg_loss(self.parameters(), self.outer.parameters())
+        reg = reg_loss(self.parameters(), self.outer.parameters(), args.reg)
 
         return loss + reg
 
@@ -158,7 +185,7 @@ class MAMLEngine(Engine):
         self.outer.module.train()
         if not hasattr(self, "best_acc"):
             self.best_acc = -1
-        test_net = model_cls(args.ways).to(self.device)
+        test_net = model_cls(args.ways, args.hidden_size).to(self.device)
         test_optim = optim.SGD(test_net.parameters(), lr=0.1)
         accs = []
         for idx, batch in enumerate(test_loader):
@@ -174,7 +201,7 @@ class MAMLEngine(Engine):
             for _ in range(args.inner_steps):
                 out = test_net(train_inputs)
                 loss = F.cross_entropy(out, train_labels) + reg_loss(
-                    list(test_net.parameters()), self.outer.parameters()
+                    list(test_net.parameters()), self.outer.parameters(), args.reg
                 )
                 # loss = F.cross_entropy(out, train_labels)
                 test_optim.zero_grad()
@@ -191,9 +218,14 @@ class MAMLEngine(Engine):
         return {"acc": acc, "best_acc": self.best_acc}
 
 
-engine_config = EngineConfig(valid_step=20000, train_iters=1000000)
+engine_config = EngineConfig(
+    valid_step=int(args.inner_steps * args.task_num * 100),
+    train_iters=int(args.inner_steps * args.task_num * 7500),
+)
 parent_config = Config(
-    log_step=800, retain_graph=True, gradient_accumulation=args.task_num
+    log_step=int(args.inner_steps * args.task_num * 10),
+    retain_graph=True,
+    gradient_accumulation=args.task_num,
 )
 child_config = Config(type="darts", unroll_steps=args.inner_steps)
 
@@ -201,6 +233,7 @@ outer = Outer(
     name="outer",
     module=parent_module,
     optimizer=parent_optimizer,
+    scheduler=parent_scheduler,
     config=parent_config,
 )
 inner = Inner(
