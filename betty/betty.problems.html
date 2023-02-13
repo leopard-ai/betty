@@ -175,6 +175,7 @@
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../examples/data_reweighting.html">Data Reweighting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/maml.html">Model-Agnostic Meta-Learning (MAML)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/neural_architecture_search.html">Neural Architecture Search</a></li>
 </ul>
 
@@ -254,7 +255,7 @@
 <span id="problem"></span><h2>Problem<a class="headerlink" href="#module-betty.problems.problem" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="betty.problems.problem.Problem">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">betty.problems.problem.</span></span><span class="sig-name descname"><span class="pre">Problem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_data_loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">betty.problems.problem.</span></span><span class="sig-name descname"><span class="pre">Problem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_data_loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the base class for an optimization problem in multilevel optimization.
 Specifically, each problem is defined by the parameter (or module), the sets of the upper
 and lower constraining problems, the dataset, the loss function, the optimizer, and other
@@ -379,7 +380,7 @@ graph are all ready/done. <code class="docutils literal notranslate"><span class
 
 <dl class="py method">
 <dt class="sig sig-object py" id="betty.problems.problem.Problem.configure_device">
-<span class="sig-name descname"><span class="pre">configure_device</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.configure_device"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.configure_device" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">configure_device</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.configure_device"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.configure_device" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the device for the current problem.</p>
 </dd></dl>
 
@@ -418,6 +419,11 @@ graph are all ready/done. <code class="docutils literal notranslate"><span class
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.epoch_callback_exec">
+<span class="sig-name descname"><span class="pre">epoch_callback_exec</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.epoch_callback_exec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.epoch_callback_exec" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="betty.problems.problem.Problem.eval">
@@ -584,11 +590,6 @@ Return the user-defined name of the module.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="betty.problems.problem.Problem.on_epoch_end_exec">
-<span class="sig-name descname"><span class="pre">on_epoch_end_exec</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.on_epoch_end_exec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.on_epoch_end_exec" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="betty.problems.problem.Problem.one_step_descent">
 <span class="sig-name descname"><span class="pre">one_step_descent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.one_step_descent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.one_step_descent" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -612,10 +613,34 @@ Return the user-defined name of the module.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="betty.problems.problem.Problem.patch_module_optimizer_loader">
-<span class="sig-name descname"><span class="pre">patch_module_optimizer_loader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.patch_module_optimizer_loader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.patch_module_optimizer_loader" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.patch_data_loader">
+<span class="sig-name descname"><span class="pre">patch_data_loader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.patch_data_loader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.patch_data_loader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Patch data loader given the systems configuration (e.g., DDP, FSDP)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.patch_everything">
+<span class="sig-name descname"><span class="pre">patch_everything</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.patch_everything"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.patch_everything" title="Permalink to this definition">¶</a></dt>
 <dd><p>We patch module, optimizer, data loader, and lr scheduler for device placement,
 distributed training, zero optimizer, fsdp, etc.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.patch_module">
+<span class="sig-name descname"><span class="pre">patch_module</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.patch_module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.patch_module" title="Permalink to this definition">¶</a></dt>
+<dd><p>Patch module given the systems configuration (e.g., DDP, FSDP)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.patch_optimizer">
+<span class="sig-name descname"><span class="pre">patch_optimizer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.patch_optimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.patch_optimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Patch optimizer given the systems configuration (e.g., DDP, FSDP)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.patch_scheduler">
+<span class="sig-name descname"><span class="pre">patch_scheduler</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.patch_scheduler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.patch_scheduler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Patch scheduler given the systems configuration (e.g., DDP, FSDP)</p>
 </dd></dl>
 
 <dl class="py property">
@@ -643,6 +668,30 @@ distributed training, zero optimizer, fsdp, etc.</p>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.set_module">
+<span class="sig-name descname"><span class="pre">set_module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.set_module"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.set_module" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set new module for the current Problem class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.set_optimizer">
+<span class="sig-name descname"><span class="pre">set_optimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.set_optimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.set_optimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set new optimizer for the current Problem class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.set_scheduler">
+<span class="sig-name descname"><span class="pre">set_scheduler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scheduler</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.set_scheduler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.set_scheduler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set new scheduler for the current Problem class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="betty.problems.problem.Problem.set_train_data_loader">
+<span class="sig-name descname"><span class="pre">set_train_data_loader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/problem.html#Problem.set_train_data_loader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.problem.Problem.set_train_data_loader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set new data loader for the current Problem class.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -725,7 +774,7 @@ usually achieve memory &amp; compute efficiency especially when the large unroll
 recommend users to use <code class="docutils literal notranslate"><span class="pre">ImplicitProblem</span></code> as a default class to define problems in MLO.</p>
 <span class="target" id="module-betty.problems.implicit_problem"></span><dl class="py class">
 <dt class="sig sig-object py" id="betty.problems.implicit_problem.ImplicitProblem">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">betty.problems.implicit_problem.</span></span><span class="sig-name descname"><span class="pre">ImplicitProblem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_data_loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/implicit_problem.html#ImplicitProblem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.implicit_problem.ImplicitProblem" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">betty.problems.implicit_problem.</span></span><span class="sig-name descname"><span class="pre">ImplicitProblem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_data_loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/implicit_problem.html#ImplicitProblem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.implicit_problem.ImplicitProblem" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">ImplicitProblem</span></code> is sublassed from <code class="docutils literal notranslate"><span class="pre">Problem</span></code>.</p>
 </dd></dl>
 
@@ -739,7 +788,7 @@ memory/computation efficiency of ITD is oftentimes worse than AID. In addition, 
 be familiar with functional programming style due to the use of stateless modules.</p>
 <span class="target" id="module-betty.problems.iterative_problem"></span><dl class="py class">
 <dt class="sig sig-object py" id="betty.problems.iterative_problem.IterativeProblem">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">betty.problems.iterative_problem.</span></span><span class="sig-name descname"><span class="pre">IterativeProblem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_data_loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/iterative_problem.html#IterativeProblem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.iterative_problem.IterativeProblem" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">betty.problems.iterative_problem.</span></span><span class="sig-name descname"><span class="pre">IterativeProblem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_data_loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/problems/iterative_problem.html#IterativeProblem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.problems.iterative_problem.IterativeProblem" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">IterativeProblem</span></code> is sublassed from <code class="docutils literal notranslate"><span class="pre">Problem</span></code>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="betty.problems.iterative_problem.IterativeProblem.patch_modules">
@@ -828,6 +877,7 @@ gradient flow through the parameter update process.</p>
 <li><a class="reference internal" href="#betty.problems.problem.Problem.configure_distributed_training"><code class="docutils literal notranslate"><span class="pre">Problem.configure_distributed_training()</span></code></a></li>
 <li><a class="reference internal" href="#betty.problems.problem.Problem.configure_roll_back"><code class="docutils literal notranslate"><span class="pre">Problem.configure_roll_back()</span></code></a></li>
 <li><a class="reference internal" href="#betty.problems.problem.Problem.count"><code class="docutils literal notranslate"><span class="pre">Problem.count</span></code></a></li>
+<li><a class="reference internal" href="#betty.problems.problem.Problem.epoch_callback_exec"><code class="docutils literal notranslate"><span class="pre">Problem.epoch_callback_exec()</span></code></a></li>
 <li><a class="reference internal" href="#betty.problems.problem.Problem.eval"><code class="docutils literal notranslate"><span class="pre">Problem.eval()</span></code></a></li>
 <li><a class="reference internal" href="#betty.problems.problem.Problem.forward"><code class="docutils literal notranslate"><span class="pre">Problem.forward()</span></code></a></li>
 <li><a class="reference internal" href="#betty.problems.problem.Problem.get_batch"><code class="docutils literal notranslate"><span class="pre">Problem.get_batch()</span></code></a></li>
@@ -843,15 +893,22 @@ gradient flow through the parameter update process.</p>
 <li><a class="reference internal" href="#betty.problems.problem.Problem.load_state_dict"><code class="docutils literal notranslate"><span class="pre">Problem.load_state_dict()</span></code></a></li>
 <li><a class="reference internal" href="#betty.problems.problem.Problem.log"><code class="docutils literal notranslate"><span class="pre">Problem.log()</span></code></a></li>
 <li><a class="reference internal" href="#betty.problems.problem.Problem.name"><code class="docutils literal notranslate"><span class="pre">Problem.name</span></code></a></li>
-<li><a class="reference internal" href="#betty.problems.problem.Problem.on_epoch_end_exec"><code class="docutils literal notranslate"><span class="pre">Problem.on_epoch_end_exec()</span></code></a></li>
 <li><a class="reference internal" href="#betty.problems.problem.Problem.one_step_descent"><code class="docutils literal notranslate"><span class="pre">Problem.one_step_descent()</span></code></a></li>
 <li><a class="reference internal" href="#betty.problems.problem.Problem.optimizer_step"><code class="docutils literal notranslate"><span class="pre">Problem.optimizer_step()</span></code></a></li>
 <li><a class="reference internal" href="#betty.problems.problem.Problem.parameters"><code class="docutils literal notranslate"><span class="pre">Problem.parameters()</span></code></a></li>
 <li><a class="reference internal" href="#betty.problems.problem.Problem.parents"><code class="docutils literal notranslate"><span class="pre">Problem.parents</span></code></a></li>
-<li><a class="reference internal" href="#betty.problems.problem.Problem.patch_module_optimizer_loader"><code class="docutils literal notranslate"><span class="pre">Problem.patch_module_optimizer_loader()</span></code></a></li>
+<li><a class="reference internal" href="#betty.problems.problem.Problem.patch_data_loader"><code class="docutils literal notranslate"><span class="pre">Problem.patch_data_loader()</span></code></a></li>
+<li><a class="reference internal" href="#betty.problems.problem.Problem.patch_everything"><code class="docutils literal notranslate"><span class="pre">Problem.patch_everything()</span></code></a></li>
+<li><a class="reference internal" href="#betty.problems.problem.Problem.patch_module"><code class="docutils literal notranslate"><span class="pre">Problem.patch_module()</span></code></a></li>
+<li><a class="reference internal" href="#betty.problems.problem.Problem.patch_optimizer"><code class="docutils literal notranslate"><span class="pre">Problem.patch_optimizer()</span></code></a></li>
+<li><a class="reference internal" href="#betty.problems.problem.Problem.patch_scheduler"><code class="docutils literal notranslate"><span class="pre">Problem.patch_scheduler()</span></code></a></li>
 <li><a class="reference internal" href="#betty.problems.problem.Problem.paths"><code class="docutils literal notranslate"><span class="pre">Problem.paths</span></code></a></li>
 <li><a class="reference internal" href="#betty.problems.problem.Problem.recover_states"><code class="docutils literal notranslate"><span class="pre">Problem.recover_states()</span></code></a></li>
 <li><a class="reference internal" href="#betty.problems.problem.Problem.set_grads"><code class="docutils literal notranslate"><span class="pre">Problem.set_grads()</span></code></a></li>
+<li><a class="reference internal" href="#betty.problems.problem.Problem.set_module"><code class="docutils literal notranslate"><span class="pre">Problem.set_module()</span></code></a></li>
+<li><a class="reference internal" href="#betty.problems.problem.Problem.set_optimizer"><code class="docutils literal notranslate"><span class="pre">Problem.set_optimizer()</span></code></a></li>
+<li><a class="reference internal" href="#betty.problems.problem.Problem.set_scheduler"><code class="docutils literal notranslate"><span class="pre">Problem.set_scheduler()</span></code></a></li>
+<li><a class="reference internal" href="#betty.problems.problem.Problem.set_train_data_loader"><code class="docutils literal notranslate"><span class="pre">Problem.set_train_data_loader()</span></code></a></li>
 <li><a class="reference internal" href="#betty.problems.problem.Problem.state_dict"><code class="docutils literal notranslate"><span class="pre">Problem.state_dict()</span></code></a></li>
 <li><a class="reference internal" href="#betty.problems.problem.Problem.step"><code class="docutils literal notranslate"><span class="pre">Problem.step()</span></code></a></li>
 <li><a class="reference internal" href="#betty.problems.problem.Problem.step_after_roll_back"><code class="docutils literal notranslate"><span class="pre">Problem.step_after_roll_back()</span></code></a></li>

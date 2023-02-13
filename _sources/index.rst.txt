@@ -89,6 +89,7 @@ Below is a figure that illustrates the main concepts of GML/MLO.
    :maxdepth: 1
 
    Data Reweighting<examples/data_reweighting.rst>
+   Model-Agnostic Meta-Learning (MAML)<examples/maml.rst>
    Neural Architecture Search<examples/neural_architecture_search.rst>
 
 

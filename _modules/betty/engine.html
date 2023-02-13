@@ -167,6 +167,7 @@
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../examples/data_reweighting.html">Data Reweighting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/maml.html">Model-Agnostic Meta-Learning (MAML)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../examples/neural_architecture_search.html">Neural Architecture Search</a></li>
 </ul>
 
@@ -297,6 +298,9 @@
         <span class="c1"># roll back</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_roll_back</span> <span class="o">=</span> <span class="kc">False</span>
 
+        <span class="c1"># device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="c1"># initialize</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
 
@@ -364,7 +368,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">parse_config</span><span class="p">()</span>
 
         <span class="c1"># initialize distributed training</span>
-        <span class="n">dist_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialize_distributed</span><span class="p">()</span>
+        <span class="n">dist_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configure_systems</span><span class="p">()</span>
 
         <span class="c1"># initialize logger</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span><span class="p">(</span><span class="n">logger_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger_type</span><span class="p">)</span>
@@ -372,17 +376,23 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Initializing Multilevel Optimization...</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
-        <span class="c1"># parse dependency</span>
+        <span class="c1"># parse problem dependency</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parse_dependency</span><span class="p">()</span>
 
         <span class="c1"># set problem attributes</span>
         <span class="k">for</span> <span class="n">problem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">problems</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_problem_attr</span><span class="p">(</span><span class="n">problem</span><span class="p">)</span>
 
+        <span class="c1"># env initialization</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">configure_distributed_training</span><span class="p">(</span><span class="n">dist_dict</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">configure_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
         <span class="c1"># problem initialization</span>
         <span class="k">for</span> <span class="n">problem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">problems</span><span class="p">:</span>
             <span class="n">problem</span><span class="o">.</span><span class="n">add_logger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">)</span>
             <span class="n">problem</span><span class="o">.</span><span class="n">configure_distributed_training</span><span class="p">(</span><span class="n">dist_dict</span><span class="p">)</span>
+            <span class="n">problem</span><span class="o">.</span><span class="n">configure_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
             <span class="n">problem</span><span class="o">.</span><span class="n">configure_roll_back</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_roll_back</span><span class="p">)</span>
             <span class="n">problem</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -392,10 +402,11 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_rank_zero</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Time spent on initialization: </span><span class="si">{</span><span class="n">end</span><span class="o">-</span><span class="n">start</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> (s)</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Engine.initialize_distributed"><a class="viewcode-back" href="../../betty/betty.engine.html#betty.engine.Engine.initialize_distributed">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_distributed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Engine.configure_systems"><a class="viewcode-back" href="../../betty/betty.engine.html#betty.engine.Engine.configure_systems">[docs]</a>    <span class="k">def</span> <span class="nf">configure_systems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize distributed training.</span>
+<span class="sd">        Configure basic systems set-up like distributed training and device placement.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># configure distributed training</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strategy</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;distributed&quot;</span><span class="p">,</span> <span class="s2">&quot;zero&quot;</span><span class="p">,</span> <span class="s2">&quot;fsdp&quot;</span><span class="p">]:</span>
             <span class="n">dist</span><span class="o">.</span><span class="n">init_process_group</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="p">)</span>
 
@@ -412,6 +423,19 @@
         <span class="n">dist_dict</span><span class="p">[</span><span class="s2">&quot;world_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_world_size</span>
         <span class="n">dist_dict</span><span class="p">[</span><span class="s2">&quot;rank&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rank</span>
         <span class="n">dist_dict</span><span class="p">[</span><span class="s2">&quot;local_rank&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_local_rank</span>
+
+        <span class="c1"># configure device for the current rank</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strategy</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;distributed&quot;</span><span class="p">,</span> <span class="s2">&quot;zero&quot;</span><span class="p">,</span> <span class="s2">&quot;fsdp&quot;</span><span class="p">]:</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">set_device</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_local_rank</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_local_rank</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strategy</span> <span class="o">==</span> <span class="s2">&quot;accelerate&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">accelerator</span><span class="o">.</span><span class="n">device</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strategy</span> <span class="o">==</span> <span class="s2">&quot;cpu&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strategy</span> <span class="o">==</span> <span class="s2">&quot;gpu&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
 
         <span class="k">return</span> <span class="n">dist_dict</span></div>
 
@@ -487,7 +511,6 @@
         <span class="c1"># Parse upper-to-lower dependency</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value_list</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span><span class="p">[</span><span class="s2">&quot;u2l&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">value_list</span><span class="p">:</span>
-
                 <span class="c1"># find all paths from low to high for backpropagation</span>
                 <span class="n">paths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_paths</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">dst</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
                 <span class="n">key</span><span class="o">.</span><span class="n">add_paths</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span>
@@ -495,7 +518,6 @@
         <span class="c1"># Parse lower-to-upper dependency</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value_list</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span><span class="p">[</span><span class="s2">&quot;l2u&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">value_list</span><span class="p">:</span>
-
                 <span class="c1"># add value problem to parents of key problem for backpropgation</span>
                 <span class="n">key</span><span class="o">.</span><span class="n">add_parent</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
                 <span class="n">value</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>

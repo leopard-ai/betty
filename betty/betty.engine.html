@@ -173,6 +173,7 @@
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../examples/data_reweighting.html">Data Reweighting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/maml.html">Model-Agnostic Meta-Learning (MAML)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/neural_architecture_search.html">Neural Architecture Search</a></li>
 </ul>
 
@@ -276,6 +277,12 @@ dependencies. It also provides a primitive for executing multilevel optimization
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="betty.engine.Engine.configure_systems">
+<span class="sig-name descname"><span class="pre">configure_systems</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/engine.html#Engine.configure_systems"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.engine.Engine.configure_systems" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configure basic systems set-up like distributed training and device placement.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="betty.engine.Engine.do_validation">
 <span class="sig-name descname"><span class="pre">do_validation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/engine.html#Engine.do_validation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.engine.Engine.do_validation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check whether to run validation.</p>
@@ -308,12 +315,6 @@ dependencies. It also provides a primitive for executing multilevel optimization
 <dt class="sig sig-object py" id="betty.engine.Engine.initialize">
 <span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/engine.html#Engine.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.engine.Engine.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize dependencies (computational graph) between problems.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="betty.engine.Engine.initialize_distributed">
-<span class="sig-name descname"><span class="pre">initialize_distributed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/betty/engine.html#Engine.initialize_distributed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#betty.engine.Engine.initialize_distributed" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize distributed training.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -442,11 +443,11 @@ modified depth-first search algorithm is used.</p>
 <li><a class="reference internal" href="#module-betty.engine">Engine</a><ul>
 <li><a class="reference internal" href="#betty.engine.Engine"><code class="docutils literal notranslate"><span class="pre">Engine</span></code></a><ul>
 <li><a class="reference internal" href="#betty.engine.Engine.check_leaf"><code class="docutils literal notranslate"><span class="pre">Engine.check_leaf()</span></code></a></li>
+<li><a class="reference internal" href="#betty.engine.Engine.configure_systems"><code class="docutils literal notranslate"><span class="pre">Engine.configure_systems()</span></code></a></li>
 <li><a class="reference internal" href="#betty.engine.Engine.do_validation"><code class="docutils literal notranslate"><span class="pre">Engine.do_validation()</span></code></a></li>
 <li><a class="reference internal" href="#betty.engine.Engine.eval"><code class="docutils literal notranslate"><span class="pre">Engine.eval()</span></code></a></li>
 <li><a class="reference internal" href="#betty.engine.Engine.find_paths"><code class="docutils literal notranslate"><span class="pre">Engine.find_paths()</span></code></a></li>
 <li><a class="reference internal" href="#betty.engine.Engine.initialize"><code class="docutils literal notranslate"><span class="pre">Engine.initialize()</span></code></a></li>
-<li><a class="reference internal" href="#betty.engine.Engine.initialize_distributed"><code class="docutils literal notranslate"><span class="pre">Engine.initialize_distributed()</span></code></a></li>
 <li><a class="reference internal" href="#betty.engine.Engine.is_implemented"><code class="docutils literal notranslate"><span class="pre">Engine.is_implemented()</span></code></a></li>
 <li><a class="reference internal" href="#betty.engine.Engine.is_rank_zero"><code class="docutils literal notranslate"><span class="pre">Engine.is_rank_zero()</span></code></a></li>
 <li><a class="reference internal" href="#betty.engine.Engine.parse_config"><code class="docutils literal notranslate"><span class="pre">Engine.parse_config()</span></code></a></li>

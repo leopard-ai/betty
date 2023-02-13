@@ -39,8 +39,6 @@
   <!-- <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" /> -->
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/tabs.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -169,6 +167,7 @@
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/data_reweighting.html">Data Reweighting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/maml.html">Model-Agnostic Meta-Learning (MAML)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/neural_architecture_search.html">Neural Architecture Search</a></li>
 </ul>
 
@@ -264,7 +263,7 @@
 
 <span class="c1"># pylint: disable=W0223</span>
 <div class="viewcode-block" id="IterativeProblem"><a class="viewcode-back" href="../../../betty/betty.problems.html#betty.problems.iterative_problem.IterativeProblem">[docs]</a><span class="k">class</span> <span class="nc">IterativeProblem</span><span class="p">(</span><span class="n">Problem</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    ``IterativeProblem`` is sublassed from ``Problem``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -276,10 +275,16 @@
         <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">scheduler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">train_data_loader</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">extra_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">name</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">,</span> <span class="n">train_data_loader</span><span class="p">,</span> <span class="n">device</span>
+            <span class="n">name</span><span class="p">,</span>
+            <span class="n">config</span><span class="p">,</span>
+            <span class="n">module</span><span class="p">,</span>
+            <span class="n">optimizer</span><span class="p">,</span>
+            <span class="n">scheduler</span><span class="p">,</span>
+            <span class="n">train_data_loader</span><span class="p">,</span>
+            <span class="n">extra_config</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="c1"># functorch installation check</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">HAS_FUNCTORCH</span><span class="p">:</span>
@@ -322,7 +327,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
 
 <div class="viewcode-block" id="IterativeProblem.patch_modules"><a class="viewcode-back" href="../../../betty/betty.problems.html#betty.problems.iterative_problem.IterativeProblem.patch_modules">[docs]</a>    <span class="k">def</span> <span class="nf">patch_modules</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Patch PyTorch&#39;s native stateful module into the stateless module so as to support</span>
 <span class="sd">        functional forward that takes params as its input.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -332,7 +337,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">buffers</span> <span class="o">=</span> <span class="n">buffers</span></div>
 
 <div class="viewcode-block" id="IterativeProblem.patch_optimizer"><a class="viewcode-back" href="../../../betty/betty.problems.html#betty.problems.iterative_problem.IterativeProblem.patch_optimizer">[docs]</a>    <span class="k">def</span> <span class="nf">patch_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Patch PyTorch&#39;s native optimizer by replacing all involved in-place operations to allow</span>
 <span class="sd">        gradient flow through the parameter update process.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -340,7 +345,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">patch_optimizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="IterativeProblem.patch_scheduler"><a class="viewcode-back" href="../../../betty/betty.problems.html#betty.problems.iterative_problem.IterativeProblem.patch_scheduler">[docs]</a>    <span class="k">def</span> <span class="nf">patch_scheduler</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Patch scheduler to be compatible with the patched optimizer</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -415,11 +420,8 @@
      
        <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
          <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-         <script src="../../../_static/jquery.js"></script>
-         <script src="../../../_static/underscore.js"></script>
          <script src="../../../_static/doctools.js"></script>
-         <script src="../../../_static/tabs.js"></script>
-         <script src="../../../_static/design-tabs.js"></script>
+         <script src="../../../_static/sphinx_highlight.js"></script>
      
 
   

@@ -1,0 +1,645 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-PQBQ3CV');
+  </script>
+  <!-- End Google Tag Manager -->
+
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="google-site-verification" content="okUst94cAlWSsUsGZTB4xSS4UKTtRV8Nu5XZ9pdd3Aw" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Implicit Model Agnostic Meta-Learning &mdash; Betty</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!-- <link rel="stylesheet" href="../_static/pygments.css" type="text/css" /> -->
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Neural Architecture Search" href="neural_architecture_search.html" />
+    <link rel="prev" title="Data Reweighting" href="data_reweighting.html" />
+  <!-- Google Analytics -->
+  
+  <!-- End Google Analytics -->
+  
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+  <!-- Preload the theme fonts -->
+
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-book.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/FreightSans/freight-sans-medium-italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/IBMPlexMono/IBMPlexMono-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Light.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/UCity/UCity-Semibold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="../_static/fonts/Inconsolata/Inconsolata.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
+<!-- Preload the katex fonts -->
+
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Math-Italic.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Main-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size1-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size4-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size2-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Size3-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/fonts/KaTeX_Caligraphic-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <script defer src="https://use.fontawesome.com/releases/v6.1.1/js/all.js" integrity="sha384-xBXmu0dk1bEoiwd71wOonQLyH+VpgR1XcDH3rtxrLww5ajNTuMvBdL5SOiFZnNdp" crossorigin="anonymous"></script>
+</head>
+
+<div class="container-fluid header-holder tutorials-header" id="header-holder">
+  <div class="container">
+    <div class="header-container">
+      <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning">
+      <!--  <img class="call-to-action-img" src="../_static/images/logo-lightning-icon.png"/> -->
+      </a>
+
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://leopard-ai.github.io/betty">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/leopard-ai/betty">GitHub</a>
+          </li>
+
+        </ul>
+      </div>
+
+      <a class="main-menu-open-button" href="#" data-behavior="open-mobile-menu"></a>
+    </div>
+  </div>
+</div>
+
+<body class="pytorch-body">
+
+   
+
+    
+
+    <div class="table-of-contents-link-wrapper">
+      <span>Table of Contents</span>
+      <a href="#" class="toggle-table-of-contents" data-behavior="toggle-table-of-contents"></a>
+    </div>
+
+    <nav data-toggle="wy-nav-shift" class="pytorch-left-menu" id="pytorch-left-menu">
+      <div class="pytorch-side-scroll">
+        <div class="pytorch-menu pytorch-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          <div class="pytorch-left-menu-search">
+            
+
+            
+              
+              
+            
+
+            
+
+
+  
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search Docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+            
+          </div>
+
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Get Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart/concept.html">Major Concepts</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/basic/basic.html">Basic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial/intermediate/intermediate.html">Intermediate</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Docs</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.engine.html">betty.engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.problems.html">betty.problems</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.hypergradient.html">betty.hypergradient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.optim.html">betty.optim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../betty/betty.logging.html">betty.logging</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="data_reweighting.html">Data Reweighting</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Model-Agnostic Meta-Learning (MAML)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basics">Basics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="neural_architecture_search.html">Neural Architecture Search</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <div class="pytorch-container">
+      <div class="pytorch-page-level-bar" id="pytorch-page-level-bar">
+        <div class="pytorch-breadcrumbs-wrapper">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="pytorch-breadcrumbs">
+    
+      <li>
+        <a href="../index.html">
+          
+            Docs
+          
+        </a> &gt;
+      </li>
+
+        
+      <li>Implicit Model Agnostic Meta-Learning</li>
+    
+    
+      <li class="pytorch-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/examples/maml.rst.txt" rel="nofollow"><img src="../_static/images/view-page-source-icon.svg"></a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+</div>
+        </div>
+
+        <div class="pytorch-shortcuts-wrapper" id="pytorch-shortcuts-wrapper">
+          Shortcuts
+        </div>
+      </div>
+
+      <section data-toggle="wy-nav-shift" id="pytorch-content-wrap" class="pytorch-content-wrap">
+        <div class="pytorch-content-left">
+
+        
+          
+          <div class="rst-content">
+          
+            <div role="main" class="main-content" itemscope="itemscope" itemtype="http://schema.org/Article">
+             <article itemprop="articleBody" id="pytorch-article" class="pytorch-article">
+              
+  <section id="implicit-model-agnostic-meta-learning">
+<h1>Implicit Model Agnostic Meta-Learning<a class="headerlink" href="#implicit-model-agnostic-meta-learning" title="Permalink to this heading">¶</a></h1>
+<p>Here we re-implement the model-agnostic meta-learning algorithm from
+<a class="reference external" href="https://arxiv.org/pdf/1909.04630.pdf">Meta-Learning with Implicit Gradients</a>,
+where we learn the initialization weight for convolutional neural networks (CNNs) that allows
+quick adaptations to various tasks given only few samples (i.e. few-shot learning).
+In this post, we assume that the potential readers are already familiar with the algorithm,
+and therefore mainly focus on how to implement MAML with Betty. Also, we note that,
+while we focus on the implicit MAML instead of MAML in this blog post, the
+modification for MAML is highly straightforward just by replacing <code class="docutils literal notranslate"><span class="pre">ImplicitProblem</span></code>
+with <code class="docutils literal notranslate"><span class="pre">IterativeProblem</span></code>. Finally, the full version of our code can be found
+<a class="reference external" href="https://github.com/leopard-ai/betty/tree/main/examples/implicit_maml">here</a>.</p>
+<section id="basics">
+<h2>Basics<a class="headerlink" href="#basics" title="Permalink to this heading">¶</a></h2>
+<p>MAML can be interpreted as a bilevel optimization problem, where the upper level learns
+the initiazliation weight that allows quick adaptation to new tasks and
+the lower level learns to adapt to the task given few training examples. Therefore,
+users need to define two <code class="docutils literal notranslate"><span class="pre">Problem</span></code> classes for both levels. Following Betty’s design
+principle, each level can be defined by providing:</p>
+<ol class="arabic simple">
+<li><p>Module</p></li>
+<li><p>Optimizer</p></li>
+<li><p>Data loader (or data loading function)</p></li>
+<li><p>Loss function</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Problem</span></code> configuration</p></li>
+<li><p>Name</p></li>
+<li><p>(Optional) learning rate scheduler, …</p></li>
+</ol>
+<p>While data loading is decoupled in most other bi-level optimization problems, in MAML,
+it’s coupled as the adaptation result from the lower level should be the tested on the
+same task in the upper level. We will dive into this in this post.</p>
+<section id="environment">
+<h3>Environment<a class="headerlink" href="#environment" title="Permalink to this heading">¶</a></h3>
+<p>As stated above, data loading is coupled for upper and lower levels in MAML. This requires
+the user to implement a unified data loading mechanism. Unfortunately, this is hard to achieve
+(or the code will get ugly) with the Betty’s <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class design where users provide
+data loader separately for each <code class="docutils literal notranslate"><span class="pre">Problem</span></code> class through the class constructor.
+To enable the clean implementation for such cases (where data loading is entangled for
+multiple <code class="docutils literal notranslate"><span class="pre">Problem``s),</span> <span class="pre">Betty</span> <span class="pre">provides</span> <span class="pre">the</span> <span class="pre">``Env</span></code> class where users can specify a unified
+data loading mechanism.</p>
+<p>More specifically, we use <a class="reference external" href="https://github.com/learnables/learn2learn">learn2learn</a>
+to load MAML dataset loading, and define the data loading mechanism in the <code class="docutils literal notranslate"><span class="pre">step</span></code> method.
+The code is shown below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">learn2learn</span> <span class="k">as</span> <span class="nn">l2l</span>
+<span class="kn">from</span> <span class="nn">betty.envs</span> <span class="kn">import</span> <span class="n">Env</span>
+
+<span class="n">tasksets</span> <span class="o">=</span> <span class="n">l2l</span><span class="o">.</span><span class="n">vision</span><span class="o">.</span><span class="n">benchmarks</span><span class="o">.</span><span class="n">get_tasksets</span><span class="p">(</span>
+    <span class="n">args</span><span class="o">.</span><span class="n">task</span><span class="p">,</span>
+    <span class="n">train_ways</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ways</span><span class="p">,</span>
+    <span class="n">train_samples</span><span class="o">=</span><span class="mi">2</span> <span class="o">*</span> <span class="n">args</span><span class="o">.</span><span class="n">shots</span><span class="p">,</span>
+    <span class="n">test_ways</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ways</span><span class="p">,</span>
+    <span class="n">test_samples</span><span class="o">=</span><span class="mi">2</span> <span class="o">*</span> <span class="n">args</span><span class="o">.</span><span class="n">shots</span><span class="p">,</span>
+    <span class="n">num_tasks</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">task_num</span><span class="p">,</span>
+    <span class="n">root</span><span class="o">=</span><span class="s2">&quot;./data&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">split_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">shots</span><span class="p">,</span> <span class="n">ways</span><span class="p">):</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;train&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+    <span class="n">adapt_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+    <span class="n">adapt_indices</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">shots</span> <span class="o">*</span> <span class="n">ways</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">eval_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="o">~</span><span class="n">adapt_indices</span><span class="p">)</span>
+    <span class="n">adapt_indices</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">adapt_indices</span><span class="p">)</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">adapt_indices</span><span class="p">],</span> <span class="n">labels</span><span class="p">[</span><span class="n">adapt_indices</span><span class="p">])</span>
+    <span class="n">out</span><span class="p">[</span><span class="s2">&quot;test&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">eval_indices</span><span class="p">],</span> <span class="n">labels</span><span class="p">[</span><span class="n">eval_indices</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">out</span>
+
+<span class="k">class</span> <span class="nc">MAMLEnv</span><span class="p">(</span><span class="n">Env</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span> <span class="o">=</span> <span class="n">tasksets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;train&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">data</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
+        <span class="n">data</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">),</span> <span class="n">labels</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">split_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">shots</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">ways</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;test&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;test&quot;</span><span class="p">]</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">MAMLEnv</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="upper-level">
+<h3>Upper-Level<a class="headerlink" href="#upper-level" title="Permalink to this heading">¶</a></h3>
+<p>Betty allows users to define a custom data loading mechanism through <code class="docutils literal notranslate"><span class="pre">get_batch</span></code> method.
+Access to <code class="docutils literal notranslate"><span class="pre">Env</span></code> will be granted by <code class="docutils literal notranslate"><span class="pre">Engine</span></code>, and users can simply use <code class="docutils literal notranslate"><span class="pre">self.env</span></code>.
+Also, since the upper problem is updated only after the <code class="docutils literal notranslate"><span class="pre">meta_batch_size</span></code> amount of
+gradient accumulation, users need to specify this thorugh <code class="docutils literal notranslate"><span class="pre">gradient_accumulation</span></code>
+attribute in <code class="docutils literal notranslate"><span class="pre">Config</span></code>. The rest part (e.g., defining loss function, module, optimizer,
+etc.) is relatively straightforward, and we direct readers who are unfamiliar with this
+to our <a class="reference external" href="https://leopard-ai.github.io/betty/tutorial/basic/basic_start.html">Tutorial</a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Upper</span><span class="p">(</span><span class="n">ImplicitProblem</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+        <span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">batch</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="n">acc</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;loss&quot;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="s2">&quot;acc&quot;</span><span class="p">:</span> <span class="n">acc</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">get_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;test&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span>
+
+<span class="n">parent_module</span> <span class="o">=</span> <span class="n">ConvNet</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">ways</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">hidden_size</span><span class="p">)</span>
+<span class="n">parent_optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">AdamW</span><span class="p">(</span><span class="n">parent_module</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">3e-4</span><span class="p">)</span>
+<span class="n">parent_scheduler</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">CosineAnnealingLR</span><span class="p">(</span>
+    <span class="n">parent_optimizer</span><span class="p">,</span>
+    <span class="n">T_max</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">meta_batch_size</span> <span class="o">*</span> <span class="mi">7500</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">parent_config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span>
+    <span class="n">log_step</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">inner_steps</span> <span class="o">*</span> <span class="n">args</span><span class="o">.</span><span class="n">meta_batch_size</span> <span class="o">*</span> <span class="mi">10</span><span class="p">),</span>
+    <span class="n">retain_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">gradient_accumulation</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">meta_batch_size</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">parent</span> <span class="o">=</span> <span class="n">Upper</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;upper&quot;</span><span class="p">,</span>
+    <span class="n">module</span><span class="o">=</span><span class="n">parent_module</span><span class="p">,</span>
+    <span class="n">optimizer</span><span class="o">=</span><span class="n">parent_optimizer</span><span class="p">,</span>
+    <span class="n">scheduler</span><span class="o">=</span><span class="n">parent_scheduler</span><span class="p">,</span>
+    <span class="n">config</span><span class="o">=</span><span class="n">parent_config</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="lower-level">
+<h3>Lower-Level<a class="headerlink" href="#lower-level" title="Permalink to this heading">¶</a></h3>
+<p>As in the upper level, we also define the custom data loading mechanism through
+the <code class="docutils literal notranslate"><span class="pre">get_batch</span></code> method. In addition, we need to initialize the weight of inner CNNs
+to that of outer CNNs in the beginning of the inner loop. We offer such functionality
+via <code class="docutils literal notranslate"><span class="pre">on_inner_loop_start</span></code> method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">reg_loss</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">reference_parameters</span><span class="p">,</span> <span class="n">reg_lambda</span><span class="o">=</span><span class="mf">0.25</span><span class="p">):</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">reference_parameters</span><span class="p">):</span>
+        <span class="n">loss</span> <span class="o">+=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">pow</span><span class="p">((</span><span class="n">p1</span> <span class="o">-</span> <span class="n">p2</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">reg_lambda</span> <span class="o">*</span> <span class="n">loss</span>
+
+<span class="k">class</span> <span class="nc">Lower</span><span class="p">(</span><span class="n">ImplicitProblem</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+        <span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">batch</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="n">reg</span> <span class="o">=</span> <span class="n">reg_loss</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">args</span><span class="o">.</span><span class="n">reg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">loss</span> <span class="o">+</span> <span class="n">reg</span>
+
+    <span class="k">def</span> <span class="nf">get_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span>
+
+    <span class="k">def</span> <span class="nf">on_inner_loop_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">upper</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">state_dict</span><span class="p">())</span>
+
+<span class="n">child_module</span> <span class="o">=</span> <span class="n">model_cls</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">ways</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">hidden_size</span><span class="p">)</span>
+<span class="n">child_optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">child_module</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-1</span><span class="p">)</span>
+<span class="n">child_config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;darts&quot;</span><span class="p">,</span> <span class="n">unroll_steps</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">inner_steps</span><span class="p">)</span>
+<span class="n">lower</span> <span class="o">=</span> <span class="n">Lower</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">,</span>
+    <span class="n">module</span><span class="o">=</span><span class="n">child_module</span><span class="p">,</span>
+    <span class="n">optimizer</span><span class="o">=</span><span class="n">child_optimizer</span><span class="p">,</span>
+    <span class="n">config</span><span class="o">=</span><span class="n">child_config</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="engine">
+<h3>Engine<a class="headerlink" href="#engine" title="Permalink to this heading">¶</a></h3>
+<p>As illustruated in our
+<a class="reference external" href="https://leopard-ai.github.io/betty/tutorial/basic/basic_start.html">Tutorial</a>,
+the overall execution of MLO is handled by <code class="docutils literal notranslate"><span class="pre">Engine</span></code>. Since we handle data loading in
+<code class="docutils literal notranslate"><span class="pre">Env</span></code>’s <code class="docutils literal notranslate"><span class="pre">step</span></code> method, we have to (1) provide <code class="docutils literal notranslate"><span class="pre">MAMLEnv</span></code> to the <code class="docutils literal notranslate"><span class="pre">Engine</span></code> and (2)
+coordinate the execution order of <code class="docutils literal notranslate"><span class="pre">env.step</span></code> with other <code class="docutils literal notranslate"><span class="pre">problem.step</span></code>. For the
+first part, users can simply provide users’ custom <code class="docutils literal notranslate"><span class="pre">Env</span></code> via the <code class="docutils literal notranslate"><span class="pre">Engine</span></code> class
+constructor. Coordinating execution order of <code class="docutils literal notranslate"><span class="pre">Env</span></code> and <code class="docutils literal notranslate"><span class="pre">Problem</span></code> can be achieved in
+the <code class="docutils literal notranslate"><span class="pre">train_step</span></code> method in <code class="docutils literal notranslate"><span class="pre">Engine</span></code>. The below code shows how to do these.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MAMLEngine</span><span class="p">(</span><span class="n">Engine</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">train_step</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_step</span> <span class="o">%</span> <span class="n">args</span><span class="o">.</span><span class="n">inner_steps</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">inner_steps</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">leaf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">leaves</span><span class="p">:</span>
+            <span class="n">leaf</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">global_step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">global_step</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">validation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">upper</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;best_acc&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">best_acc</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">test_net</span> <span class="o">=</span> <span class="n">ConvNet</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">ways</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">hidden_size</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">test_optim</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">test_net</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="n">accs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">500</span><span class="p">):</span>
+            <span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">tasksets</span><span class="o">.</span><span class="n">test</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
+            <span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">),</span> <span class="n">labels</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">split_data</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">shots</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">ways</span><span class="p">)</span>
+            <span class="n">train_inputs</span><span class="p">,</span> <span class="n">train_labels</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">]</span>
+            <span class="n">test_inputs</span><span class="p">,</span> <span class="n">test_labels</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;test&quot;</span><span class="p">]</span>
+            <span class="n">test_net</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">upper</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">state_dict</span><span class="p">())</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">inner_steps</span><span class="p">):</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">test_net</span><span class="p">(</span><span class="n">train_inputs</span><span class="p">)</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">train_labels</span><span class="p">)</span>
+                <span class="n">test_optim</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+                <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+                <span class="n">test_optim</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+            <span class="n">out</span> <span class="o">=</span> <span class="n">test_net</span><span class="p">(</span><span class="n">test_inputs</span><span class="p">)</span>
+            <span class="n">accs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">out</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">test_labels</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span>
+
+        <span class="n">acc</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">accs</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">acc</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_acc</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">best_acc</span> <span class="o">=</span> <span class="n">acc</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;acc&quot;</span><span class="p">:</span> <span class="n">acc</span><span class="p">,</span> <span class="s2">&quot;best_acc&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_acc</span><span class="p">}</span>
+
+<span class="n">u2l</span> <span class="o">=</span> <span class="p">{</span><span class="n">outer</span><span class="p">:</span> <span class="p">[</span><span class="n">inner</span><span class="p">]}</span>
+<span class="n">l2u</span> <span class="o">=</span> <span class="p">{</span><span class="n">inner</span><span class="p">:</span> <span class="p">[</span><span class="n">outer</span><span class="p">]}</span>
+<span class="n">dependencies</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;u2l&quot;</span><span class="p">:</span> <span class="n">u2l</span><span class="p">,</span> <span class="s2">&quot;l2u&quot;</span><span class="p">:</span> <span class="n">l2u</span><span class="p">}</span>
+<span class="n">engine</span> <span class="o">=</span> <span class="n">MAMLEngine</span><span class="p">(</span>
+    <span class="n">config</span><span class="o">=</span><span class="n">engine_config</span><span class="p">,</span> <span class="n">problems</span><span class="o">=</span><span class="n">problems</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="n">dependencies</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span>
+<span class="p">)</span>
+<span class="n">engine</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Finally, users can also define the validation mechanism via the <code class="docutils literal notranslate"><span class="pre">validation</span></code> method,
+and execute MAML training with <code class="docutils literal notranslate"><span class="pre">engine.run()</span></code>.</p>
+<p>Overall, throughout this tutorial, we tried to describe how to handle a unified/entangled
+data loading mechanism for multiple <code class="docutils literal notranslate"><span class="pre">Problem</span></code> classes via <code class="docutils literal notranslate"><span class="pre">Env</span></code>. Such use of <code class="docutils literal notranslate"><span class="pre">Env</span></code>
+can also be useful for implementing reinforcement learning related algorithms.</p>
+</section>
+</section>
+</section>
+
+
+             </article>
+             
+            </div>
+            <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="neural_architecture_search.html" class="btn btn-neutral float-right" title="Neural Architecture Search" accesskey="n" rel="next">Next <img src="../_static/images/chevron-right-orange.svg" class="next-page"></a>
+      
+      
+        <a href="data_reweighting.html" class="btn btn-neutral" title="Data Reweighting" accesskey="p" rel="prev"><img src="../_static/images/chevron-right-orange.svg" class="previous-page"> Previous</a>
+      
+    </div>
+  
+
+  
+
+    <hr>
+
+  
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, sangkeun00.
+
+    </p>
+  </div>
+    
+      <div>
+        Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+      </div>
+     
+
+</footer>
+
+          </div>
+        </div>
+
+        <div class="pytorch-content-right" id="pytorch-content-right">
+          <div class="pytorch-right-menu" id="pytorch-right-menu">
+            <div class="pytorch-side-scroll" id="pytorch-side-scroll-right">
+              <ul>
+<li><a class="reference internal" href="#">Implicit Model Agnostic Meta-Learning</a><ul>
+<li><a class="reference internal" href="#basics">Basics</a><ul>
+<li><a class="reference internal" href="#environment">Environment</a></li>
+<li><a class="reference internal" href="#upper-level">Upper-Level</a></li>
+<li><a class="reference internal" href="#lower-level">Lower-Level</a></li>
+<li><a class="reference internal" href="#engine">Engine</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  
+
+
+  
+
+     
+       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+         <script src="../_static/doctools.js"></script>
+         <script src="../_static/sphinx_highlight.js"></script>
+     
+
+  
+
+  <script type="text/javascript" src="../_static/js/vendor/popper.min.js"></script>
+  <script type="text/javascript" src="../_static/js/vendor/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+  <!-- Begin Footer -->
+
+  <div class="container-fluid docs-tutorials-resources" id="docs-tutorials-resources">
+    <div class="container">
+      <div class="row">
+      </div>
+    </div>
+  </div>
+
+  <div class="cookie-banner-wrapper">
+  <div class="container">
+    <p class="gdpr-notice">To analyze traffic and optimize your experience, we serve cookies on this site. By clicking or navigating, you agree to allow our usage of cookies. Read PyTorch Lightning's <a href="https://pytorchlightning.ai/privacy-policy">Privacy Policy</a>.</p>
+    <img class="close-button" src="../_static/images/pytorch-x.svg">
+  </div>
+</div>
+
+  <!-- End Footer -->
+
+  <!-- Begin Mobile Menu -->
+
+  <div class="mobile-main-menu">
+    <div class="container-fluid">
+      <div class="container">
+        <div class="mobile-main-menu-header-container">
+          <a class="header-logo" href="https://leopard-ai.github.io/betty" aria-label="PyTorch Lightning"></a>
+          <a class="main-menu-close-button" href="#" data-behavior="close-mobile-menu"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-main-menu-links-container">
+      <div class="main-menu">
+        <ul>
+          <li>
+            <a href="https://leopard-ai.github.io/betty">Docs</a>
+          </li>
+
+          <li>
+            <a href="https://github.com/leopard-ai/betty">Github</a>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Mobile Menu -->
+
+  <script type="text/javascript" src="../_static/js/vendor/anchor.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      mobileMenu.bind();
+      mobileTOC.bind();
+      pytorchAnchors.bind();
+      sideMenus.bind();
+      scrollToAnchor.bind();
+      highlightNavigation.bind();
+      mainMenuDropdown.bind();
+      filterTags.bind();
+
+      // Add class to links that have code blocks, since we cannot create links in code blocks
+      $("article.pytorch-article a span.pre").each(function(e) {
+        $(this).closest("a").addClass("has-code");
+      });
+    })
+  </script>
+
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PQBQ3CV"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+ </body>
+</html>

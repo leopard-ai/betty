@@ -167,6 +167,7 @@
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="examples/data_reweighting.html">Data Reweighting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/maml.html">Model-Agnostic Meta-Learning (MAML)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/neural_architecture_search.html">Neural Architecture Search</a></li>
 </ul>
 
@@ -410,10 +411,10 @@
 </li>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.clear_dependencies">clear_dependencies() (betty.problems.problem.Problem method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.clip_grad">clip_grad() (betty.problems.problem.Problem method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="betty/betty.logging.html#betty.logging.logger_tensorboard.TensorBoardLogger.close">close() (betty.logging.logger_tensorboard.TensorBoardLogger method)</a>
 </li>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.config">config (betty.problems.problem.Problem property)</a>
@@ -423,6 +424,8 @@
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.configure_distributed_training">configure_distributed_training() (betty.problems.problem.Problem method)</a>
 </li>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.configure_roll_back">configure_roll_back() (betty.problems.problem.Problem method)</a>
+</li>
+      <li><a href="betty/betty.engine.html#betty.engine.Engine.configure_systems">configure_systems() (betty.engine.Engine method)</a>
 </li>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.count">count (betty.problems.problem.Problem property)</a>
 </li>
@@ -454,10 +457,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="betty/betty.engine.html#betty.engine.Engine">Engine (class in betty.engine)</a>
 </li>
-      <li><a href="betty/betty.logging.html#betty.logging.logger_base.LoggerBase.error">error() (betty.logging.logger_base.LoggerBase static method)</a>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.epoch_callback_exec">epoch_callback_exec() (betty.problems.problem.Problem method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="betty/betty.logging.html#betty.logging.logger_base.LoggerBase.error">error() (betty.logging.logger_base.LoggerBase static method)</a>
+</li>
       <li><a href="betty/betty.engine.html#betty.engine.Engine.eval">eval() (betty.engine.Engine method)</a>
 
       <ul>
@@ -514,8 +519,6 @@
         <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.initialize">(betty.problems.problem.Problem method)</a>
 </li>
       </ul></li>
-      <li><a href="betty/betty.engine.html#betty.engine.Engine.initialize_distributed">initialize_distributed() (betty.engine.Engine method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="betty/betty.engine.html#betty.engine.Engine.is_implemented">is_implemented() (betty.engine.Engine method)</a>
@@ -615,12 +618,10 @@
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.on_epoch_end_exec">on_epoch_end_exec() (betty.problems.problem.Problem method)</a>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.one_step_descent">one_step_descent() (betty.problems.problem.Problem method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.one_step_descent">one_step_descent() (betty.problems.problem.Problem method)</a>
-</li>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.optimizer_step">optimizer_step() (betty.problems.problem.Problem method)</a>
 </li>
   </ul></td>
@@ -637,7 +638,11 @@
 </li>
       <li><a href="betty/betty.engine.html#betty.engine.Engine.parse_dependency">parse_dependency() (betty.engine.Engine method)</a>
 </li>
-      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.patch_module_optimizer_loader">patch_module_optimizer_loader() (betty.problems.problem.Problem method)</a>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.patch_data_loader">patch_data_loader() (betty.problems.problem.Problem method)</a>
+</li>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.patch_everything">patch_everything() (betty.problems.problem.Problem method)</a>
+</li>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.patch_module">patch_module() (betty.problems.problem.Problem method)</a>
 </li>
       <li><a href="betty/betty.problems.html#betty.problems.iterative_problem.IterativeProblem.patch_modules">patch_modules() (betty.problems.iterative_problem.IterativeProblem method)</a>
 </li>
@@ -646,12 +651,16 @@
       <li><a href="betty/betty.problems.html#betty.problems.iterative_problem.IterativeProblem.patch_optimizer">patch_optimizer() (betty.problems.iterative_problem.IterativeProblem method)</a>
 
       <ul>
+        <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.patch_optimizer">(betty.problems.problem.Problem method)</a>
+</li>
         <li><a href="betty/betty.optim.html#betty.optim.patch_optimizer">(in module betty.optim)</a>
 </li>
       </ul></li>
       <li><a href="betty/betty.problems.html#betty.problems.iterative_problem.IterativeProblem.patch_scheduler">patch_scheduler() (betty.problems.iterative_problem.IterativeProblem method)</a>
 
       <ul>
+        <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.patch_scheduler">(betty.problems.problem.Problem method)</a>
+</li>
         <li><a href="betty/betty.optim.html#betty.optim.patch_scheduler">(in module betty.optim)</a>
 </li>
       </ul></li>
@@ -683,12 +692,20 @@
 </li>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.set_grads">set_grads() (betty.problems.problem.Problem method)</a>
 </li>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.set_module">set_module() (betty.problems.problem.Problem method)</a>
+</li>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.set_optimizer">set_optimizer() (betty.problems.problem.Problem method)</a>
+</li>
       <li><a href="betty/betty.engine.html#betty.engine.Engine.set_problem_attr">set_problem_attr() (betty.engine.Engine method)</a>
 </li>
-      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.state_dict">state_dict() (betty.problems.problem.Problem method)</a>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.set_scheduler">set_scheduler() (betty.problems.problem.Problem method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.set_train_data_loader">set_train_data_loader() (betty.problems.problem.Problem method)</a>
+</li>
+      <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.state_dict">state_dict() (betty.problems.problem.Problem method)</a>
+</li>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.step">step() (betty.problems.problem.Problem method)</a>
 </li>
       <li><a href="betty/betty.problems.html#betty.problems.problem.Problem.step_after_roll_back">step_after_roll_back() (betty.problems.problem.Problem method)</a>
