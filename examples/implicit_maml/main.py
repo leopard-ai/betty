@@ -6,9 +6,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision.transforms import ToTensor, Resize, Compose
 
-from torchmeta.datasets import Omniglot, MiniImagenet
-from torchmeta.utils.data import BatchMetaDataLoader
-from torchmeta.transforms import ClassSplitter, Categorical, Rotation
+import learn2learn as l2l
 
 from betty.engine import Engine
 from betty.problems import ImplicitProblem
@@ -22,9 +20,13 @@ argparser = argparse.ArgumentParser()
 argparser.add_argument("--task", type=str, help="task", default="omniglot")
 argparser.add_argument("--ways", type=int, help="n ways", default=5)
 argparser.add_argument("--shots", type=int, help="k shots (train)", default=5)
-argparser.add_argument("--test_shots", type=int, help="k shots (test)", default=15)
 argparser.add_argument("--inner_steps", type=int, help="num inner steps", default=5)
-argparser.add_argument("--task_num", type=int, help="meta batch size", default=16)
+argparser.add_argument(
+    "--meta_batch_size", type=int, help="meta batch size", default=16
+)
+argparser.add_argument(
+    "--task_num", type=int, help="number of tasks for MAML", default=500000
+)
 argparser.add_argument("--seed", type=int, help="random seed", default=1)
 argparser.add_argument("--hidden_size", type=int, default=64)
 argparser.add_argument("--reg", type=float, default=0.5)
@@ -37,80 +39,28 @@ if torch.cuda.is_available():
 np.random.seed(args.seed)
 
 # data loader
-dataset_transform = ClassSplitter(
-    shuffle=True,
-    num_train_per_class=args.shots,
-    num_test_per_class=args.test_shots,
+tasksets = l2l.vision.benchmarks.get_tasksets(
+    args.task,
+    train_ways=args.ways,
+    train_samples=2 * args.shots,
+    test_ways=args.ways,
+    test_samples=2 * args.shots,
+    num_tasks=args.task_num,
+    root="./data",
 )
-if args.task == "omniglot":
-    class_augmentations = [Rotation([90, 180, 270])]
-    transform = Compose([Resize(28), ToTensor()])
-    meta_train_dataset = Omniglot(
-        "data",
-        transform=transform,
-        target_transform=Categorical(args.ways),
-        num_classes_per_task=args.ways,
-        meta_train=True,
-        class_augmentations=class_augmentations,
-        dataset_transform=dataset_transform,
-        download=True,
-    )
-    meta_test_dataset = Omniglot(
-        "data",
-        transform=transform,
-        target_transform=Categorical(args.ways),
-        num_classes_per_task=args.ways,
-        meta_test=True,
-        dataset_transform=dataset_transform,
-    )
-elif args.task == "miniimagenet":
-    transform = Compose([Resize(84), ToTensor()])
-    meta_train_dataset = MiniImagenet(
-        "data",
-        transform=transform,
-        target_transform=Categorical(args.ways),
-        num_classes_per_task=args.ways,
-        meta_train=True,
-        dataset_transform=dataset_transform,
-        download=True,
-    )
-    meta_test_dataset = MiniImagenet(
-        "data",
-        transform=transform,
-        target_transform=Categorical(args.ways),
-        num_classes_per_task=args.ways,
-        meta_test=True,
-        dataset_transform=dataset_transform,
-    )
-
-train_loader = BatchMetaDataLoader(
-    meta_train_dataset,
-    batch_size=1,
-    num_workers=4,
-    shuffle=True,
-    pin_memory=True,
-)
-test_loader = BatchMetaDataLoader(
-    meta_test_dataset,
-    batch_size=1,
-    num_workers=4,
-    shuffle=True,
-    pin_memory=True,
-)
-
 
 # module & optimizer setup
 model_cls = None
 if args.task == "omniglot":
     model_cls = ConvOmniglot
-elif args.task == "miniimagenet":
+elif args.task == "mini-imagenet":
     model_cls = ConvMiniImagenet
 
 parent_module = model_cls(args.ways, args.hidden_size)
-parent_optimizer = optim.AdamW(parent_module.parameters(), lr=3e-4)
+parent_optimizer = optim.AdamW(parent_module.parameters(), lr=5e-4)
 parent_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
     parent_optimizer,
-    T_max=int(args.task_num * 7500),
+    T_max=int(args.meta_batch_size * 7500),
 )
 
 child_module = model_cls(args.ways, args.hidden_size)
@@ -125,6 +75,18 @@ def reg_loss(parameters, reference_parameters, reg_lambda=0.25):
     return reg_lambda * loss
 
 
+def split_data(data, labels, shots, ways):
+    out = {"train": None, "test": None}
+    adapt_indices = np.zeros(data.size(0), dtype=bool)
+    adapt_indices[np.arange(shots * ways) * 2] = True
+    eval_indices = torch.from_numpy(~adapt_indices)
+    adapt_indices = torch.from_numpy(adapt_indices)
+    out["train"] = (data[adapt_indices], labels[adapt_indices])
+    out["test"] = (data[eval_indices], labels[eval_indices])
+
+    return out
+
+
 class Outer(ImplicitProblem):
     def training_step(self, batch):
         inputs, labels = batch
@@ -137,7 +99,7 @@ class Outer(ImplicitProblem):
     def get_batch(self):
         inputs, labels = self.env.batch["test"]
 
-        return inputs[0].to(self.device), labels[0].to(self.device)
+        return inputs, labels
 
 
 class Inner(ImplicitProblem):
@@ -152,7 +114,7 @@ class Inner(ImplicitProblem):
     def get_batch(self):
         inputs, labels = self.env.batch["train"]
 
-        return inputs[0].to(self.device), labels[0].to(self.device)
+        return inputs, labels
 
     def on_inner_loop_start(self):
         self.module.load_state_dict(self.outer.module.state_dict())
@@ -162,16 +124,15 @@ class MAMLEnv(Env):
     def __init__(self):
         super().__init__()
 
-        self.train_data_loader = train_loader
-        self.train_data_iterator = iter(self.train_data_loader)
-        self.batch = None
+        self.tasks = tasksets
+        self.batch = {"train": None, "test": None}
 
     def step(self):
-        try:
-            self.batch = next(self.train_data_iterator)
-        except StopIteration:
-            self.train_data_iterator = iter(self.train_data_loader)
-            self.batch = next(self.train_data_iterator)
+        data, labels = self.tasks.train.sample()
+        data, labels = data.to(self.device), labels.to(self.device)
+        out = split_data(data, labels, args.shots, args.ways)
+        self.batch["train"] = out["train"]
+        self.batch["test"] = out["test"]
 
 
 class MAMLEngine(Engine):
@@ -188,22 +149,16 @@ class MAMLEngine(Engine):
         test_net = model_cls(args.ways, args.hidden_size).to(self.device)
         test_optim = optim.SGD(test_net.parameters(), lr=0.1)
         accs = []
-        for idx, batch in enumerate(test_loader):
-            if idx == 500:
-                break
-            train_inputs, train_labels = batch["train"]
-            test_inputs, test_labels = batch["test"]
-            train_inputs = train_inputs[0].to(self.device)
-            train_labels = train_labels[0].to(self.device)
-            test_inputs = test_inputs[0].to(self.device)
-            test_labels = test_labels[0].to(self.device)
+        for i in range(500):
+            inputs, labels = tasksets.test.sample()
+            inputs, labels = inputs.to(self.device), labels.to(self.device)
+            out = split_data(inputs, labels, args.shots, args.ways)
+            train_inputs, train_labels = out["train"]
+            test_inputs, test_labels = out["test"]
             test_net.load_state_dict(self.outer.module.state_dict())
             for _ in range(args.inner_steps):
                 out = test_net(train_inputs)
-                loss = F.cross_entropy(out, train_labels) + reg_loss(
-                    list(test_net.parameters()), self.outer.parameters(), args.reg
-                )
-                # loss = F.cross_entropy(out, train_labels)
+                loss = F.cross_entropy(out, train_labels)
                 test_optim.zero_grad()
                 loss.backward()
                 test_optim.step()
@@ -219,13 +174,13 @@ class MAMLEngine(Engine):
 
 
 engine_config = EngineConfig(
-    valid_step=int(args.inner_steps * args.task_num * 100),
-    train_iters=int(args.inner_steps * args.task_num * 7500),
+    valid_step=int(args.inner_steps * args.meta_batch_size * 100),
+    train_iters=int(args.inner_steps * args.meta_batch_size * 7500),
 )
 parent_config = Config(
-    log_step=int(args.inner_steps * args.task_num * 10),
+    log_step=int(args.inner_steps * args.meta_batch_size * 10),
     retain_graph=True,
-    gradient_accumulation=args.task_num,
+    gradient_accumulation=args.meta_batch_size,
 )
 child_config = Config(type="darts", unroll_steps=args.inner_steps)
 
