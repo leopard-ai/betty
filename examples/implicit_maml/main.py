@@ -4,7 +4,6 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
-from torchvision.transforms import ToTensor, Resize, Compose
 
 import learn2learn as l2l
 
@@ -25,7 +24,7 @@ argparser.add_argument(
     "--meta_batch_size", type=int, help="meta batch size", default=16
 )
 argparser.add_argument(
-    "--task_num", type=int, help="number of tasks for MAML", default=500000
+    "--task_num", type=int, help="number of tasks for MAML", default=-1
 )
 argparser.add_argument("--seed", type=int, help="random seed", default=1)
 argparser.add_argument("--hidden_size", type=int, default=64)
