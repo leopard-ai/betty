@@ -47,7 +47,7 @@ hyperparameters.
 | FOMAML        | 98.3%        | 99.2%        | 89.4%         | 97.9%         |
 | Reptile       | 97.68%       | 99.48%       | 89.43%        | 97.12%        |
 | iMAML (orig)  | 99.16%       | 99.67%       | 94.46%        | 98.69%        |
-| iMAML (Betty) | 98.68%       | 99.58%       |               |               |
+| iMAML (Betty) | 98.68%       | 99.58%       | 92.90%        | 98.04%        |
 
 ### Mini-ImageNet
 To be added.
