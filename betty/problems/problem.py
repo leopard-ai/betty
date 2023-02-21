@@ -128,6 +128,12 @@ class Problem:
         # set inner_loop_start to True
         self._inner_loop_start = True
 
+        # accelerate
+        if self._strategy == "accelerate":
+            from accelerate import Accelerator
+
+            self.accelerator = Accelerator()
+
         # set up data loader
         if self.is_implemented("configure_train_data_loader"):
             if self.train_data_loader is None:

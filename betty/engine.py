@@ -145,6 +145,7 @@ class Engine:
         if self.env is not None:
             self.env.configure_distributed_training(dist_dict)
             self.env.configure_device(self.device)
+            self.env.initialize()
 
         # problem initialization
         for problem in self.problems:

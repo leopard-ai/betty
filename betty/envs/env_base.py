@@ -1,24 +1,64 @@
+import torch
+
+from betty.patch.data_loader import get_distributed_data_loader
 from betty.utils import convert_tensor
 
 
 class Env:
-    def __init__(self, env=None, train_data_loader=None, config=None, *args, **kwargs):
-        self.env = env
-        self.train_data_loader = train_data_loader
-        self.config = config
+    env = None
+    train_data_loader = None
 
-        # device
-        self.device = None
+    device = None
 
-        # distributed training
-        self._strategy = None
-        self._backend = None
-        self._world_size = None
-        self._rank = None
-        self._local_rank = None
+    accelerator = None
 
-    def reset(self):
-        pass
+    _strategy = None
+    _world_size = None
+    _rank = None
+    _local_rank = None
+
+    def initialize(self):
+        if self._strategy == "accelerate":
+            from accelerate import Accelerator
+
+            self.accelerator = Accelerator()
+
+        if self.train_data_loader is not None:
+            self.train_data_loader = self.patch_data_loader(self.train_data_loader)
+
+    def patch_module(self, module):
+        """
+        Patch module given the systems configuration (e.g., DDP, FSDP)
+        """
+        module.to(self.device)
+        if self._strategy in ["distributed", "zero"]:
+            module = torch.nn.parallel.DistributedDataParallel(
+                module=module,
+                gradient_as_bucket_view=True,
+            )
+        elif self._strategy == "fsdp":
+            from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+
+            module = FSDP(module, device_id=self.device)
+        elif self._strategy == "accelerate":
+            module = self.accelerator.prepare(module)
+
+        return module
+
+    def patch_data_loader(self, loader):
+        """
+        Patch data loader given the systems configuration (e.g., DDP, FSDP)
+        """
+        if self._strategy in ["distributed", "zero", "fsdp"]:
+            patched_loader = get_distributed_data_loader(
+                loader, world_size=self._world_size, rank=self._rank
+            )
+        elif self._strategy == "accelerate":
+            patched_loader = self.accelerator.prepare(loader)
+        else:
+            patched_loader = loader
+
+        return patched_loader
 
     def configure_device(self, device):
         """
@@ -34,7 +74,6 @@ class Env:
         :type dictionary: dict
         """
         self._strategy = dictionary["strategy"]
-        self._backend = dictionary["backend"]
         self._world_size = dictionary["world_size"]
         self._rank = dictionary["rank"]
         self._local_rank = dictionary["local_rank"]
