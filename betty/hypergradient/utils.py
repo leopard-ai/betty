@@ -1,4 +1,3 @@
-import math
 import torch
 
 
@@ -23,14 +22,22 @@ def precondition(vectors, problem):
             param_group = problem.get_opt_param_group_for_param(param)
             state = problem.get_opt_state_for_param(param)
 
-            step = state.get("step", 0)
-            exp_avg_sq = state.get("exp_avg_sq", torch.zeros_like(vector))
-            beta2 = param_group["betas"][1]
-            eps = param_group["eps"]
-            denom = torch.add(
-                torch.sqrt(torch.mean(beta2 * exp_avg_sq)), eps
-            ) / math.sqrt(1 - beta2**step)
+            with torch.no_grad():
+                beta1, beta2 = param_group["betas"]
+                eps = param_group["eps"]
+                last_grad = state.get("last_grad", torch.zeros_like(vector))
+                exp_avg = state.get("exp_avg", torch.zeros_like(vector))
+                exp_avg_sq = state.get("exp_avg_sq", torch.zeros_like(vector))
+                exp_avg_old = (exp_avg - (1 - beta1) * last_grad) / beta1
+                exp_avg_sq_old = (
+                    exp_avg_sq - (1 - beta2) * last_grad * last_grad
+                ) / beta2
 
-            outputs.append(vector / denom)
+                scale = (1 - beta1) * beta2 * exp_avg_sq_old - beta1 * (
+                    1 - beta2
+                ) * last_grad * exp_avg_old
+                scale /= (torch.sqrt(exp_avg_sq) + eps) ** 3
+            out = vector * scale * param_group["lr"]
+            outputs.append(out)
 
     return outputs

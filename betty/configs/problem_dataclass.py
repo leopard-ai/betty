@@ -33,7 +33,7 @@ class Config:
 
     # darts
     darts_alpha: float = 0.01
-    darts_preconditioned: bool = True
+    darts_adam_alpha: float = 1.0
 
     # neumann
     neumann_iterations: int = 1

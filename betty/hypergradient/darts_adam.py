@@ -1,9 +1,10 @@
 import torch
 
 from betty.utils import to_vec, replace_none_with_zero
+from betty.hypergradient.utils import precondition
 
 
-def darts(vector, curr, prev, sync):
+def darts_adam(vector, curr, prev, sync):
     """
     Approximate the matrix-vector multiplication with the best response Jacobian by the
     finite difference method. More specifically, we modified the finite difference method proposed
@@ -23,12 +24,13 @@ def darts(vector, curr, prev, sync):
     :rtype: Sequence of Tensor
     """
     config = curr.config
-    R = config.darts_alpha
+    R = config.darts_adam_alpha
     if curr._strategy == "fsdp":
         curr_flat_param = curr.module._fsdp_wrapped_module.flat_param
         param_len = curr_flat_param.numel() - curr_flat_param._shard_numel_padded
         offset = curr._rank * param_len
         vector = [vector[0][offset : offset + param_len]]
+    vector = precondition(vector, curr)
     eps = R / to_vec(vector).norm().add_(1e-12).item()
 
     for p, v in zip(curr.trainable_parameters(), vector):
