@@ -219,6 +219,7 @@ class Problem:
             self.module = torch.nn.parallel.DistributedDataParallel(
                 module=self.module,
                 gradient_as_bucket_view=True,
+                find_unused_parameters=True,
             )
         elif self._strategy == "fsdp":
             if self.is_rank_zero():
