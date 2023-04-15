@@ -62,7 +62,7 @@ def darts(vector, curr, prev, sync):
 
     # reverse weight change
     for p, v in zip(curr.trainable_parameters(), vector):
-        p.data.add(v.data, alpha=eps)
+        p.data.add_(v.data, alpha=eps)
 
     implicit_grad = None
     if not sync:
