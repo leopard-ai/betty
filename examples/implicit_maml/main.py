@@ -63,14 +63,24 @@ elif args.task == "mini-imagenet":
     elif args.model_type == "wrn":
         model_cls = l2l.vision.models.WRN28
 
-parent_module = model_cls(args.ways) if args.model_type == "wrn" else model_cls(args.ways, args.hidden_size)
-parent_optimizer = optim.AdamW(parent_module.parameters(), lr=args.meta_lr, weight_decay=1e-4)
+parent_module = (
+    model_cls(args.ways)
+    if args.model_type == "wrn"
+    else model_cls(args.ways, args.hidden_size)
+)
+parent_optimizer = optim.AdamW(
+    parent_module.parameters(), lr=args.meta_lr, weight_decay=1e-4
+)
 parent_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
     parent_optimizer,
     T_max=int(args.meta_batch_size * 7500),
 )
 
-child_module = model_cls(args.ways) if args.model_type == "wrn" else model_cls(args.ways, args.hidden_size)
+child_module = (
+    model_cls(args.ways)
+    if args.model_type == "wrn"
+    else model_cls(args.ways, args.hidden_size)
+)
 child_optimizer = optim.SGD(child_module.parameters(), lr=args.base_lr)
 
 
@@ -153,7 +163,11 @@ class MAMLEngine(Engine):
         self.outer.module.train()
         if not hasattr(self, "best_acc"):
             self.best_acc = -1
-        test_net = model_cls(args.ways) if args.model_type == "wrn" else model_cls(args.ways, args.hidden_size)
+        test_net = (
+            model_cls(args.ways)
+            if args.model_type == "wrn"
+            else model_cls(args.ways, args.hidden_size)
+        )
         test_optim = optim.SGD(test_net.parameters(), lr=args.base_lr)
         test_net = test_net.to(self.device)
         accs = []

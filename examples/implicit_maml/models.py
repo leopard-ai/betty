@@ -121,8 +121,9 @@ def ConvMiniImagenet(out_features, hidden_size=64):
 
 def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding"""
-    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
-                     padding=1, bias=False)
+    return nn.Conv2d(
+        in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False
+    )
 
 
 class BasicBlock(nn.Module):
@@ -182,12 +183,13 @@ class BasicBlock(nn.Module):
                 feat_size = out.size()[2]
                 keep_rate = max(
                     1.0 - self.drop_rate / 40000 * self.num_batches_tracked,
-                    1.0 - self.drop_rate
+                    1.0 - self.drop_rate,
                 )
                 gamma = (
                     (1 - keep_rate)
-                    / self.block_size**2 * feat_size**2
-                    / (feat_size - self.block_size + 1)**2
+                    / self.block_size**2
+                    * feat_size**2
+                    / (feat_size - self.block_size + 1) ** 2
                 )
                 out = self.DropBlock(out, gamma=gamma)
             else:
@@ -206,17 +208,18 @@ class DropBlock(nn.Module):
         self.block_size = block_size
 
     def forward(self, x, gamma):
-
         if self.training:
             batch_size, channels, height, width = x.shape
 
             bernoulli = torch.distributions.Bernoulli(gamma)
-            mask = bernoulli.sample((
-                batch_size,
-                channels,
-                height - (self.block_size - 1),
-                width - (self.block_size - 1),
-            )).to(x.device)
+            mask = bernoulli.sample(
+                (
+                    batch_size,
+                    channels,
+                    height - (self.block_size - 1),
+                    width - (self.block_size - 1),
+                )
+            ).to(x.device)
             block_mask = self._compute_block_mask(mask)
             countM = (
                 block_mask.size(0)
@@ -230,7 +233,7 @@ class DropBlock(nn.Module):
             return x
 
     def _compute_block_mask(self, mask):
-        left_padding = int((self.block_size-1) / 2)
+        left_padding = int((self.block_size - 1) / 2)
         right_padding = int(self.block_size / 2)
 
         batch_size, channels, height, width = mask.shape
@@ -239,9 +242,10 @@ class DropBlock(nn.Module):
 
         offsets = torch.stack(
             [
-                torch.arange(self.block_size).view(-1, 1).expand(
-                    self.block_size,
-                    self.block_size).reshape(-1),
+                torch.arange(self.block_size)
+                .view(-1, 1)
+                .expand(self.block_size, self.block_size)
+                .reshape(-1),
                 torch.arange(self.block_size).repeat(self.block_size),
             ]
         ).t()
@@ -251,24 +255,20 @@ class DropBlock(nn.Module):
         ).to(mask.device)
 
         if nr_blocks > 0:
-            non_zero_idxs = non_zero_idxs.repeat(self.block_size ** 2, 1)
+            non_zero_idxs = non_zero_idxs.repeat(self.block_size**2, 1)
             offsets = offsets.repeat(nr_blocks, 1).view(-1, 4)
             offsets = offsets.long()
 
             block_idxs = non_zero_idxs + offsets
             padded_mask = F.pad(
-                mask,
-                (left_padding, right_padding, left_padding, right_padding)
+                mask, (left_padding, right_padding, left_padding, right_padding)
             )
             padded_mask[
-                block_idxs[:, 0],
-                block_idxs[:, 1],
-                block_idxs[:, 2],
-                block_idxs[:, 3]] = 1.0
+                block_idxs[:, 0], block_idxs[:, 1], block_idxs[:, 2], block_idxs[:, 3]
+            ] = 1.0
         else:
             padded_mask = F.pad(
-                mask,
-                (left_padding, right_padding, left_padding, right_padding)
+                mask, (left_padding, right_padding, left_padding, right_padding)
             )
 
         block_mask = 1 - padded_mask
@@ -276,7 +276,6 @@ class DropBlock(nn.Module):
 
 
 class ResNet12Backbone(nn.Module):
-
     def __init__(
         self,
         hidden_size=64,
@@ -291,9 +290,19 @@ class ResNet12Backbone(nn.Module):
         self.inplanes = channels
         block = BasicBlock
         if wider:
-            num_filters = [hidden_size*1, int(hidden_size*2.5), hidden_size*5, hidden_size*10]
+            num_filters = [
+                hidden_size * 1,
+                int(hidden_size * 2.5),
+                hidden_size * 5,
+                hidden_size * 10,
+            ]
         else:
-            num_filters = [hidden_size*1, hidden_size*2, hidden_size*4, hidden_size*8]
+            num_filters = [
+                hidden_size * 1,
+                hidden_size * 2,
+                hidden_size * 4,
+                hidden_size * 8,
+            ]
 
         self.layer1 = self._make_layer(
             block,
@@ -337,8 +346,8 @@ class ResNet12Backbone(nn.Module):
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(
                     m.weight,
-                    mode='fan_out',
-                    nonlinearity='leaky_relu',
+                    mode="fan_out",
+                    nonlinearity="leaky_relu",
                 )
             elif isinstance(m, nn.BatchNorm2d):
                 nn.init.constant_(m.weight, 1)
@@ -356,29 +365,34 @@ class ResNet12Backbone(nn.Module):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
-                nn.Conv2d(self.inplanes, planes * block.expansion,
-                          kernel_size=1, stride=1, bias=False),
-                nn.BatchNorm2d(planes * block.expansion, momentum=1.0, track_running_stats=False),
+                nn.Conv2d(
+                    self.inplanes,
+                    planes * block.expansion,
+                    kernel_size=1,
+                    stride=1,
+                    bias=False,
+                ),
+                nn.BatchNorm2d(
+                    planes * block.expansion, momentum=1.0, track_running_stats=False
+                ),
             )
         layers = []
-        layers.append(block(
-            self.inplanes,
-            planes,
-            stride,
-            downsample,
-            dropblock_dropout,
-            drop_block,
-            block_size)
-        )
-        for _ in range(2):
-            layers.append(block(
+        layers.append(
+            block(
+                self.inplanes,
                 planes,
-                planes,
-                1,
-                None,
+                stride,
+                downsample,
                 dropblock_dropout,
                 drop_block,
-                block_size)
+                block_size,
+            )
+        )
+        for _ in range(2):
+            layers.append(
+                block(
+                    planes, planes, 1, None, dropblock_dropout, drop_block, block_size
+                )
             )
         self.inplanes = planes * block.expansion
         return nn.Sequential(*layers)
@@ -462,7 +476,7 @@ class ResNet12(nn.Module):
             channels=channels,
         )
         scale_factor = 10 if wider else 8
-        self.classifier = torch.nn.Linear(hidden_size*scale_factor, output_size)
+        self.classifier = torch.nn.Linear(hidden_size * scale_factor, output_size)
 
     def forward(self, x):
         x = self.features(x)
