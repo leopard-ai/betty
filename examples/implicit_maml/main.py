@@ -12,7 +12,7 @@ from betty.problems import ImplicitProblem
 from betty.configs import Config, EngineConfig
 from betty.envs import Env
 
-from models import ConvOmniglot, ConvMiniImagenet
+from models import ConvOmniglot, ConvMiniImagenet, ResNet12
 
 
 argparser = argparse.ArgumentParser()
@@ -29,6 +29,9 @@ argparser.add_argument(
 argparser.add_argument("--seed", type=int, help="random seed", default=1)
 argparser.add_argument("--hidden_size", type=int, default=64)
 argparser.add_argument("--reg", type=float, default=0.5)
+argparser.add_argument("--meta_lr", type=float, default=5e-4)
+argparser.add_argument("--base_lr", type=float, default=1e-1)
+argparser.add_argument("--model_type", type=str, default="cnn")
 args = argparser.parse_args()
 
 # Random seed setup
@@ -53,17 +56,22 @@ model_cls = None
 if args.task == "omniglot":
     model_cls = ConvOmniglot
 elif args.task == "mini-imagenet":
-    model_cls = ConvMiniImagenet
+    if args.model_type == "cnn":
+        model_cls = ConvMiniImagenet
+    elif args.model_type == "resnet":
+        model_cls = ResNet12
+    elif args.model_type == "wrn":
+        model_cls = l2l.vision.models.WRN28
 
-parent_module = model_cls(args.ways, args.hidden_size)
-parent_optimizer = optim.AdamW(parent_module.parameters(), lr=5e-4)
+parent_module = model_cls(args.ways) if args.model_type == "wrn" else model_cls(args.ways, args.hidden_size)
+parent_optimizer = optim.AdamW(parent_module.parameters(), lr=args.meta_lr, weight_decay=1e-4)
 parent_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
     parent_optimizer,
     T_max=int(args.meta_batch_size * 7500),
 )
 
-child_module = model_cls(args.ways, args.hidden_size)
-child_optimizer = optim.SGD(child_module.parameters(), lr=1e-1)
+child_module = model_cls(args.ways) if args.model_type == "wrn" else model_cls(args.ways, args.hidden_size)
+child_optimizer = optim.SGD(child_module.parameters(), lr=args.base_lr)
 
 
 def reg_loss(parameters, reference_parameters, reg_lambda=0.25):
@@ -145,8 +153,9 @@ class MAMLEngine(Engine):
         self.outer.module.train()
         if not hasattr(self, "best_acc"):
             self.best_acc = -1
-        test_net = model_cls(args.ways, args.hidden_size).to(self.device)
-        test_optim = optim.SGD(test_net.parameters(), lr=0.1)
+        test_net = model_cls(args.ways) if args.model_type == "wrn" else model_cls(args.ways, args.hidden_size)
+        test_optim = optim.SGD(test_net.parameters(), lr=args.base_lr)
+        test_net = test_net.to(self.device)
         accs = []
         for i in range(500):
             inputs, labels = tasksets.test.sample()
