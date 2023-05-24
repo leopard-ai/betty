@@ -28,7 +28,9 @@ def precondition(vectors, problem):
                 last_grad = state.get("last_grad", torch.zeros_like(vector))
                 exp_avg = state.get("exp_avg", torch.zeros_like(vector))
                 exp_avg_sq = state.get("exp_avg_sq", torch.zeros_like(vector))
-                exp_avg_old = (exp_avg - (1 - beta1) * last_grad) / beta1
+                exp_avg_old = (
+                    (exp_avg - (1 - beta1) * last_grad) / beta1 if beta1 != 0 else 0
+                )
                 exp_avg_sq_old = (
                     exp_avg_sq - (1 - beta2) * last_grad * last_grad
                 ) / beta2

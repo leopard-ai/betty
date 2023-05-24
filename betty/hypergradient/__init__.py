@@ -3,7 +3,7 @@ import torch
 from betty.utils import replace_none_with_zero
 
 from .darts import darts
-from .darts_adam import darts_adam
+from .sama import sama
 from .cg import cg
 from .neumann import neumann
 from .reinforce import reinforce
@@ -11,7 +11,7 @@ from .reinforce import reinforce
 
 jvp_fn_mapping = {
     "darts": darts,
-    "darts_adam": darts_adam,
+    "sama": sama,
     "neumann": neumann,
     "cg": cg,
     "reinforce": reinforce,
