@@ -233,7 +233,7 @@ are on the way!
 ### Training
 
 - Gradient accumulation
-- FP16 training
+- FP16/BF16 training
 - Distributed data-parallel training
 - Gradient clipping
 
