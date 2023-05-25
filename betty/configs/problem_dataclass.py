@@ -19,8 +19,8 @@ class Config:
     # gradient clipping
     gradient_clipping: float = 0.0
 
-    # fp16 training
-    fp16: bool = False
+    # precision
+    precision: str = "fp32"
     initial_dynamic_scale: float = 4096.0
     scale_factor: float = 2.0
 
@@ -33,7 +33,9 @@ class Config:
 
     # darts
     darts_alpha: float = 0.01
-    darts_adam_alpha: float = 1.0
+
+    # sama
+    sama_adam_alpha: float = 1.0
 
     # neumann
     neumann_iterations: int = 1

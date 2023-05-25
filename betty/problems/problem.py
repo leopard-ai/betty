@@ -14,7 +14,7 @@ from betty.patch.optimizer import patch_optimizer
 from betty.patch.scheduler import patch_scheduler
 from betty.configs import Config
 from betty.hypergradient import get_grads
-from betty.utils import convert_tensor, log_from_loss_dict
+from betty.utils import convert_tensor, log_from_loss_dict, get_dtype
 
 
 class Problem:
@@ -74,10 +74,11 @@ class Problem:
         # environment
         self.env = None
 
-        # fp16 scaler
-        self._fp16 = config.fp16
+        # precision
+        self.precision = config.precision
+        self.dtype = get_dtype(self.precision)
         self.scaler = None
-        if self._fp16:
+        if self.precision == "fp16":
             self.initial_dynamic_scale = config.initial_dynamic_scale
             self.scale_factor = config.scale_factor
 
@@ -161,7 +162,7 @@ class Problem:
                 self.scheduler = self.configure_scheduler()
 
         # set up fp16 training
-        if self._is_default_fp16():
+        if self.precision == "fp16" and self._strategy != "accelerate":
             assert torch.cuda.is_available()
             scaler_cls = torch.cuda.amp.GradScaler
             if self._strategy == "fsdp":
@@ -311,8 +312,8 @@ class Problem:
         raise NotImplementedError
 
     def training_step_exec(self, batch):
-        if self._is_default_fp16():
-            with torch.cuda.amp.autocast():
+        if self.precision in ["fp16", "bf16"] and self._strategy != "accelerate":
+            with torch.cuda.amp.autocast(dtype=self.dtype):
                 return self.training_step(batch)
         else:
             return self.training_step(batch)
@@ -472,13 +473,10 @@ class Problem:
             self.train_data_iterator[idx] = iter(train_data_loader)
             batch = next(self.train_data_iterator[idx])
         if not isinstance(batch, dict):
-            batch = tuple(
-                convert_tensor(value, self.device, self._is_default_fp16())
-                for value in batch
-            )
+            batch = tuple(convert_tensor(value, self.device) for value in batch)
         else:
             for key, value in batch.items():
-                batch[key] = convert_tensor(value, self.device, self._is_default_fp16())
+                batch[key] = convert_tensor(value, self.device)
 
         return batch
 
@@ -494,7 +492,7 @@ class Problem:
         is_dict = isinstance(maybe_loss_dict, dict)
         loss = maybe_loss_dict["loss"] if is_dict else maybe_loss_dict
         loss_no_scale = loss.item()
-        if self._is_default_fp16():
+        if self.scaler is not None:
             loss = self.scaler.scale(loss)
         loss = loss / self.gas
 
@@ -632,7 +630,7 @@ class Problem:
         state_dict["optimizer"] = self.optimizer.state_dict()
         if self.scheduler is not None:
             state_dict["scheduler"] = self.scheduler.state_dict()
-        if self._is_default_fp16():
+        if self.scaler is not None:
             state_dict["scaler"] = self.scaler.state_dict()
 
         return state_dict
@@ -647,7 +645,7 @@ class Problem:
         self.optimizer.load_state_dict(state_dict["optimizer"])
         if self.scheduler is not None and "scheduler" in state_dict:
             self.scheduler.load_state_dict(state_dict["scheduler"])
-        if self._is_default_fp16() and "scaler" in state_dict:
+        if self.scaler is not None and "scaler" in state_dict:
             self.scaler.load_state_dict(state_dict["scaler"])
 
     def configure_distributed_training(self, dictionary):
@@ -731,14 +729,6 @@ class Problem:
         Check whether the current step is on the gradient accumulation boundary
         """
         return bool(self._count % self.gas == 0)
-
-    def _is_default_fp16(self):
-        """
-        Check whether to use PyTorch native fp16 (mixed-precision) feature
-        """
-        if not self._fp16 or self._strategy in ["accelerate"]:
-            return False
-        return True
 
     def is_implemented(self, fn_name):
         """

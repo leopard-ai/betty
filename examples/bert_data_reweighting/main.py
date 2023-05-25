@@ -17,7 +17,7 @@ from betty.configs import Config, EngineConfig
 
 parser = argparse.ArgumentParser(description="Meta_Weight_Net")
 parser.add_argument("--baseline", action="store_true")
-parser.add_argument("--fp16", action="store_true")
+parser.add_argument("--precision", type=str, default="fp32")
 parser.add_argument("--strategy", type=str, default="default")
 parser.add_argument("--local_rank", type=int, default=0)
 parser.add_argument("--rollback", action="store_true")
@@ -165,14 +165,13 @@ engine_config = EngineConfig(
 )
 finetune_config = Config(
     type="darts",
-    fp16=args.fp16,
+    precision=args.precision,
     retain_graph=True,
     gradient_clipping=5.0,
     log_step=args.valid_step,
     unroll_steps=5,
-    darts_preconditioned=False,
 )
-reweight_config = Config(type="darts", fp16=args.fp16)
+reweight_config = Config(type="darts", precision=args.precision)
 
 finetune = Finetune(
     name="finetune",

@@ -1,10 +1,19 @@
 import torch
 
 
-def convert_tensor(item, device=None, fp16=False):
+def convert_tensor(item, device=None):
     if not isinstance(item, torch.Tensor):
         return item
     return item.to(device)
+
+
+def get_dtype(precision):
+    if precision == "fp16":
+        return torch.float16
+    elif precision == "bf16":
+        return torch.bfloat16
+    else:
+        return torch.float32
 
 
 def get_grad_norm(parameters):

@@ -20,7 +20,7 @@ def sama(vector, curr, prev, sync):
     :rtype: Sequence of Tensor
     """
     config = curr.config
-    R = config.darts_adam_alpha
+    R = config.sama_adam_alpha
     vector = precondition(vector, curr)
     eps = R / to_vec(vector).norm().add_(1e-12).item()
 

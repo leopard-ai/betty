@@ -37,19 +37,16 @@ class ImplicitProblem(Problem):
 
     def optimizer_step(self, *args, **kwargs):
         if self.is_implemented("custom_optimizer_step"):
-            assert (
-                not self._is_default_fp16()
-            ), "[!] FP16 training is not supported for custom optimizer step."
             if self.gradient_clipping > 0.0:
                 self.clip_grad()
             self.custom_optimizer_step(*args, **kwargs)
         else:
-            if self._is_default_fp16():
+            if self.scaler is not None:
                 self.scaler.unscale_(self.optimizer)
                 if self.gradient_clipping > 0.0:
                     self.clip_grad()
                 self.scaler.step(self.optimizer)
-                if self.config.type == "darts_adam":
+                if self.config.type == "sama":
                     for param in self.trainable_parameters():
                         state = self.get_opt_state_for_param(param)
                         if param.grad is not None and len(state) != 0:
@@ -59,7 +56,7 @@ class ImplicitProblem(Problem):
                 if self.gradient_clipping > 0.0:
                     self.clip_grad()
                 self.optimizer.step()
-                if self.config.type == "darts_adam":
+                if self.config.type == "sama":
                     for param in self.trainable_parameters():
                         state = self.get_opt_state_for_param(param)
                         if param.grad is not None and len(state) != 0:
