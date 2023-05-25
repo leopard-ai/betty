@@ -15,7 +15,7 @@ from betty.configs import Config, EngineConfig
 
 parser = argparse.ArgumentParser(description="Meta_Weight_Net")
 parser.add_argument("--device", type=str, default="cuda")
-parser.add_argument("--fp16", action="store_true")
+parser.add_argument("--precision", type=str, default="fp32")
 parser.add_argument("--strategy", type=str, default="default")
 parser.add_argument("--rollback", action="store_true")
 parser.add_argument("--seed", type=int, default=0)
@@ -151,8 +151,10 @@ class ReweightingEngine(Engine):
         return {"acc": acc, "best_acc": best_acc}
 
 
-outer_config = Config(type="darts", fp16=args.fp16, log_step=100, retain_graph=True)
-inner_config = Config(type="darts", fp16=args.fp16, unroll_steps=1)
+outer_config = Config(
+    type="darts", precision=args.precision, log_step=100, retain_graph=True
+)
+inner_config = Config(type="darts", precision=args.precision, unroll_steps=1)
 engine_config = EngineConfig(
     train_iters=15000,
     valid_step=100,
