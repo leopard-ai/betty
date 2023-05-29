@@ -203,7 +203,7 @@ as:
 
 .. code:: python
 
-    reweight_config = Config(type="darts", log_step=100, gradient_accumulation=4, fp16=True)
+    reweight_config = Config(type="darts", log_step=100, gradient_accumulation=4, precision="fp16")
 
 |
 

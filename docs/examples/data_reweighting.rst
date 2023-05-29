@@ -227,8 +227,8 @@ objects which call their constructors.
 
     #we difine the configurations of both the problems using the Config library
     #configuration of a prooblem contains important specifications related to the problem
-    outer_config = Config(type="darts", fp16=args.fp16, log_step=100)
-    inner_config = Config(type="darts", fp16=args.fp16, unroll_steps=1)
+    outer_config = Config(type="darts", precision=args.precision, log_step=100)
+    inner_config = Config(type="darts", precision=args.precision, unroll_steps=1)
 
     #we instantiate the Inner and Outer problems and set their 'name', 'config',
     #'device' attributes
