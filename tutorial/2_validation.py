@@ -71,8 +71,6 @@ transform = transforms.Compose(
 valid_dataset = MNIST(root="./data", train=False, transform=transform)
 valid_dataloader = DataLoader(valid_dataset, batch_size=100, pin_memory=True)
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-
 
 ####################
 ##### Reweight #####
@@ -102,7 +100,6 @@ reweight = Reweight(
     optimizer=reweight_optimizer,
     train_data_loader=reweight_dataloader,
     config=reweight_config,
-    device=device,
 )
 
 ####################
@@ -139,7 +136,6 @@ classifier = Classifier(
     scheduler=classifier_scheduler,
     train_data_loader=classifier_dataloader,
     config=classifier_config,
-    device=device,
 )
 
 
@@ -151,7 +147,7 @@ class ReweightingEngine(Engine):
         if not hasattr(self, "best_acc"):
             self.best_acc = -1
         for x, target in valid_dataloader:
-            x, target = x.to(device), target.to(device)
+            x, target = x.to(self.device), target.to(self.device)
             out = self.classifier(x)
             correct += (out.argmax(dim=1) == target).sum().item()
             total += x.size(0)
@@ -159,7 +155,7 @@ class ReweightingEngine(Engine):
         if self.best_acc < acc:
             self.best_acc = acc
 
-        print("acc:", acc, "best_acc:", self.best_acc)
+        return {"acc": acc, "best_acc": self.best_acc}
 
 
 engine_config = EngineConfig(train_iters=3000, valid_step=100)

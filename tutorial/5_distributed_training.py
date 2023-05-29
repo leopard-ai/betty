@@ -89,8 +89,6 @@ valid_transform = transforms.Compose([transforms.ToTensor(), normalize])
 valid_dataset = CIFAR10(root="./data", train=False, transform=valid_transform)
 valid_dataloader = DataLoader(valid_dataset, batch_size=50, pin_memory=True)
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-
 
 ####################
 ##### Reweight #####
@@ -114,7 +112,7 @@ class Reweight(ImplicitProblem):
         return {"loss": loss, "acc": acc}
 
 
-reweight_config = Config(log_step=100, fp16=True)
+reweight_config = Config(log_step=100, precision="fp16")
 reweight = Reweight(
     name="reweight",
     module=reweight_module,
@@ -224,7 +222,7 @@ class Classifier(ImplicitProblem):
         return torch.mean(weight * loss_reshape)
 
 
-classifier_config = Config(type="darts", unroll_steps=1, fp16=True)
+classifier_config = Config(type="darts", unroll_steps=1, precision="fp16")
 classifier = Classifier(
     name="classifier",
     module=classifier_module,
@@ -243,7 +241,7 @@ class ReweightingEngine(Engine):
         if not hasattr(self, "best_acc"):
             self.best_acc = -1
         for x, target in valid_dataloader:
-            x, target = x.to(device), target.to(device)
+            x, target = x.to(self.device), target.to(self.device)
             out = self.classifier(x)
             correct += (out.argmax(dim=1) == target).sum().item()
             total += x.size(0)

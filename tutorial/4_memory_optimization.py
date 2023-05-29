@@ -18,7 +18,7 @@ from betty.problems import ImplicitProblem
 from betty.configs import Config, EngineConfig
 
 
-fp16 = True
+precision = "fp16"
 distributed = True
 
 
@@ -112,14 +112,13 @@ class Reweight(ImplicitProblem):
         return {"loss": loss, "acc": acc}
 
 
-reweight_config = Config(log_step=100, fp16=fp16)
+reweight_config = Config(log_step=100, precision=precision)
 reweight = Reweight(
     name="reweight",
     module=reweight_module,
     optimizer=reweight_optimizer,
     train_data_loader=reweight_dataloader,
     config=reweight_config,
-    device=device,
 )
 
 ####################
@@ -223,7 +222,7 @@ class Classifier(ImplicitProblem):
         return torch.mean(weight * loss_reshape)
 
 
-classifier_config = Config(type="darts", unroll_steps=1, fp16=fp16)
+classifier_config = Config(type="darts", unroll_steps=1, precision=precision)
 classifier = Classifier(
     name="classifier",
     module=classifier_module,
@@ -231,7 +230,6 @@ classifier = Classifier(
     scheduler=classifier_scheduler,
     train_data_loader=classifier_dataloader,
     config=classifier_config,
-    device=device,
 )
 
 

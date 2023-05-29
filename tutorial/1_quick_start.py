@@ -99,7 +99,6 @@ reweight = Reweight(
     optimizer=reweight_optimizer,
     train_data_loader=reweight_dataloader,
     config=reweight_config,
-    device=device,
 )
 
 ####################
@@ -138,7 +137,6 @@ classifier = Classifier(
     scheduler=classifier_scheduler,
     train_data_loader=classifier_dataloader,
     config=classifier_config,
-    device=device,
 )
 
 
