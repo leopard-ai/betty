@@ -118,6 +118,8 @@ class Engine:
                         self.logger.info("Early stopping is executed!")
                         break
 
+        self.cleanup()
+
     def initialize(self):
         """
         Initialize dependencies (computational graph) between problems.
@@ -338,6 +340,15 @@ class Engine:
         Check whether the current process is rank 0
         """
         return self._rank == 0
+
+    def cleanup(self):
+        """
+        Clean up distributed training
+        """
+        if self._strategy in ["distributed", "zero", "fsdp"]:
+            dist.destroy_process_group()
+        if self.is_rank_zero():
+            self.logger.info("Multilevel optimization finished!")
 
     def is_implemented(self, fn_name):
         """
