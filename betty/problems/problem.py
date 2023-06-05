@@ -830,6 +830,12 @@ class Problem:
         """
         raise NotImplementedError
 
+    def meta_trainable_parameters(self):
+        """
+        Define parameters for calculating upper-level gradients.
+        """
+        return self.trainable_parameters()
+
     def clear_dependencies(self):
         """
         Clear the dependencies of the current problem.

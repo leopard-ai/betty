@@ -17,7 +17,7 @@ def precondition(vectors, problem):
 
     outputs = []
     if optimizer_type == "adam":
-        params = problem.trainable_parameters()
+        params = problem.meta_trainable_parameters()
         for vector, param in zip(vectors, params):
             param_group = problem.get_opt_param_group_for_param(param)
             state = problem.get_opt_state_for_param(param)

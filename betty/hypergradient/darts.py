@@ -31,7 +31,7 @@ def darts(vector, curr, prev, sync):
         vector = [vector[0][offset : offset + param_len]]
     eps = R / to_vec(vector).norm().add_(1e-12).item()
 
-    for p, v in zip(curr.trainable_parameters(), vector):
+    for p, v in zip(curr.meta_trainable_parameters(), vector):
         p.data.add_(v.data, alpha=eps)
     loss_p = curr.training_step_exec(curr.cur_batch)
     grad_p = torch.autograd.grad(loss_p, prev.trainable_parameters(), allow_unused=True)
@@ -49,7 +49,7 @@ def darts(vector, curr, prev, sync):
         prev.set_grads(prev.trainable_parameters(), grad_p)
 
     # negative
-    for p, v in zip(curr.trainable_parameters(), vector):
+    for p, v in zip(curr.meta_trainable_parameters(), vector):
         p.data.add_(v.data, alpha=-2 * eps)
     loss_n = curr.training_step_exec(curr.cur_batch)
     if sync:
@@ -61,7 +61,7 @@ def darts(vector, curr, prev, sync):
         grad_n = replace_none_with_zero(grad_n, prev.trainable_parameters())
 
     # reverse weight change
-    for p, v in zip(curr.trainable_parameters(), vector):
+    for p, v in zip(curr.meta_trainable_parameters(), vector):
         p.data.add(v.data, alpha=eps)
 
     implicit_grad = None
