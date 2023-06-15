@@ -17,7 +17,6 @@ class EngineConfig:
     roll_back: bool = False
 
     # distributed training
-    distributed: bool = False
     backend: str = "nccl"
     strategy: str = "default"
 
