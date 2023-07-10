@@ -1,8 +1,9 @@
 import copy
 import numpy as np
+import torch
 import torchvision.datasets
 import torchvision.transforms as transforms
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 
 
 def uniform_corruption(corruption_ratio, num_classes):
@@ -40,6 +41,10 @@ def build_dataloader(
     corruption_type=None,
     corruption_ratio=0.0,
     batch_size=100,
+    resume_idxes=None,
+    resume_labels=None,
+    sampler=None,
+    analysis=False,
 ):
     np.random.seed(seed)
     normalize = transforms.Normalize(
@@ -62,6 +67,8 @@ def build_dataloader(
             normalize,
         ]
     )
+    if analysis:
+        train_transforms = test_transforms
 
     dataset_list = {
         "cifar10": torchvision.datasets.CIFAR10,
@@ -117,12 +124,18 @@ def build_dataloader(
 
         index_to_train.extend(index_to_class_for_train)
 
+    if resume_idxes is not None:
+        index_to_train = resume_idxes
+    else:
+        torch.save(index_to_train, "train_index.pt")
+        torch.save(imbalanced_num_list, "imbalance.pt")
     meta_dataset = copy.deepcopy(train_dataset)
     train_dataset.data = train_dataset.data[index_to_train]
     train_dataset.targets = list(np.array(train_dataset.targets)[index_to_train])
     meta_dataset.data = meta_dataset.data[index_to_meta]
     meta_dataset.targets = list(np.array(meta_dataset.targets)[index_to_meta])
 
+    torch.save(train_dataset.targets, "orig_label.pt")
     if corruption_type is not None:
         corruption_matrix = corruption_list[corruption_type](
             corruption_ratio, num_classes
@@ -131,9 +144,21 @@ def build_dataloader(
         for index in range(len(train_dataset.targets)):
             p = corruption_matrix[train_dataset.targets[index]]
             train_dataset.targets[index] = np.random.choice(num_classes, p=p)
+    if resume_labels is not None:
+        train_dataset.targets = resume_labels
+    else:
+        torch.save(train_dataset.targets, "train_label.pt")
+
+    train_sampler = None
+    if analysis:
+        train_sampler = SequentialSampler(train_dataset)
+    elif sampler is not None:
+        train_sampler = sampler
+    else:
+        train_sampler = RandomSampler(train_dataset)
 
     train_dataloader = DataLoader(
-        train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True
+        train_dataset, batch_size=batch_size, pin_memory=True, sampler=train_sampler
     )
     meta_dataloader = DataLoader(
         meta_dataset, batch_size=batch_size, shuffle=True, pin_memory=True

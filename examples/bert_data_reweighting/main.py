@@ -1,4 +1,5 @@
 import os
+import random
 import argparse
 import pandas as pd
 
@@ -21,6 +22,7 @@ parser.add_argument("--precision", type=str, default="fp32")
 parser.add_argument("--strategy", type=str, default="default")
 parser.add_argument("--local_rank", type=int, default=0)
 parser.add_argument("--rollback", action="store_true")
+parser.add_argument("--retrain", action="store_true")
 parser.add_argument("--seed", type=int, default=0)
 parser.add_argument("--meta_net_hidden_size", type=int, default=500)
 parser.add_argument("--meta_net_num_layers", type=int, default=1)
@@ -29,6 +31,7 @@ parser.add_argument("--model_name", type=str, default="roberta-large")
 parser.add_argument("--lr", type=float, default=1e-5)
 parser.add_argument("--patience", type=int, default=0)
 parser.add_argument("--weight_decay", type=float, default=5e-3)
+parser.add_argument("--hypergradient", type=str, default="darts")
 parser.add_argument("--meta_lr", type=float, default=1e-5)
 parser.add_argument("--meta_weight_decay", type=float, default=0)
 parser.add_argument("--batch_size", type=int, default=120)
@@ -38,6 +41,7 @@ parser.add_argument("--max_seq_len", type=int, default=50)
 parser.add_argument("--train_iters", type=int, default=750)
 parser.add_argument("--warmup_iters", type=int, default=250)
 parser.add_argument("--valid_step", type=int, default=50)
+parser.add_argument("--unroll_steps", type=int, default=5)
 
 args = parser.parse_args()
 print(args)
@@ -72,6 +76,13 @@ train_data = DataPrecessForSentence(tokenizer, train_df, max_seq_len=args.max_se
 train_data, meta_data = split_dataset(
     train_data, imbalance_factor=args.imbalance_factor
 )
+if not args.retrain:
+    datasets = {"train": train_data, "meta": meta_data}
+    torch.save(datasets, "datasets.pt")
+else:
+    datasets = torch.load("datasets.pt")
+    train_data = datasets["train"]
+    meta_data = datasets["meta"]
 train_loader = DataLoader(train_data, shuffle=True, batch_size=args.batch_size)
 epoch_len = len(train_loader)
 optimizer = torch.optim.AdamW(
@@ -83,7 +94,7 @@ scheduler = get_linear_schedule_with_warmup(
 
 # Reweight
 meta_net = MLP(
-    in_size=2,
+    in_size=1,
     hidden_size=args.meta_net_hidden_size,
     num_layers=args.meta_net_num_layers,
 )
@@ -112,7 +123,7 @@ class Finetune(ImplicitProblem):
             loss = torch.mean(loss_vector)
         else:
             loss_vector_reshape = torch.reshape(loss_vector, (-1, 1))
-            weight = self.reweight(probs.detach())
+            weight = self.reweight(loss_vector_reshape.detach())
             loss = torch.mean(weight * loss_vector_reshape)
         return loss
 
@@ -155,6 +166,11 @@ class BERTEngine(Engine):
         valid_accuracy = running_accuracy / (len(dev_loader.dataset))
         if best_acc < valid_accuracy:
             best_acc = valid_accuracy
+        if not args.retrain and not args.baseline:
+            torch.save(self.finetune.state_dict(), f"save/net_{self.global_step}.pt")
+            torch.save(
+                self.reweight.state_dict(), f"save/meta_net_{self.global_step}.pt"
+            )
         return {"loss": valid_loss, "acc": valid_accuracy, "best_acc": best_acc}
 
 
@@ -164,12 +180,12 @@ engine_config = EngineConfig(
     strategy=args.strategy,
 )
 finetune_config = Config(
-    type="darts",
+    type=args.hypergradient,
     precision=args.precision,
     retain_graph=True,
-    gradient_clipping=5.0,
+    # gradient_clipping=5.0,
     log_step=args.valid_step,
-    unroll_steps=5,
+    unroll_steps=args.unroll_steps,
 )
 reweight_config = Config(type="darts", precision=args.precision)
 
@@ -189,7 +205,7 @@ reweight = Reweight(
     config=reweight_config,
 )
 
-if args.baseline:
+if args.baseline or args.retrain:
     problems = [finetune]
     u2l, l2u = {}, {}
 else:

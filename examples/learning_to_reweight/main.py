@@ -1,15 +1,17 @@
 import argparse
+from collections import Counter
 
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
+from torch.utils.data import WeightedRandomSampler
 
 from model import *
 from data import *
 from utils import *
 
 from betty.engine import Engine
-from betty.problems import ImplicitProblem
+from betty.problems import ImplicitProblem, MetaIterativeProblem
 from betty.configs import Config, EngineConfig
 
 
@@ -18,7 +20,9 @@ parser.add_argument("--device", type=str, default="cuda")
 parser.add_argument("--precision", type=str, default="fp32")
 parser.add_argument("--strategy", type=str, default="default")
 parser.add_argument("--rollback", action="store_true")
-parser.add_argument("--seed", type=int, default=0)
+parser.add_argument("--baseline", action="store_true")
+parser.add_argument("--retrain", action="store_true")
+parser.add_argument("--seed", type=int, default=1)
 parser.add_argument("--local_rank", type=int, default=0)
 parser.add_argument("--meta_net_hidden_size", type=int, default=100)
 parser.add_argument("--meta_net_num_layers", type=int, default=1)
@@ -46,6 +50,15 @@ args = parser.parse_args()
 print(args)
 set_seed(args.seed)
 
+sampler = None
+resume_idxes = None
+resume_labels = None
+if args.retrain:
+    sample_weight = torch.load("reweight.pt")
+    resume_idxes = torch.load("train_index.pt")
+    resume_labels = torch.load("train_label.pt")
+    sampler = WeightedRandomSampler(sample_weight, len(sample_weight))
+
 (
     train_dataloader,
     meta_dataloader,
@@ -59,7 +72,12 @@ set_seed(args.seed)
     corruption_type=args.corruption_type,
     corruption_ratio=args.corruption_ratio,
     batch_size=args.batch_size,
+    resume_idxes=resume_idxes,
+    resume_labels=resume_labels,
+    sampler=sampler,
 )
+
+print(Counter(train_dataloader.dataset.targets))
 
 
 class Outer(ImplicitProblem):
@@ -99,6 +117,8 @@ class Inner(ImplicitProblem):
     def training_step(self, batch):
         inputs, labels = batch
         outputs = self.forward(inputs)
+        if args.baseline or args.retrain:
+            return F.cross_entropy(outputs, labels.long())
         loss_vector = F.cross_entropy(outputs, labels.long(), reduction="none")
         loss_vector_reshape = torch.reshape(loss_vector, (-1, 1))
         weight = self.outer(loss_vector_reshape.detach())
@@ -148,6 +168,14 @@ class ReweightingEngine(Engine):
         acc = correct / total * 100
         if best_acc < acc:
             best_acc = acc
+        if not args.retrain and not args.baseline:
+            torch.save(
+                self.inner.state_dict(), f"{args.dataset}/net_{self.global_step}.pt"
+            )
+            torch.save(
+                self.outer.state_dict(),
+                f"{args.dataset}/meta_net_{self.global_step}.pt",
+            )
         return {"acc": acc, "best_acc": best_acc}
 
 
@@ -157,7 +185,7 @@ outer_config = Config(
 inner_config = Config(type="darts", precision=args.precision, unroll_steps=1)
 engine_config = EngineConfig(
     train_iters=15000,
-    valid_step=100,
+    valid_step=500,
     strategy=args.strategy,
     roll_back=args.rollback,
     logger_type="tensorboard",
@@ -165,9 +193,13 @@ engine_config = EngineConfig(
 outer = Outer(name="outer", config=outer_config)
 inner = Inner(name="inner", config=inner_config)
 
-problems = [outer, inner]
-u2l = {outer: [inner]}
-l2u = {inner: [outer]}
+if args.baseline or args.retrain:
+    problems = [inner]
+    u2l, l2u = {}, {}
+else:
+    problems = [outer, inner]
+    u2l = {outer: [inner]}
+    l2u = {inner: [outer]}
 dependencies = {"l2u": l2u, "u2l": u2l}
 
 engine = ReweightingEngine(
