@@ -226,9 +226,22 @@ class Problem:
             if self.is_rank_zero():
                 self.logger.warning("FSDP requires PyTorch version >= 1.12")
             from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+            from torch.distributed.fsdp.fully_sharded_data_parallel import (
+                MixedPrecision,
+            )
 
-            self.synchronize_params(self.parameters())
-            self.module = FSDP(self.module, device_id=self.device)
+            fsdp_mixed_precision_policy = MixedPrecision(
+                param_dtype=self.dtype,
+                reduce_dtype=self.dtype,
+                buffer_dtype=self.dtype,
+            )
+
+            self.module = FSDP(
+                self.module,
+                mixed_precision=fsdp_mixed_precision_policy,
+                sync_module_states=True,
+                device_id=self.device,
+            )
         elif self._strategy == "accelerate":
             self.module = self.accelerator.prepare(self.module)
 

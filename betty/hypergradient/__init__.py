@@ -7,6 +7,7 @@ from .sama import sama
 from .cg import cg
 from .neumann import neumann
 from .reinforce import reinforce
+from .utils import grad
 
 
 jvp_fn_mapping = {
@@ -19,11 +20,13 @@ jvp_fn_mapping = {
 
 
 def get_grads(loss, path, retain_graph, do_sync):
-    jvp = torch.autograd.grad(
+    is_fsdp = True if path[0]._strategy == "fsdp" else False
+    jvp = grad(
         loss,
         path[1].meta_trainable_parameters(),
         retain_graph=retain_graph,
         allow_unused=True,
+        is_fsdp=is_fsdp,
     )
     jvp = replace_none_with_zero(jvp, path[1].meta_trainable_parameters())
     for i in range(1, len(path) - 1):

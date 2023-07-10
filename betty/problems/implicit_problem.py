@@ -3,6 +3,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import copy
+
 import torch
 from betty.problems import Problem
 
@@ -46,7 +48,7 @@ class ImplicitProblem(Problem):
                 if self.gradient_clipping > 0.0:
                     self.clip_grad()
                 self.scaler.step(self.optimizer)
-                if self.config.type == "sama":
+                if self.config.type in ["sama"]:
                     for param in self.trainable_parameters():
                         state = self.get_opt_state_for_param(param)
                         if param.grad is not None and len(state) != 0:
@@ -56,23 +58,24 @@ class ImplicitProblem(Problem):
                 if self.gradient_clipping > 0.0:
                     self.clip_grad()
                 self.optimizer.step()
-                if self.config.type == "sama":
+                if self.config.type in ["sama"]:
                     for param in self.trainable_parameters():
                         state = self.get_opt_state_for_param(param)
                         if param.grad is not None and len(state) != 0:
                             state["last_grad"] = param.grad.detach().clone()
 
     def cache_states(self):
-        self.module_state_dict_cache = self.module.state_dict()
+        self.module_state_dict_cache = copy.deepcopy(self.module.state_dict())
         if self.optimizer is not None:
-            self.opitmizer_state_dict_cache = self.optimizer.state_dict()
+            self.opitmizer_state_dict_cache = copy.deepcopy(self.optimizer.state_dict())
 
-    def recover_states(self):
+    def recover_states(self, clean=True):
         self.module.load_state_dict(self.module_state_dict_cache)
         if self.optimizer is not None:
             self.optimizer.load_state_dict(self.opitmizer_state_dict_cache)
-        self.module_state_dict_cache = None
-        self.opitmizer_state_dict_cache = None
+        if clean:
+            self.module_state_dict_cache = None
+            self.opitmizer_state_dict_cache = None
 
     def parameters(self):
         return list(self.module.parameters())

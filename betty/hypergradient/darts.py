@@ -1,5 +1,7 @@
 import torch
+import torch.distributed as dist
 
+from betty.hypergradient.utils import grad, precondition
 from betty.utils import to_vec, replace_none_with_zero
 
 
@@ -23,46 +25,41 @@ def darts(vector, curr, prev, sync):
     :rtype: Sequence of Tensor
     """
     config = curr.config
+    is_fsdp = True if curr._strategy == "fsdp" else False
     R = config.darts_alpha
-    if curr._strategy == "fsdp":
-        curr_flat_param = curr.module._fsdp_wrapped_module.flat_param
-        param_len = curr_flat_param.numel() - curr_flat_param._shard_numel_padded
-        offset = curr._rank * param_len
-        vector = [vector[0][offset : offset + param_len]]
-    eps = R / to_vec(vector).norm().add_(1e-12).item()
+    vector_norm = to_vec(vector).norm()
+    if is_fsdp:
+        vector_norm_sq = vector_norm.pow(2)
+        dist.all_reduce(vector_norm_sq, op=dist.ReduceOp.SUM)
+        vector_norm = vector_norm_sq.sqrt()
+    eps = R / vector_norm.add_(1e-15).item()
 
     for p, v in zip(curr.meta_trainable_parameters(), vector):
         p.data.add_(v.data, alpha=eps)
     loss_p = curr.training_step_exec(curr.cur_batch)
-    grad_p = torch.autograd.grad(loss_p, prev.trainable_parameters(), allow_unused=True)
+    grad_p = grad(
+        loss_p, prev.trainable_parameters(), allow_unused=True, is_fsdp=is_fsdp
+    )
     grad_p = replace_none_with_zero(grad_p, prev.trainable_parameters())
     if sync:
         grad_p = [-g_p.div_(2 * eps) for g_p in grad_p]
-        if prev._strategy == "fsdp":
-            prev_flat_param = prev.module._fsdp_wrapped_module.flat_param
-            offset = prev._rank * prev_flat_param.numel()
-            valid_len = prev_flat_param.numel() - prev_flat_param._shard_numel_padded
-            prev_grad_shard = grad_p[0].narrow(0, offset, valid_len)
-            new_grad_p = torch.zeros_like(prev.trainable_parameters()[0])
-            new_grad_p[:valid_len] = prev_grad_shard
-            grad_p = [new_grad_p]
         prev.set_grads(prev.trainable_parameters(), grad_p)
 
     # negative
     for p, v in zip(curr.meta_trainable_parameters(), vector):
-        p.data.add_(v.data, alpha=-2 * eps)
+        p.data.sub_(v.data, alpha=2 * eps)
     loss_n = curr.training_step_exec(curr.cur_batch)
     if sync:
         torch.autograd.backward(loss_n / (2 * eps), inputs=prev.trainable_parameters())
     else:
-        grad_n = torch.autograd.grad(
-            loss_n, prev.trainable_parameters(), allow_unused=True
+        grad_n = grad(
+            loss_n, prev.trainable_parameters(), allow_unused=True, is_fsdp=is_fsdp
         )
         grad_n = replace_none_with_zero(grad_n, prev.trainable_parameters())
 
     # reverse weight change
     for p, v in zip(curr.meta_trainable_parameters(), vector):
-        p.data.add(v.data, alpha=eps)
+        p.data.add_(v.data, alpha=eps)
 
     implicit_grad = None
     if not sync:

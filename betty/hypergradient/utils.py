@@ -1,4 +1,24 @@
+import math
 import torch
+
+
+def grad(loss, parameters, retain_graph=False, allow_unused=False, is_fsdp=False):
+    def get_grad(p):
+        return p.grad.detach().clone() if p.grad is not None else torch.zeros_like(p)
+
+    if is_fsdp:
+        grad_orig = [get_grad(p) for p in parameters]
+        torch.autograd.backward(loss, retain_graph=retain_graph, inputs=parameters)
+
+        grads = []
+        for p, g in zip(parameters, grad_orig):
+            grads.append(get_grad(p) - g)
+            p.grad.copy_(g.data)
+        return grads
+    else:
+        return torch.autograd.grad(
+            loss, parameters, retain_graph=retain_graph, allow_unused=allow_unused
+        )
 
 
 def get_optimzer_type(optimizer):

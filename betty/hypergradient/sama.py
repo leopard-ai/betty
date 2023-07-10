@@ -21,8 +21,10 @@ def sama(vector, curr, prev, sync):
     """
     config = curr.config
     R = config.sama_adam_alpha
+
     vector = precondition(vector, curr)
-    eps = R / to_vec(vector).norm().add_(1e-12).item()
+    vector_norm = to_vec(vector).norm()
+    eps = R / vector_norm.add_(1e-15).item()
 
     for p, v in zip(curr.meta_trainable_parameters(), vector):
         p.data.add_(v.data, alpha=eps)
@@ -35,7 +37,7 @@ def sama(vector, curr, prev, sync):
 
     # negative
     for p, v in zip(curr.meta_trainable_parameters(), vector):
-        p.data.add_(v.data, alpha=-2 * eps)
+        p.data.sub_(v.data, alpha=2 * eps)
     loss_n = curr.training_step_exec(curr.cur_batch)
     if sync:
         torch.autograd.backward(loss_n / (2 * eps), inputs=prev.trainable_parameters())
@@ -47,7 +49,7 @@ def sama(vector, curr, prev, sync):
 
     # reverse weight change
     for p, v in zip(curr.meta_trainable_parameters(), vector):
-        p.data.add(v.data, alpha=eps)
+        p.data.add_(v.data, alpha=eps)
 
     implicit_grad = None
     if not sync:
