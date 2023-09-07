@@ -204,8 +204,10 @@ parent_config = Config(
     retain_graph=True,
     gradient_accumulation=args.meta_batch_size,
 )
-#child_config = Config(type="darts", unroll_steps=args.inner_steps)
-child_config = Config(type="cg", cg_iterations=3, cg_alpha=1., unroll_steps=args.inner_steps)
+# child_config = Config(type="darts", unroll_steps=args.inner_steps)
+child_config = Config(
+    type="cg", cg_iterations=3, cg_alpha=1.0, unroll_steps=args.inner_steps
+)
 
 outer = Outer(
     name="outer",
