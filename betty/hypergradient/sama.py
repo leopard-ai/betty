@@ -48,8 +48,11 @@ def sama(vector, curr, prev, sync):
         grad_n = replace_none_with_zero(grad_n, prev.trainable_parameters())
 
     # reverse weight change
-    for p, v in zip(curr.meta_trainable_parameters(), vector):
-        p.data.add_(v.data, alpha=eps)
+    if not config.sama_multitask:
+        for p, v in zip(curr.meta_trainable_parameters(), vector):
+            p.data.add_(v.data, alpha=eps)
+    else:
+        curr.synchronize_params(curr.meta_trainable_parameters(), all_reduce=True)
 
     implicit_grad = None
     if not sync:

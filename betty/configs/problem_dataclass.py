@@ -33,9 +33,11 @@ class Config:
 
     # darts
     darts_alpha: float = 0.01
+    darts_multitask: bool = False
 
     # sama
     sama_adam_alpha: float = 1.0
+    sama_multitask: bool = False
 
     # neumann
     neumann_iterations: int = 1

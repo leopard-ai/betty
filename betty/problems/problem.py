@@ -596,13 +596,17 @@ class Problem:
                 else:
                     param.grad = grad
 
-    def synchronize_params(self, params):
+    def synchronize_params(self, params, all_reduce=False):
         """
         synchronize parameters across distributed data-parallel processes
         """
         if self._world_size > 1 and self._strategy not in ["fsdp", "accelerate"]:
             for param in params:
-                dist.broadcast(param.data, 0)
+                if not all_reduce:
+                    dist.broadcast(param.data, 0)
+                else:
+                    param.data.div_(self._world_size)
+                    dist.all_reduce(param.data, op=dist.ReduceOp.SUM)
 
     @abc.abstractmethod
     def optimizer_step(self, *args, **kwargs):

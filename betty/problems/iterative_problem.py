@@ -60,8 +60,8 @@ class IterativeProblem(Problem):
         self.buffers_cache = None
         self.opitmizer_state_dict_cache = None
 
-    def initialize(self, engine_config):
-        super().initialize(engine_config=engine_config)
+    def initialize(self):
+        super().initialize()
         # patch module to be functional so that gradient flows through param update
         # optimizer & scheduler should accordingly be patched as module gets patched
         self.initialize_optimizer_state()
