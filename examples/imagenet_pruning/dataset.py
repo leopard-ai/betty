@@ -89,7 +89,6 @@ def get_subset_data(
     instance_weights_dir: str,
     frac_data_kept: float,
 ):
-
     if prune_strategy == "metaweight":
         print("Metaweight pruning strategy!")
         print("Load : ", os.path.join(instance_weights_dir, "sorted_idx.pt"))
