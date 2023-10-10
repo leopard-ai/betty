@@ -13,8 +13,8 @@ dynamic = ["version", "description"]
 requires-python = ">=3.6,<3.11"
 
 dependencies = [
-    "torch>=1.8.*",
-    "numpy>=1.9.*",
+    "torch>=1.8.0",
+    "numpy>=1.9.0",
 ]
 
 [tool.flit.module]
