@@ -11,4 +11,4 @@ _build
 betty.egg-info
 .env
 .venv
-venv/
+venv*/
