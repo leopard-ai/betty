@@ -1,3 +1,3 @@
 "Betty: an automatic differentiation library for generalized meta-learning and multilevel optimization"
 
-__version__ = "0.2.1"
+__version__ = "0.2.1rc1"
