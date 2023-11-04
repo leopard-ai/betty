@@ -50,7 +50,7 @@ def cg(vector, curr, prev, sync):
         r_new = [rr - alpha * pp for rr, pp in zip(r, hvp)]
         r_new_vec = to_vec(r_new)
         beta = torch.dot(r_new_vec, r_new_vec) / numerator
-        p_new = [rr + beta * pp for rr, pp in zip(r, p)]
+        p_new = [rr + beta * pp for rr, pp in zip(r_new, p)]
 
         x, p, r = x_new, p_new, r_new
     x = [config.cg_alpha * xx for xx in x]
