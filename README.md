@@ -32,7 +32,7 @@ pip install betty-ml
 
 ## Update
 
-**[Sep 22 2023]** "SAMA: Making Scalable Meta Learning Practical" got accepted at [NeurIPS 2023](https://openreview.net/forum?id=LV_MeMS38Q9)!
+**[Sep 22 2023]** "SAMA: Making Scalable Meta Learning Practical" got accepted at [NeurIPS 2023](https://openreview.net/forum?id=Xazhn0JoNx)!
 
 **[Jan 21 2023]** Betty got accepted as a *notable-top-5% (oral)* paper at [ICLR 2023](https://openreview.net/forum?id=LV_MeMS38Q9)!
 
