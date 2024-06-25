@@ -28,19 +28,19 @@ python main.py
 - Meta-learning (Single GPU + mixed-precision)
 
 ```bash
-python main.py --fp16
+python main.py --precision fp16
 ```
 
 - Meta-learning (Multi GPU)
 
 ```bash
-torchrun --standalone --nnodes=1 --nproc_per_node=2 main.py --fp16 --strategy distributed
+torchrun --standalone --nnodes=1 --nproc_per_node=2 main.py --precision fp16 --strategy distributed
 ```
 
 - Meta-learning (Multi GPU + ZeRO optimizer)
 
 ```bash
-torchrun --standalone --nnodes=1 --nproc_per_node=2 main.py --fp16 --strategy zero
+torchrun --standalone --nnodes=1 --nproc_per_node=2 main.py --precision fp16 --strategy zero
 ```
 
 ## Acknowledgements
