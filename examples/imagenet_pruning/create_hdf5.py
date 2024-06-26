@@ -1,4 +1,5 @@
 """Create ImageNet HDF5 from standard directory structure."""
+
 import io
 import os
 

@@ -409,7 +409,6 @@ class ResNet12Backbone(nn.Module):
 
 
 class ResNet12(nn.Module):
-
     """
     [[Source]](https://github.com/learnables/learn2learn/blob/master/learn2learn/vision/models/resnet12.py)
 

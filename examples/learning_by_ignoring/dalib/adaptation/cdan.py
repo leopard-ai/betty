@@ -92,10 +92,8 @@ class ConditionalDomainAdversarialLoss(nn.Module):
         else:
             self.map = MultiLinearMap()
 
-        self.bce = (
-            lambda input, target, weight: F.binary_cross_entropy(
-                input, target, weight, reduction=reduction
-            )
+        self.bce = lambda input, target, weight: (
+            F.binary_cross_entropy(input, target, weight, reduction=reduction)
             if self.entropy_conditioning
             else F.binary_cross_entropy(input, target, reduction=reduction)
         )
