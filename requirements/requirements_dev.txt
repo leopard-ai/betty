@@ -1,7 +1,7 @@
 -r requirements.txt
 
 # compile
-torch>=2.0.*
+torch>=2.0.0
 
 # iterative problem
 higher
